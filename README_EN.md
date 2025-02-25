@@ -4,12 +4,11 @@
 
 # Reall3dViewer
 
-Reall3dViewer是一个基于`Three.js`的`3D Gaussian Splatting`渲染器。打造卓越的渲染器并非易事，我们选择开源，希望能集思广益，群策群力，共同为推动`3DGS`应用发展助一臂之力！
+Reall3dViewer is a 3D Gaussian Splatting renderer built on Three.js. Crafting an exceptional renderer is no small feat, which is why we've chosen to open-source our project. We hope to harness the collective wisdom and efforts of the community to drive the advancement of 3DGS applications together!
 
 <br>
 
 <p align="center">
-    <a href="https://github.com/reall3d-com/Reall3dViewer/blob/master/README_EN.md"><img src="https://img.shields.io/badge/Readme-engilsh-brightgreen.svg"></a>
     <a href="https://github.com/microsoft/TypeScript"><img src="https://img.shields.io/badge/Lang-typescript-brightgreen.svg"></a>
     <a href="https://github.com/mrdoob/three.js"><img src="https://img.shields.io/badge/Base-threejs-brightgreen.svg"></a>
     <a href="https://repo-sam.inria.fr/fungraph/3d-gaussian-splatting/"><img src="https://img.shields.io/badge/Model-3DGS-brightgreen.svg"></a>
@@ -19,23 +18,20 @@ Reall3dViewer是一个基于`Three.js`的`3D Gaussian Splatting`渲染器。打�
 
 <br>
 
-## 特点
-- [x] 友好支持移动端
-- [x] 支持`.splat`以及优化的`.bin`格式
-- [x] 支持标注测量
-- [x] 支持文字水印
-- [x] 支持大场景渲染
+## Features
+[x] Mobile friendly
+[x] Support `.splat` and optimized `.bin` formats
+[x] Support mark and measurement
+[x] Support text watermark
+[x] Support large scene rendering
 
 
-## 在线演示
+## Live demo
 https://reall3d.com/reall3dviewer/index.html
 
 
-## 用法
+## Basic Usage
 ```shell
-# install
-npm install
-
 # develop
 npm run dev
 
@@ -46,19 +42,19 @@ npm run build
 # http://hostname:port/index.html?url=your-model-link-address
 ```
 
-## 履历
+## Release History
 https://github.com/reall3d-com/Reall3dViewer/releases
 
 
-## 鸣谢
-感谢以下项目提供的参考实现
+## Acknowledgments
+We would like to express our gratitude to the following projects for their valuable reference implementations
 - https://github.com/antimatter15/splat
 - https://github.com/mkkellogg/GaussianSplats3D
 - https://github.com/huggingface/gsplat.js
 - https://github.com/playcanvas/supersplat
 
 
-## 联系
-欢迎在项目页面上提交`issue`，商业版提供模型格式优化工具，支持嵌入水印保护模型产权，请随时与我们联系。
+## Contact
+Feel free to submit an issue on the project page. Our commercial version offers a 3DGS model format optimization tool and supports embedding watermarks to protect model ownership. Please don't hesitate to contact us.
 - Site: https://reall3d.com
 - Email: ai@geohold.com 

@@ -1,0 +1,351 @@
+// ================================
+// Copyright (c) 2025 reall3d.com
+// ================================
+import { MarkCirclePlan } from './MarkCirclePlan';
+import {
+    AddMarkToWeakRef,
+    ClearMarkPoint,
+    ComputePlansArea,
+    ComputePlansCenter,
+    ComputePoint3Area,
+    CSS3DRendererDispose,
+    GetCamera,
+    GetCSS3DRenderer,
+    GetMarkWarpElement,
+    GetOptions,
+    GetScene,
+    MarkFinish,
+    LoadSmallSceneMetaData,
+    MetaMarkRemoveData,
+    MetaMarkSaveData,
+    MarkUpdateVisible,
+    OnViewerUpdate,
+    HttpPostMetaData,
+    ViewerNeedUpdate,
+    DeleteMarkWeakRef,
+    GetMarkFromWeakRef,
+    GetMarkDataByName,
+    UpdateMarkByName,
+    SetCameraInfo,
+    MetaSaveSmallSceneCameraInfo,
+    GetCameraInfo,
+    GetPcCameraInfoCache,
+    UpdateAllMarkByMeterScale,
+    ReComputePlansArea,
+    Information,
+    OnSetWaterMark,
+    GetCachedWaterMark,
+    MetaSaveWatermark,
+    OnSetFlyPositions,
+    GetFlyPositionArray,
+    OnSetFlyTargets,
+    GetFlyTargetArray,
+} from './../../events/EventConstants';
+import { MarkMultiLines } from './MarkMultiLines';
+import { CSS3DRenderer } from 'three/examples/jsm/Addons.js';
+import { Events } from '../../events/Events';
+import { Object3D, Vector3 } from 'three';
+import { Reall3dViewerOptions } from '../../viewer/Reall3dViewerOptions';
+import { MarkDistanceLine } from './MarkDistanceLine';
+import { MarkData } from './data/MarkData';
+import { MarkSinglePoint } from './MarkSinglePoint';
+import { MarkMultiPlans } from './MarkMulitPlans';
+import { MarkDataSinglePoint } from './data/MarkDataSinglePoint';
+import { MarkDataMultiPlans } from './data/MarkDataMultiPlans';
+import { MarkDataMultiLines } from './data/MarkDataMultiLines';
+import { MarkDataDistanceLine } from './data/MarkDataDistanceLine';
+import { CameraInfo } from '../../controls/SetupCameraControls';
+
+export function setupMark(events: Events) {
+    const on = (key: number, fn?: Function, multiFn?: boolean): Function | Function[] => events.on(key, fn, multiFn);
+    const fire = (key: number, ...args: any): any => events.fire(key, ...args);
+    const markMap: Map<string, WeakRef<any>> = new Map();
+
+    const divMarkWarp: HTMLDivElement = document.createElement('div');
+    divMarkWarp.classList.add('mark-warp');
+    document.body.appendChild(divMarkWarp);
+
+    const css3DRenderer = new CSS3DRenderer();
+    css3DRenderer.setSize(innerWidth, innerHeight);
+    css3DRenderer.domElement.style.position = 'absolute';
+    css3DRenderer.domElement.style.top = '0px';
+    css3DRenderer.domElement.style.pointerEvents = 'none';
+    divMarkWarp.appendChild(css3DRenderer.domElement);
+
+    on(GetMarkWarpElement, () => divMarkWarp);
+    on(GetCSS3DRenderer, () => css3DRenderer);
+    on(CSS3DRendererDispose, () => document.body.removeChild(divMarkWarp));
+    on(OnViewerUpdate, () => css3DRenderer.render(fire(GetScene), fire(GetCamera)), true);
+
+    on(AddMarkToWeakRef, (mark: any) => {
+        const name: string = mark?.getMarkData?.()?.name || mark?.name;
+        if (!name) return;
+        markMap.set(name, new WeakRef(mark));
+    });
+    on(DeleteMarkWeakRef, (mark: any) => {
+        const name: string = mark?.getMarkData?.()?.name || mark?.name;
+        markMap.delete(name);
+    });
+    on(GetMarkFromWeakRef, (name: string): any => markMap.get(name)?.deref());
+    on(UpdateMarkByName, (name: string, data: MarkDataSinglePoint | MarkDataMultiPlans | MarkDataMultiLines | MarkDataDistanceLine) => {
+        const mark = fire(GetMarkFromWeakRef, name);
+        if (!mark || !data) return;
+        mark.drawUpdate?.(data);
+    });
+    on(GetMarkDataByName, (name: string): MarkDataSinglePoint | MarkDataMultiPlans | MarkDataMultiLines | MarkDataDistanceLine => {
+        const mark = fire(GetMarkFromWeakRef, name);
+        if (!mark) return {};
+        return mark.getMarkData?.();
+    });
+
+    on(MarkUpdateVisible, (visible?: boolean) => {
+        if (visible !== undefined) fire(GetOptions).markVisible = visible;
+        fire(GetScene).traverse((child: Object3D) => child['isMark'] && (child.visible = fire(GetOptions).markVisible));
+        fire(ViewerNeedUpdate);
+    });
+
+    on(MetaSaveSmallSceneCameraInfo, async (): Promise<boolean> => {
+        if (fire(GetOptions).bigSceneMode) return false;
+        if (fire(GetOptions).offset) return false; // TODO 大平移场景暂不考虑
+
+        const marks = [];
+        fire(GetScene).traverse((child: any) => {
+            if (child.isMark) {
+                const data = child.getMarkData?.();
+                data && marks.push(data);
+            }
+        });
+        const cameraInfo: CameraInfo = fire(GetCameraInfo);
+        const meterScale: number = fire(GetOptions).meterScale;
+        const watermark: string = fire(GetCachedWaterMark);
+        const flyPositions: number[] = fire(GetFlyPositionArray);
+        const flyTargets: number[] = fire(GetFlyTargetArray);
+        const metaData = { meterScale, cameraInfo };
+        marks.length && (metaData['marks'] = marks);
+        watermark && (metaData['watermark'] = watermark);
+        flyPositions.length && (metaData['flyPositions'] = flyPositions);
+        flyTargets.length && (metaData['flyTargets'] = flyTargets);
+        const meta = JSON.stringify(metaData, null, 2);
+
+        return await fire(HttpPostMetaData, meta, fire(GetOptions).url);
+    });
+
+    on(MetaMarkSaveData, async (): Promise<boolean> => {
+        const marks = [];
+        fire(GetScene).traverse((child: any) => {
+            if (child.isMark) {
+                const data = child.getMarkData?.();
+                data && marks.push(data);
+            }
+        });
+        const cameraInfo: CameraInfo = fire(GetPcCameraInfoCache);
+        const meterScale: number = fire(GetOptions).meterScale;
+        const watermark: string = fire(GetCachedWaterMark);
+        const flyPositions: number[] = fire(GetFlyPositionArray);
+        const flyTargets: number[] = fire(GetFlyTargetArray);
+        const metaData = { meterScale };
+        cameraInfo && (metaData['cameraInfo'] = cameraInfo);
+        marks.length && (metaData['marks'] = marks);
+        watermark && (metaData['watermark'] = watermark);
+        flyPositions.length && (metaData['flyPositions'] = flyPositions);
+        flyTargets.length && (metaData['flyTargets'] = flyTargets);
+        const meta = JSON.stringify(metaData, null, 2);
+
+        return await fire(HttpPostMetaData, meta, fire(GetOptions).url);
+    });
+
+    on(MetaMarkRemoveData, async (): Promise<boolean> => {
+        const cameraInfo: CameraInfo = fire(GetPcCameraInfoCache);
+        const meterScale: number = fire(GetOptions).meterScale;
+        const watermark: string = fire(GetCachedWaterMark);
+        const flyPositions: number[] = fire(GetFlyPositionArray);
+        const flyTargets: number[] = fire(GetFlyTargetArray);
+        const metaData = { meterScale };
+        cameraInfo && (metaData['cameraInfo'] = cameraInfo);
+        watermark && (metaData['watermark'] = watermark);
+        flyPositions.length && (metaData['flyPositions'] = flyPositions);
+        flyTargets.length && (metaData['flyTargets'] = flyTargets);
+        const meta = JSON.stringify(metaData, null, 2);
+
+        const rs = await fire(HttpPostMetaData, meta, fire(GetOptions).url);
+
+        const marks: WeakRef<any>[] = [];
+        markMap.forEach(item => marks.push(item));
+        marks.forEach(item => item.deref()?.dispose?.());
+        fire(ViewerNeedUpdate);
+
+        return rs;
+    });
+
+    on(MetaSaveWatermark, async (): Promise<boolean> => {
+        const marks = [];
+        fire(GetScene).traverse((child: any) => {
+            if (child.isMark) {
+                const data = child.getMarkData?.();
+                data && marks.push(data);
+            }
+        });
+        const cameraInfo: CameraInfo = fire(GetPcCameraInfoCache);
+        const meterScale: number = fire(GetOptions).meterScale;
+        const watermark: string = fire(GetCachedWaterMark);
+        const flyPositions: number[] = fire(GetFlyPositionArray);
+        const flyTargets: number[] = fire(GetFlyTargetArray);
+        const metaData = { meterScale };
+        cameraInfo && (metaData['cameraInfo'] = cameraInfo);
+        marks.length && (metaData['marks'] = marks);
+        watermark && (metaData['watermark'] = watermark);
+        flyPositions.length && (metaData['flyPositions'] = flyPositions);
+        flyTargets.length && (metaData['flyTargets'] = flyTargets);
+        const meta = JSON.stringify(metaData, null, 2);
+
+        return await fire(HttpPostMetaData, meta, fire(GetOptions).url);
+    });
+
+    on(LoadSmallSceneMetaData, () => {
+        return new Promise(resolve => {
+            const opts: Reall3dViewerOptions = fire(GetOptions);
+            if (opts.bigSceneMode) {
+                fire(SetCameraInfo, null);
+                resolve(false);
+            } else {
+                let metaUrl = opts.url.substring(0, opts.url.lastIndexOf('.')) + '.meta.json'; // xxx/abc.bin => xxx/abc.meta.json
+                fetch(metaUrl, { mode: 'cors', credentials: 'omit', cache: 'reload' })
+                    .then(response => (!response.ok ? [] : response.json()))
+                    .then((data: any) => {
+                        if (data.meterScale) {
+                            fire(GetOptions).meterScale = data.meterScale;
+                            fire(Information, { scale: `1 : ${fire(GetOptions).meterScale} m` });
+                        }
+                        fire(SetCameraInfo, data);
+                        const marks = data.marks || [];
+
+                        // 初始化标注，隐藏待激活显示
+                        marks.forEach((data: MarkData) => {
+                            if (data.type === 'MarkSinglePoint') {
+                                // 单点
+                                const mark = new MarkSinglePoint(events, data);
+                                mark.visible = false;
+                                fire(GetScene).add(mark);
+                            } else if (data.type === 'MarkDistanceLine') {
+                                // 测量距离
+                                const mark = new MarkDistanceLine(events);
+                                mark.draw(data);
+                                mark.visible = false;
+                                fire(GetScene).add(mark);
+                            } else if (data.type === 'MarkMultiLines') {
+                                // 折线
+                                const mark = new MarkMultiLines(events);
+                                mark.draw(data, true);
+                                mark.visible = false;
+                                fire(GetScene).add(mark);
+                            } else if (data.type === 'MarkMultiPlans') {
+                                // 多面
+                                const mark = new MarkMultiPlans(events);
+                                mark.draw(data, true);
+                                mark.visible = false;
+                                fire(GetScene).add(mark);
+                            } else if (data.type === 'MarkCirclePlan') {
+                                // 圆面
+                                const mark = new MarkCirclePlan(events);
+                                mark.draw(data);
+                                mark.visible = false;
+                                fire(GetScene).add(mark);
+                            }
+                        });
+
+                        fire(OnSetWaterMark, data.watermark || '');
+                        fire(OnSetFlyPositions, data.flyPositions || []);
+                        fire(OnSetFlyTargets, data.flyTargets || []);
+
+                        resolve(true);
+                    })
+                    .catch(e => {
+                        console.error(e.message);
+                        fire(SetCameraInfo, null);
+                        resolve(false);
+                    });
+            }
+        });
+    });
+
+    on(MarkFinish, () => {
+        const opts: Reall3dViewerOptions = fire(GetOptions);
+        opts.markMode = false;
+        fire(ClearMarkPoint);
+        fire(ViewerNeedUpdate);
+    });
+
+    on(UpdateAllMarkByMeterScale, (markData: any, saveData: boolean = true) => {
+        const meterScale: number = markData?.meterScale;
+        if (!meterScale) return;
+        if (typeof meterScale !== 'number' || meterScale <= 0) {
+            console.warn('meterScale is not a number or <= 0', markData);
+            return;
+        }
+
+        saveData && (fire(GetOptions).meterScale = markData.meterScale);
+        fire(Information, { scale: `1 : ${meterScale} m` });
+
+        for (const value of markMap.values()) {
+            const mark = value.deref();
+            if (!mark) continue;
+
+            if (mark instanceof MarkDistanceLine) {
+                (mark as MarkDistanceLine).updateByMeterScale(meterScale);
+            } else if (mark instanceof MarkMultiLines) {
+                (mark as MarkMultiLines).updateByMeterScale(meterScale);
+            } else if (mark instanceof MarkMultiPlans) {
+                (mark as MarkMultiPlans).updateByMeterScale(meterScale);
+            }
+        }
+    });
+
+    on(ComputePlansCenter, (positions: number[]): Vector3 => {
+        const p0 = new Vector3().fromArray(positions.slice(0, 3));
+        const p1 = new Vector3().fromArray(positions.slice(-6, -3));
+        const p2 = new Vector3().fromArray(positions.slice(-3));
+        const eq02 = p0.distanceTo(p2) < 0.0001;
+        const eq12 = p1.distanceTo(p2) < 0.0001;
+        const center = new Vector3();
+        const cnt = eq02 || eq12 ? positions.length / 3 - 1 : positions.length / 3;
+        for (let i = 0; i < cnt; i++) {
+            center.add(new Vector3(positions[i * 3], positions[i * 3 + 1], positions[i * 3 + 2]));
+        }
+        center.divideScalar(cnt);
+        return center;
+    });
+
+    on(ComputePlansArea, (positions: number[]): number => {
+        const points: Vector3[] = [];
+        for (let i = 0, cnt = positions.length / 3; i < cnt; i++) {
+            points.push(new Vector3(positions[i * 3], positions[i * 3 + 1], positions[i * 3 + 2]));
+        }
+        const eq1 = points[0].distanceTo(points[points.length - 1]) < 0.0001;
+        const eq2 = points[points.length - 2].distanceTo(points[points.length - 1]) < 0.0001;
+        (eq1 || eq2) && points.pop();
+
+        if (points.length < 3) return 0;
+
+        let total: number = 0;
+        for (let i = 0, cnt = points.length - 2; i < cnt; i++) {
+            total += fire(ComputePoint3Area, points[0], points[i + 1], points[i + 2], fire(GetOptions).meterScale);
+        }
+        return total;
+    });
+
+    on(ReComputePlansArea, (points: Vector3[], meterScale: number): number => {
+        let total: number = 0;
+        for (let i = 0, cnt = points.length - 2; i < cnt; i++) {
+            total += fire(ComputePoint3Area, points[0], points[i + 1], points[i + 2], meterScale);
+        }
+        return total;
+    });
+
+    on(ComputePoint3Area, (p1: Vector3, p2: Vector3, p3: Vector3, meterScale: number): number => {
+        const a = p1.distanceTo(p2) * meterScale;
+        const b = p2.distanceTo(p3) * meterScale;
+        const c = p3.distanceTo(p1) * meterScale;
+        const s = (a + b + c) / 2;
+        return Math.sqrt(s * (s - a) * (s - b) * (s - c));
+    });
+}
