@@ -52,21 +52,24 @@ function fnClick(className: string) {
         let txt = document.querySelector('#gsviewer .operation table').classList.toggle('plus') ? '＋' : '－';
         document.querySelector('#gsviewer .op-show').innerHTML = txt;
     } else if (className == 'demo1') {
-        viewer.reset();
+        viewer.reset({ debugMode: true });
         viewer.addModel(`https://reall3d.com/demo-models/yz.bin`);
     } else if (className == 'demo2') {
-        viewer.reset();
+        viewer.reset({ debugMode: true });
         viewer.addModel(`https://reall3d.com/demo-models/jtstjg.bin`);
     } else if (className == 'demo3') {
-        viewer.reset();
+        viewer.reset({ debugMode: true });
         viewer.addModel(`https://reall3d.com/demo-models/djj.bin`);
     } else if (className == 'demo4') {
-        viewer.reset();
+        viewer.reset({ debugMode: true });
         viewer.addModel(`https://reall3d.com/demo-models/bzg.bin`);
     } else if (className == 'big-lod') {
         // 大场景LOD
-        viewer.reset();
-        viewer.options({ bigSceneMode: true, maxRenderCountOfMobile: 128 * 10240, maxRenderCountOfPc: 256 * 10240 });
+        const debugMode = true;
+        const pointcloudMode = false;
+        const maxRenderCountOfMobile = 128 * 10240;
+        const maxRenderCountOfPc = 256 * 10240;
+        viewer.reset({ debugMode, pointcloudMode, maxRenderCountOfMobile, maxRenderCountOfPc });
         viewer.addScene(`https://reall3d.com/demo-models/000-lod-kcc.scene.json`);
     } else if (className == 'switch-rotate') {
         let opts: Reall3dViewerOptions = viewer.options();

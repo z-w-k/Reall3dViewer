@@ -241,6 +241,7 @@ export class Reall3dViewer {
 
             opts.maxRenderCountOfMobile && (fire(GetOptions).maxRenderCountOfMobile = opts.maxRenderCountOfMobile);
             opts.maxRenderCountOfPc && (fire(GetOptions).maxRenderCountOfPc = opts.maxRenderCountOfPc);
+            opts.debugMode !== undefined && (fire(GetOptions).debugMode = opts.debugMode);
 
             opts.markType !== undefined && (fire(GetOptions).markType = opts.markType);
             if (opts.markVisible !== undefined) {
@@ -297,10 +298,9 @@ export class Reall3dViewer {
         fetch(sceneUrl, { mode: 'cors', credentials: 'omit', cache: 'reload' })
             .then(response => (!response.ok ? {} : response.json()))
             .then((data: any) => {
-                this.reset({ bigSceneMode: !!data.autoCut || data.models.length > 1 });
-                this.options({ autoRotate: true, pointcloudMode: false, position: [-0.192, -16.737, 31.569], lookAt: [-1.068, 4.291, 2.455] });
+                const opts: Reall3dViewerOptions = this.events.fire(GetOptions);
+                this.reset({ ...opts, bigSceneMode: !!data.autoCut || data.models.length > 1 });
                 this.splatMesh.meta = data;
-
                 for (let i = 0, max = data.models.length; i < max; i++) {
                     const model: ModelOptions = data.models[i];
                     this.addModel(model.url, model);

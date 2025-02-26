@@ -96,7 +96,7 @@ export function initSplatMeshOptions(options: SplatMeshOptions): SplatMeshOption
     // opts.maxRenderCountOfMobile ??= opts.bigSceneMode ? 64 * 2 * 10240 : 98 * 2 * 10240;
     // opts.maxRenderCountOfPc ??= opts.bigSceneMode ? 128 * 10240 : 256 * 2 * 10240;
     // opts.maxFetchCount = opts.maxFetchCount ? (opts.maxFetchCount >= 1 && opts.maxFetchCount <= 32 ? opts.maxFetchCount : 16) : 16;
-    opts.debugMode ??= location.protocol === 'http:' || /^test\./.test(location.host); // 生产环境不开启
+    // opts.debugMode ??= location.protocol === 'http:' || /^test\./.test(location.host); // 生产环境不开启
     opts.name ??= '';
     opts.showWaterMark ??= true;
 
