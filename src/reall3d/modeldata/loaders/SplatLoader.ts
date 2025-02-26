@@ -18,8 +18,8 @@ export async function loadSplat(model: SplatModel) {
     try {
         model.status = ModelStatus.Fetching;
         const signal: AbortSignal = model.abortController.signal;
-        const cache = model.FetchReload ? 'reload' : 'default';
-        const req = await fetch(model.url, { mode: 'cors', credentials: 'omit', cache, signal });
+        const cache = model.opts.fetchReload ? 'reload' : 'default';
+        const req = await fetch(model.opts.url, { mode: 'cors', credentials: 'omit', cache, signal });
         if (req.status != 200) {
             console.warn(`fetch error: ${req.status}`);
             model.status === ModelStatus.Fetching && (model.status = ModelStatus.FetchFailed);
@@ -31,14 +31,14 @@ export async function loadSplat(model: SplatModel) {
         model.fileSize = contentLength;
         const maxVertexCount = (contentLength / model.rowLength) | 0;
         if (maxVertexCount < 1) {
-            console.warn('data empty', model.url);
+            console.warn('data empty', model.opts.url);
             model.status === ModelStatus.Fetching && (model.status = ModelStatus.Invalid);
             return;
         }
 
         model.modelSplatCount = maxVertexCount;
         model.downloadSplatCount = 0;
-        model.splatData = new Uint8Array(Math.min(model.modelSplatCount, model.LimitSplatCount) * SplatDataSize36);
+        model.splatData = new Uint8Array(Math.min(model.modelSplatCount, model.opts.limitSplatCount) * SplatDataSize36);
 
         let perValue = new Uint8Array(SplatDataSize36);
         let perByteLen: number = 0;
@@ -62,16 +62,16 @@ export async function loadSplat(model: SplatModel) {
 
             // 超过限制时终止下载
             const downloadLimitSplatCount = isMobile ? MobileDownloadLimitSplatCount : PcDownloadLimitSplatCount;
-            const isSingleLimit: boolean = !model.meta?.autoCut && model.downloadSplatCount >= model.LimitSplatCount;
+            const isSingleLimit: boolean = !model.meta?.autoCut && model.downloadSplatCount >= model.opts.limitSplatCount;
             const isCutLimit = model.meta?.autoCut && model.downloadSplatCount >= downloadLimitSplatCount;
             (isSingleLimit || isCutLimit) && model.abortController.abort();
         }
     } catch (e) {
         if (e.name === 'AbortError') {
-            console.warn('Fetch Abort', model.url);
+            console.warn('Fetch Abort', model.opts.url);
             model.status === ModelStatus.Fetching && (model.status = ModelStatus.FetchAborted);
         } else {
-            console.error(e.message);
+            console.error(e);
             model.status === ModelStatus.Fetching && (model.status = ModelStatus.FetchFailed);
         }
     } finally {
@@ -91,8 +91,8 @@ export async function loadSplat(model: SplatModel) {
                 value = newValue.slice(0, cntSplat * model.rowLength);
             }
 
-            if (model.downloadSplatCount + cntSplat > model.LimitSplatCount) {
-                cntSplat = model.LimitSplatCount - model.downloadSplatCount;
+            if (model.downloadSplatCount + cntSplat > model.opts.limitSplatCount) {
+                cntSplat = model.opts.limitSplatCount - model.downloadSplatCount;
             }
 
             const fnParseSplat = async () => {

@@ -7,7 +7,7 @@ export async function loadFile(model: SplatModel) {
     try {
         model.status = ModelStatus.Fetching;
         const signal: AbortSignal = model.abortController.signal;
-        const req = await fetch(model.url, { mode: 'cors', credentials: 'omit', cache: 'reload', signal });
+        const req = await fetch(model.opts.url, { mode: 'cors', credentials: 'omit', cache: 'reload', signal });
         if (req.status != 200) {
             console.warn(`fetch error: ${req.status}`);
             model.status === ModelStatus.Fetching && (model.status = ModelStatus.FetchFailed);
@@ -28,10 +28,10 @@ export async function loadFile(model: SplatModel) {
         }
     } catch (e) {
         if (e.name === 'AbortError') {
-            console.warn('Fetch Abort', model.url);
+            console.warn('Fetch Abort', model.opts.url);
             model.status === ModelStatus.Fetching && (model.status = ModelStatus.FetchAborted);
         } else {
-            console.error(e.message);
+            console.error(e);
             model.status === ModelStatus.Fetching && (model.status = ModelStatus.FetchFailed);
         }
     } finally {

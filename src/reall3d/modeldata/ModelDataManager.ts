@@ -95,7 +95,7 @@ class SplatDataManager {
         }, 300);
     }
 
-    public add(url: string, opts: ModelOptions = {}) {
+    public add(opts: ModelOptions) {
         if (this.disposed) return;
         const fire = (key: number, ...args: any): any => this.events.fire(key, ...args);
         const MaxRenderCount: number = fire(GetMaxRenderCount);
@@ -106,13 +106,14 @@ class SplatDataManager {
         if (!isBigSceneMode) {
             this.removeAll();
 
-            const model = new SplatModel(url, opts, MaxRenderCount, isBigSceneMode);
+            (!opts.limitSplatCount || opts.limitSplatCount < 1) && (opts.limitSplatCount = MaxRenderCount);
+            const model = new SplatModel(opts, meta);
             if (!fire(LoaderModelStart, model)) {
-                console.error('Unsupported format:', model.format);
+                console.error('Unsupported format:', opts.format);
                 return;
             }
 
-            this.map.set(url, model);
+            this.map.set(opts.url, model);
             fire(OnFetchStart);
 
             fire(SplatMeshCycleZoom);
@@ -120,14 +121,16 @@ class SplatDataManager {
         }
 
         // 大场景
-        let old = this.map.get(url);
+        let old = this.map.get(opts.url);
         if (old && (old.status === ModelStatus.FetchReady || old.status === ModelStatus.Fetching || old.status === ModelStatus.FetchDone)) {
             return; // 【就绪 | 正在下载 | 正常完成】状态时，直接使用，跳过
         }
-        old && this.map.delete(url);
-        const splatModel = new SplatModel(url, opts, MaxRenderCount, isBigSceneMode, meta);
+        old && this.map.delete(opts.url);
+        !opts.limitSplatCount && (opts.limitSplatCount = MaxRenderCount);
+        opts.fetchReload ??= false;
+        const splatModel = new SplatModel(opts, meta);
         meta.autoCut && (splatModel.map = this.map);
-        this.map.set(url, splatModel); // 待调度处理  // 固定使用缓存模式下载
+        this.map.set(opts.url, splatModel); // 待调度处理
         fire(OnFetchStart);
     }
 
@@ -155,15 +158,15 @@ class SplatDataManager {
                 downloading++;
                 totalSplatCount += model.modelSplatCount;
             } else if (model.status === ModelStatus.FetchDone || model.status === ModelStatus.FetchAborted) {
-                !model.dataOnly && downloaded++;
+                !model.opts.dataOnly && downloaded++;
                 totalSplatCount += model.modelSplatCount;
             }
 
             if (model.status === ModelStatus.CancelFetch || model.status === ModelStatus.FetchFailed || model.status === ModelStatus.Invalid) {
-                dels.push(model.url);
-            } else if (model.format === 'splat' || model.format === 'bin' || model.format === 'json' || model.dataOnly) {
+                dels.push(model.opts.url);
+            } else if (model.opts.format === 'splat' || model.opts.format === 'bin' || model.opts.format === 'json' || model.opts.dataOnly) {
                 !model.meta?.autoCut && cacheModels.push(model);
-                !model.dataOnly && totalFiles++;
+                !model.opts.dataOnly && totalFiles++;
             }
         }
         for (const url of dels) {
@@ -374,7 +377,7 @@ class SplatDataManager {
         let topY: number = 0;
         let maxRadius: number = 0;
         let binVer: number = 0;
-        if (!isBigSceneMode && ary.length && ary[0].format === 'bin') {
+        if (!isBigSceneMode && ary.length && ary[0].opts.format === 'bin') {
             topY = ary[0].binHeader.TopY;
             maxRadius = ary[0].binHeader.MaxRadius;
             binVer = ary[0].binHeader.Version;
@@ -395,7 +398,7 @@ class SplatDataManager {
             [WkVersion]: time,
         });
 
-        fire(Information, { scene: isBigSceneMode ? 'big' : binVer ? `small (v${binVer})` : `small (${ary[0]?.format || 'splat'})` });
+        fire(Information, { scene: isBigSceneMode ? 'big' : binVer ? `small (v${binVer})` : `small (${ary[0]?.opts.format || 'splat'})` });
         return true;
     }
 
@@ -536,11 +539,11 @@ export function setupSplatDataManager(events: Events) {
     const on = (key: number, fn?: Function, multiFn?: boolean): Function | Function[] => events.on(key, fn, multiFn);
 
     on(LoaderModelStart, (model: SplatModel) => {
-        if (model.format === 'bin') {
+        if (model.opts.format === 'bin') {
             loadBin(model);
-        } else if (model.format === 'splat') {
+        } else if (model.opts.format === 'splat') {
             loadSplat(model);
-        } else if (model.format === 'json') {
+        } else if (model.opts.format === 'json') {
             loadSplatJson(model);
         } else {
             return false;
@@ -549,7 +552,7 @@ export function setupSplatDataManager(events: Events) {
     });
 
     const manager = new SplatDataManager(events);
-    on(SplatDataManagerAddModel, (url: string, opts: ModelOptions) => manager.add(url, opts));
+    on(SplatDataManagerAddModel, (opts: ModelOptions) => manager.add(opts));
     on(SplatDataManagerRemoveModel, (url: string) => manager.remove(url));
     on(SplatDataManagerRemoveAll, () => manager.removeAll());
     on(SplatDataManagerDataChanged, (msDuring: number = 3000) => Date.now() - manager.lastPostDataTime < msDuring);

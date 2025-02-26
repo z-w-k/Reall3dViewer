@@ -88,6 +88,7 @@ export class Reall3dViewer {
     private disposed: boolean = false;
     private splatMesh: SplatMesh;
     private events: Events;
+    private updateTime: number = 0;
 
     public needUpdate: boolean = true;
 
@@ -156,6 +157,7 @@ export class Reall3dViewer {
 
         scene.add(new AmbientLight('#ffffff', 2));
         scene.add(fire(CreateFocusMarkerMesh));
+        renderer.setAnimationLoop(this.update.bind(this));
 
         on(ViewerCheckNeedUpdate, () => {
             controls.update();
@@ -184,16 +186,23 @@ export class Reall3dViewer {
         });
         on(GetCachedWaterMark, () => watermark);
 
-        fire(
-            RunLoopByFrame,
-            () => this.update(),
-            () => !this.disposed,
-            2, // 30帧，已足够流畅
-        );
-
         fire(Information, { scale: `1 : ${fire(GetOptions).meterScale} m` });
 
         this.initGsApi();
+    }
+
+    /**
+     * 刷新
+     */
+    public update(): void {
+        if (this.disposed) return;
+        const fire = (key: number, ...args: any): any => this.events.fire(key, ...args);
+
+        if (Date.now() - this.updateTime > 30) {
+            fire(OnViewerBeforeUpdate);
+            this.needUpdate && fire(OnViewerUpdate);
+            fire(OnViewerAfterUpdate);
+        }
     }
 
     // 开发调试用临时接口
@@ -204,19 +213,6 @@ export class Reall3dViewer {
         n === 4 && this.events.fire(ClearFlyPosition);
         n === 5 && this.events.fire(MetaMarkSaveData);
         n === 6 && this.events.fire(MetaMarkRemoveData);
-    }
-
-    /**
-     * 刷新
-     * @param force 是否强制刷新
-     */
-    public update(): void {
-        if (this.disposed) return;
-        const fire = (key: number, ...args: any): any => this.events.fire(key, ...args);
-
-        fire(OnViewerBeforeUpdate);
-        this.needUpdate && fire(OnViewerUpdate);
-        fire(OnViewerAfterUpdate);
     }
 
     /**
@@ -302,8 +298,8 @@ export class Reall3dViewer {
                 this.reset({ ...opts, bigSceneMode: !!data.autoCut || data.models.length > 1 });
                 this.splatMesh.meta = data;
                 for (let i = 0, max = data.models.length; i < max; i++) {
-                    const model: ModelOptions = data.models[i];
-                    this.addModel(model.url, model);
+                    const modelOpts: ModelOptions = data.models[i];
+                    this.addModel(modelOpts);
                 }
             })
             .catch(e => {
@@ -313,16 +309,23 @@ export class Reall3dViewer {
 
     /**
      * 添加要渲染的高斯模型
-     * @param url 高斯模型地址
-     * @param opts 高斯模型选项
+     * @param urlOpts 高斯模型链接或选项
      */
-    public async addModel(url: string, modelOpts: ModelOptions = {}): Promise<void> {
+    public async addModel(urlOpts: string | ModelOptions): Promise<void> {
         if (this.disposed) return;
+        let modelOpts: ModelOptions;
+        if (Object.prototype.toString.call(urlOpts) === '[object String]') {
+            modelOpts = { url: urlOpts as string };
+        } else {
+            modelOpts = urlOpts as ModelOptions;
+        }
+        if (!modelOpts.url) return console.error('model url is empty');
+
         const opts: Reall3dViewerOptions = this.events.fire(GetOptions);
-        !opts.bigSceneMode && (opts.url = url);
+        !opts.bigSceneMode && (opts.url = modelOpts.url);
         !opts.bigSceneMode && this.events.fire(SetSmallSceneCameraNotReady);
         this.events.fire(LoadSmallSceneMetaData);
-        this.splatMesh.addModel(url, modelOpts);
+        this.splatMesh.addModel(modelOpts);
         this.events.fire(GetControls).updateRotateAxis();
     }
 

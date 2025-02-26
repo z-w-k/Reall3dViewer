@@ -39,7 +39,7 @@ export async function parseBinHeader(header: Uint8Array): Promise<number[]> {
 
 export async function parseBin2Data(data: Uint8Array, splatCount: number, header: BinHeader): Promise<Uint8Array> {
     const wasmModule = WebAssembly.compile(Uint8Array.from(atob(WasmBase64), c => c.charCodeAt(0)).buffer);
-    const blockCnt = Math.floor((splatCount * SplatDataSize36) / WasmBlockSize) + 3;
+    const blockCnt = Math.floor((splatCount * SplatDataSize36) / WasmBlockSize) + 2;
     const memory = new WebAssembly.Memory({ initial: blockCnt, maximum: blockCnt });
     const instance = await WebAssembly.instantiate(await wasmModule, { env: { memory } });
     const dataParser: any = instance.exports.d;

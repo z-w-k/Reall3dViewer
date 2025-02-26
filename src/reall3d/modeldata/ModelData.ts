@@ -2,7 +2,7 @@
 // Copyright (c) 2025 reall3d.com
 // ================================
 import { BinHeader } from './formats/BinFormat';
-import { ModelFormat, ModelOptions } from './ModelOptions';
+import { ModelOptions } from './ModelOptions';
 
 /**
  * 模型状态
@@ -28,16 +28,8 @@ export enum ModelStatus {
  * Splat模型
  */
 export class SplatModel {
-    /** 模型下载地址 */
-    public url: string = null;
-    /** 根据格式（splat | bin | obj） */
-    public format: ModelFormat = 'splat';
-    /** 高斯数量限制 */
-    public readonly LimitSplatCount: number = 0;
-    /** 是否重新下载 */
-    public readonly FetchReload: boolean = true;
-    /** 是否单纯数据 */
-    public dataOnly: boolean = false;
+    /** 模型选项 */
+    public readonly opts: ModelOptions;
 
     /** 模型文件大小 */
     public fileSize: number = 0;
@@ -88,28 +80,25 @@ export class SplatModel {
     public meta: any;
     public map: Map<string, SplatModel>;
     public set: Set<SplatModel>;
-    public opts: ModelOptions;
 
-    constructor(url: string, opts: ModelOptions = {}, limitCount: number, fetchReload: boolean, meta: any = {}) {
-        this.LimitSplatCount = limitCount || 512 * 10240;
-        this.FetchReload = fetchReload;
-        this.url = url;
+    constructor(opts: ModelOptions, meta: any = {}) {
+        this.opts = { ...opts };
 
         this.meta = meta;
         meta.autoCut && (this.set = new Set());
 
-        if (opts.format) {
-            this.format = opts.format;
-        } else if (url.endsWith('.splat')) {
-            this.format = 'splat';
-        } else if (url.endsWith('.bin')) {
-            this.format = 'bin';
-        } else if (url.endsWith('.json')) {
-            this.format = 'json';
-            // } else if (url.endsWith('.ply')) {
-            //     this.format = 'ply';
+        if (!opts.format) {
+            if (opts.url?.endsWith('.bin')) {
+                this.opts.format = 'bin';
+            } else if (opts.url?.endsWith('.splat')) {
+                this.opts.format = 'splat';
+            } else if (opts.url?.endsWith('.json')) {
+                this.opts.format = 'json';
+            } else {
+                console.error('unknow format!');
+            }
         }
-        this.abortController = new AbortController();
+        !opts.dataOnly && (this.abortController = new AbortController());
     }
 
     /**

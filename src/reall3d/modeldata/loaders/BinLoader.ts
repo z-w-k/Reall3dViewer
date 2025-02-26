@@ -13,6 +13,7 @@ import {
 import { parseBin2Data, parseBinHeader } from '../wasm/WasmBinParser';
 import { BinHeader } from '../formats/BinFormat';
 import { ModelStatus, SplatModel } from '../ModelData';
+import { ModelOptions } from '../ModelOptions';
 
 const maxProcessCnt = isMobile ? 20000 : 50000;
 
@@ -24,9 +25,9 @@ export async function loadBin(model: SplatModel) {
     try {
         model.status = ModelStatus.Fetching;
         const signal: AbortSignal = model.abortController.signal;
-        const cache = model.FetchReload ? 'reload' : 'default';
+        const cache = model.opts.fetchReload ? 'reload' : 'default';
         // const cache = 'reload';
-        const req = await fetch(model.url, { mode: 'cors', credentials: 'omit', cache, signal });
+        const req = await fetch(model.opts.url, { mode: 'cors', credentials: 'omit', cache, signal });
         if (req.status != 200) {
             console.warn(`fetch error: ${req.status}`);
             model.status === ModelStatus.Fetching && (model.status = ModelStatus.FetchFailed);
@@ -36,7 +37,7 @@ export async function loadBin(model: SplatModel) {
         const contentLength = parseInt(req.headers.get('content-length') || '0');
         const dataSize = contentLength - BinHeaderSize;
         if (dataSize < Bin2DataSize) {
-            console.warn('data empty', model.url);
+            console.warn('data empty', model.opts.url);
             model.status === ModelStatus.Fetching && (model.status = ModelStatus.Invalid);
             return;
         }
@@ -86,7 +87,8 @@ export async function loadBin(model: SplatModel) {
                 rowLength = header.Version === 1 ? SplatDataSize32 : Bin2DataSize;
                 model.rowLength = rowLength;
                 model.modelSplatCount = (dataSize / rowLength) | 0;
-                !model.meta?.autoCut && (model.splatData = new Uint8Array(Math.min(model.modelSplatCount, model.LimitSplatCount) * SplatDataSize36));
+                !model.meta?.autoCut &&
+                    (model.splatData = new Uint8Array(Math.min(model.modelSplatCount, model.opts.limitSplatCount) * SplatDataSize36));
                 headChunks = null;
                 headChunk = null;
             }
@@ -127,13 +129,13 @@ export async function loadBin(model: SplatModel) {
 
             // 超过限制时终止下载
             const downloadLimitSplatCount = isMobile ? MobileDownloadLimitSplatCount : PcDownloadLimitSplatCount;
-            const isSingleLimit: boolean = !model.meta?.autoCut && model.downloadSplatCount >= model.LimitSplatCount;
+            const isSingleLimit: boolean = !model.meta?.autoCut && model.downloadSplatCount >= model.opts.limitSplatCount;
             const isCutLimit = model.meta?.autoCut && model.downloadSplatCount >= downloadLimitSplatCount;
             (isSingleLimit || isCutLimit) && model.abortController.abort();
         }
     } catch (e) {
         if (e.name === 'AbortError') {
-            console.warn('Fetch Abort', model.url);
+            console.warn('Fetch Abort', model.opts.url);
             model.status === ModelStatus.Fetching && (model.status = ModelStatus.FetchAborted);
         } else {
             console.error(e);
@@ -157,8 +159,8 @@ export async function loadBin(model: SplatModel) {
                 value = newValue.slice(0, cntSplat * model.rowLength);
             }
 
-            if (!model.meta?.autoCut && model.downloadSplatCount + cntSplat > model.LimitSplatCount) {
-                cntSplat = model.LimitSplatCount - model.downloadSplatCount;
+            if (!model.meta?.autoCut && model.downloadSplatCount + cntSplat > model.opts.limitSplatCount) {
+                cntSplat = model.opts.limitSplatCount - model.downloadSplatCount;
             }
 
             const fnParseBin2 = async () => {
@@ -200,8 +202,8 @@ export async function loadBin(model: SplatModel) {
                 value = newValue.slice(0, cntSplat * model.rowLength);
             }
 
-            if (model.downloadSplatCount + cntSplat > model.LimitSplatCount) {
-                cntSplat = model.LimitSplatCount - model.downloadSplatCount;
+            if (model.downloadSplatCount + cntSplat > model.opts.limitSplatCount) {
+                cntSplat = model.opts.limitSplatCount - model.downloadSplatCount;
             }
 
             const fnParseSplat = async () => {
@@ -239,13 +241,13 @@ export async function loadBin(model: SplatModel) {
 
 function setSplatData(model: SplatModel, data: Uint8Array) {
     let isCut: boolean = !!model.meta?.autoCut;
-    if (isCut && (model.format === 'splat' || model.meta?.models?.length > 1) && !model.meta?.box) {
+    if (isCut && (model.opts.format === 'splat' || model.meta?.models?.length > 1) && !model.meta?.box) {
         isCut = false;
         model.meta.autoCut = 0; // 硬改纠正自动裁剪
         console.warn('box is not set, ignore cut');
     }
     if (!isCut) {
-        !model.splatData && (model.splatData = new Uint8Array(model.LimitSplatCount * SplatDataSize36));
+        !model.splatData && (model.splatData = new Uint8Array(model.opts.limitSplatCount * SplatDataSize36));
         return model.splatData.set(data, model.downloadSplatCount * SplatDataSize36);
     }
 
@@ -277,7 +279,11 @@ function setSplatData(model: SplatModel, data: Uint8Array) {
         key = `${kx}-${kz}`;
         let cutModel = model.map.get(key);
         if (!cutModel) {
-            cutModel = new SplatModel(key, model.opts, model.LimitSplatCount, model.FetchReload);
+            const opts: ModelOptions = { ...model.opts };
+            opts.url = key;
+            opts.format = 'splat';
+            opts.dataOnly = true;
+            cutModel = new SplatModel(opts);
             const header = new BinHeader();
             cutModel.binHeader = header;
             header.CenterX = x;
@@ -295,11 +301,9 @@ function setSplatData(model: SplatModel, data: Uint8Array) {
             cutModel.downloadSplatCount = 1;
             cutModel.modelSplatCount = cutModel.downloadSplatCount;
             cutModel.status = ModelStatus.FetchDone;
-            cutModel.format = 'splat';
-            cutModel.dataOnly = true;
             model.map.set(key, cutModel);
         } else {
-            if (cutModel.downloadSplatCount < model.LimitSplatCount - 1) {
+            if (cutModel.downloadSplatCount < model.opts.limitSplatCount - 1) {
                 if (cutModel.downloadSplatCount === cutModel.splatData.byteLength / SplatDataSize36) {
                     const splatData = new Uint8Array(cutModel.splatData.byteLength + 10240 * SplatDataSize36);
                     splatData.set(cutModel.splatData, 0);

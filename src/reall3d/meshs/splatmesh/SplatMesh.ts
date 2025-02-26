@@ -134,9 +134,9 @@ export class SplatMesh extends Mesh {
      * @param url 高斯模型地址
      * @param opts 高斯模型选项
      */
-    public async addModel(url: string, opts: ModelOptions = {}): Promise<void> {
+    public async addModel(opts: ModelOptions): Promise<void> {
         if (this.disposed) return;
-        this.events.fire(SplatDataManagerAddModel, url, opts);
+        this.events.fire(SplatDataManagerAddModel, opts);
     }
 
     /**

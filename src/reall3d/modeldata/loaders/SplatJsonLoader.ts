@@ -5,7 +5,7 @@ import { SplatDataSize36 } from '../../utils/consts/GlobalConstants';
 import { ModelStatus, SplatModel } from '../ModelData';
 
 export async function loadSplatJson(model: SplatModel) {
-    fetch(model.url, { mode: 'cors', credentials: 'omit', cache: 'reload' })
+    fetch(model.opts.url, { mode: 'cors', credentials: 'omit', cache: 'reload' })
         .then(response => (!response.ok ? [] : response.json()))
         .then((datas: any[]) => {
             model.modelSplatCount = datas.length;
@@ -34,7 +34,7 @@ export async function loadSplatJson(model: SplatModel) {
             model.status = ModelStatus.FetchDone;
         })
         .catch(e => {
-            console.error(e.message);
+            console.error(e);
             model.status = ModelStatus.FetchFailed;
         });
 }

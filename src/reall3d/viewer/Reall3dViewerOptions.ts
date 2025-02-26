@@ -44,7 +44,7 @@ export interface Reall3dViewerOptions {
     maxFetchCount?: number | undefined;
 
     /**
-     * 模型地址（最近一次添加渲染的模型地址，仅小场景适用），小场景添加模型渲染时会自动设定为模型地址，默认 undefined，
+     * 模型地址，默认 undefined，
      */
     url?: string | undefined;
 
@@ -75,6 +75,7 @@ export interface Reall3dViewerOptions {
      *  容器元素或其选择器，默认选择器为'#gsviewer'，自动创建画布时若找不到容器节点，将在body下自动创建容器
      */
     root?: HTMLElement | string | undefined;
+
     /**
      *  画布元素或其选择器，默认选择器为'#gsviewer-canvas'，未指定时将在容器节点里面自动创建
      */
