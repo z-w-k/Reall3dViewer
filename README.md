@@ -33,9 +33,6 @@ https://reall3d.com/reall3dviewer/index.html
 
 ## 用法
 ```shell
-# install
-npm install
-
 # develop
 npm run dev
 

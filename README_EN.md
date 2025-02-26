@@ -19,11 +19,11 @@ Reall3dViewer is a 3D Gaussian Splatting renderer built on Three.js. Crafting an
 <br>
 
 ## Features
-[x] Mobile friendly
-[x] Support `.splat` and optimized `.bin` formats
-[x] Support mark and measurement
-[x] Support text watermark
-[x] Support large scene rendering
+- [x] Mobile friendly
+- [x] Support `.splat` and optimized `.bin` formats
+- [x] Support mark and measurement
+- [x] Support text watermark
+- [x] Support large scene rendering
 
 
 ## Live demo
