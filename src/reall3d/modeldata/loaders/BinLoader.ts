@@ -295,6 +295,7 @@ function setSplatData(model: SplatModel, data: Uint8Array) {
             header.MaxY = y;
             header.MinZ = z;
             header.MaxZ = z;
+            header.MaxRadius = 0;
 
             cutModel.splatData = new Uint8Array(10240 * SplatDataSize36);
             cutModel.splatData.set(data.slice(i * SplatDataSize36, (i + 1) * SplatDataSize36), 0);
@@ -322,6 +323,11 @@ function setSplatData(model: SplatModel, data: Uint8Array) {
                 header.CenterX = (header.MaxX + header.MinX) / 2;
                 header.CenterY = (header.MaxY + header.MinY) / 2;
                 header.CenterZ = (header.MaxZ + header.MinZ) / 2;
+
+                const sizeX = header.MaxX - header.MinX;
+                const sizeY = header.MaxY - header.MinY;
+                const sizeZ = header.MaxZ - header.MinZ;
+                header.MaxRadius = Math.sqrt(sizeX * sizeX + sizeY * sizeY + sizeZ * sizeZ) / 2;
 
                 cutModel.downloadSplatCount++;
                 cutModel.modelSplatCount = cutModel.downloadSplatCount;

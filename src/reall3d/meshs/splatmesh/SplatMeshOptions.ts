@@ -1,7 +1,6 @@
 // ================================
 // Copyright (c) 2025 reall3d.com
 // ================================
-import { MapControls } from 'three/examples/jsm/controls/MapControls.js';
 import { Matrix4, PerspectiveCamera, Renderer, Scene } from 'three';
 import { Events } from '../../events/Events';
 import { OrbitControls } from 'three/examples/jsm/Addons.js';
@@ -33,7 +32,7 @@ export interface SplatMeshOptions {
     /**
      *  控制器
      */
-    controls?: MapControls | OrbitControls;
+    controls?: OrbitControls;
 
     /**
      *  模型矩阵

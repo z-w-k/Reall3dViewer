@@ -2,6 +2,7 @@
 // Copyright (c) 2025 reall3d.com
 // ================================
 import { PerspectiveCamera, Renderer, Scene } from 'three';
+import { OrbitControls } from 'three/examples/jsm/Addons.js';
 import { Events } from '../events/Events';
 
 /**
@@ -22,6 +23,11 @@ export interface Reall3dViewerOptions {
      *  指定相机对象传入使用，未定义时自动生成
      */
     camera?: PerspectiveCamera | undefined;
+
+    /**
+     *  控制器
+     */
+    controls?: OrbitControls;
 
     /**
      *  渲染器事件管理器

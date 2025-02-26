@@ -98,7 +98,7 @@ export class SplatModel {
                 console.error('unknow format!');
             }
         }
-        !opts.dataOnly && (this.abortController = new AbortController());
+        this.abortController = new AbortController();
     }
 
     /**

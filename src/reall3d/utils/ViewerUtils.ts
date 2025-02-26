@@ -112,7 +112,7 @@ export function initGsViewerOptions(options: Reall3dViewerOptions): Reall3dViewe
     opts.lookAt = opts.lookAt ? [...opts.lookAt] : [0, 0, 0];
     opts.lookUp = opts.lookUp ? [...opts.lookUp] : [0, -1, 0];
     opts.fov ??= 45;
-    opts.near ??= 0.1;
+    opts.near ??= 0.001;
     opts.far ??= 1000;
     opts.enableDamping ??= true;
     opts.autoRotate ??= true;
@@ -202,6 +202,7 @@ export function initCamera(opts: Reall3dViewerOptions): PerspectiveCamera {
 
 export function initControls(opts: Reall3dViewerOptions): Controls {
     const controls: Controls = new Controls(opts);
+    opts.controls = controls;
     return controls;
 }
 
@@ -213,6 +214,7 @@ export function copyGsViewerOptions(gsViewerOptions: Reall3dViewerOptions): Spla
     opts.renderer = gsViewerOptions.renderer;
     opts.scene = gsViewerOptions.scene;
     opts.camera = gsViewerOptions.camera;
+    opts.controls = gsViewerOptions.controls;
     opts.bigSceneMode = gsViewerOptions.bigSceneMode;
     opts.maxFetchCount = gsViewerOptions.maxFetchCount;
     opts.url = gsViewerOptions.url;

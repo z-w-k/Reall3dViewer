@@ -27,6 +27,7 @@ import {
     GetOptions,
     GetSplatMesh,
     OnRenderDataUpdateDone,
+    GetCameraLookAt,
 } from '../events/EventConstants';
 import { Matrix4, Vector3, Vector4 } from 'three';
 import { Events } from '../events/Events';
@@ -236,7 +237,7 @@ class SplatDataManager {
                 if (isBigSceneMode) {
                     // 大场景模式，计算可渲染数量
                     // console.time('checkAabb');
-                    const rs = that.checkAabb(fire(GetViewProjectionMatrix), fire(GetCameraPosition), model);
+                    const rs = that.checkAabb(fire(GetViewProjectionMatrix), fire(GetCameraPosition), fire(GetCameraLookAt), model);
                     // console.timeEnd('checkAabb');
                     model.checkVisible = rs.check;
                     if (rs.check) {
@@ -446,12 +447,17 @@ class SplatDataManager {
         });
     }
 
-    private checkAabb(viewProjMatrix: Matrix4, cameraPosition: Vector3, model: SplatModel): Partial<Record<string, any>> {
+    private checkAabb(viewProjMatrix: Matrix4, cameraPosition: Vector3, cameraLookAt: Vector3, model: SplatModel): Partial<Record<string, any>> {
         if (!model.binHeader) return { check: true, distance: 0 };
         const header = model.binHeader;
 
         const matrix = (this.events.fire(GetOptions) as SplatMeshOptions).matrix || new Matrix4(); // 模型矩阵
-        const distance: number = new Vector3(header.CenterX, header.CenterY, header.CenterZ).applyMatrix4(matrix).distanceTo(cameraPosition);
+        const center: Vector3 = new Vector3(header.CenterX, header.CenterY, header.CenterZ).applyMatrix4(matrix);
+        const distance: number = center.distanceTo(cameraPosition);
+        if (distance <= header.MaxRadius * 1.5 || center.distanceTo(cameraLookAt) <= header.MaxRadius * 2) {
+            return { check: true, distance };
+        }
+
         let pos2d: Vector4;
         let clip: number;
         let range: number = 1.2;

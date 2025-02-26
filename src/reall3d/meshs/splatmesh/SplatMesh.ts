@@ -34,6 +34,7 @@ import {
     GetViewProjectionMatrix,
     CommonUtilsDispose,
     GetSplatMesh,
+    GetCameraLookAt,
 } from '../../events/EventConstants';
 import { setupSplatDataManager } from '../../modeldata/ModelDataManager';
 import { SplatMeshOptions } from './SplatMeshOptions';
@@ -72,6 +73,7 @@ export class SplatMesh extends Mesh {
         on(GetCamera, () => camera);
         on(GetCameraFov, () => camera.fov);
         on(GetCameraPosition, (copy: boolean = false) => (copy ? camera.position.clone() : camera.position));
+        on(GetCameraLookAt, (copy: boolean = false) => (copy ? opts.controls.target.clone() : opts.controls.target));
         on(GetViewProjectionMatrixArray, () => camera.projectionMatrix.clone().multiply(camera.matrixWorldInverse).multiply(this.matrix).toArray());
         on(GetViewProjectionMatrix, () => camera.projectionMatrix.clone().multiply(camera.matrixWorldInverse));
         on(GetRenderer, () => opts.renderer);
