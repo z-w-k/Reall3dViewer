@@ -61,6 +61,7 @@ class SplatDataManager {
     private lastVersionScene: number = 0;
     public lastPostDataTime: number = Date.now() + 60 * 60 * 1000;
     private doingPostData: boolean = false;
+    private postDataDone: boolean = false;
 
     private watermarkData: Uint8Array = null; // 水印数据
 
@@ -98,6 +99,7 @@ class SplatDataManager {
 
     public add(opts: ModelOptions) {
         if (this.disposed) return;
+        if (this.postDataDone) return;
         const fire = (key: number, ...args: any): any => this.events.fire(key, ...args);
         const MaxRenderCount: number = fire(GetMaxRenderCount);
         const isBigSceneMode: boolean = fire(IsBigSceneMode);
@@ -382,6 +384,11 @@ class SplatDataManager {
             topY = ary[0].binHeader.TopY;
             maxRadius = ary[0].binHeader.MaxRadius;
             binVer = ary[0].binHeader.Version;
+        }
+
+        if (!isBigSceneMode && ary.length && (ary[0].status === ModelStatus.FetchDone || ary[0].status === ModelStatus.FetchAborted)) {
+            this.postDataDone = true;
+            setTimeout(() => this.map.clear(), 5000);
         }
 
         const worker: Worker = fire(GetWorker);
