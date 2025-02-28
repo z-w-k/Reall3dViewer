@@ -9,7 +9,6 @@ import { Reall3dViewerOptions } from './reall3d/viewer/Reall3dViewerOptions';
 
 const params: URLSearchParams = new URLSearchParams(location.search);
 let url = params.get('url');
-const host = 'https://reall3d.com';
 
 let viewer: Reall3dViewer;
 if (url) {
@@ -17,7 +16,7 @@ if (url) {
     viewer.addModel(url);
 } else {
     viewer = new Reall3dViewer({ debugMode: true });
-    viewer.addModel(`${host}/demo-models/jtstjg.bin`);
+    viewer.addModel(`https://reall3d.com/demo-models/jtstjg.bin`);
 
     initDevMode();
 }
@@ -53,16 +52,16 @@ function fnClick(className: string) {
         document.querySelector('#gsviewer .op-show').innerHTML = txt;
     } else if (className == 'demo1') {
         viewer.reset({ debugMode: true });
-        viewer.addModel(`https://reall3d.com/demo-models/yz.bin`);
+        setTimeout(() => viewer.addModel(`https://reall3d.com/demo-models/yz.bin`), 50); // Let it GC
     } else if (className == 'demo2') {
         viewer.reset({ debugMode: true });
-        viewer.addModel(`https://reall3d.com/demo-models/jtstjg.bin`);
+        setTimeout(() => viewer.addModel(`https://reall3d.com/demo-models/jtstjg.bin`), 50); // Let it GC
     } else if (className == 'demo3') {
         viewer.reset({ debugMode: true });
-        viewer.addModel(`https://reall3d.com/demo-models/djj.bin`);
+        setTimeout(() => viewer.addModel(`https://reall3d.com/demo-models/djj.bin`), 50); // Let it GC
     } else if (className == 'demo4') {
         viewer.reset({ debugMode: true });
-        viewer.addModel(`https://reall3d.com/demo-models/bzg.bin`);
+        setTimeout(() => viewer.addModel(`https://reall3d.com/demo-models/bzg.bin`), 50); // Let it GC
     } else if (className == 'big-lod') {
         // 大场景LOD
         const autoRotate = false;
@@ -71,7 +70,7 @@ function fnClick(className: string) {
         const maxRenderCountOfMobile = 128 * 10240;
         const maxRenderCountOfPc = (256 + 64) * 10240;
         viewer.reset({ autoRotate, debugMode, pointcloudMode, maxRenderCountOfMobile, maxRenderCountOfPc });
-        setTimeout(() => viewer.addScene(`https://reall3d.com/demo-models/000-lod-kcc.scene.json`), 200);
+        setTimeout(() => viewer.addScene(`https://reall3d.com/demo-models/000-lod-kcc.scene.json`), 50); // Let it GC
     } else if (className == 'switch-rotate') {
         let opts: Reall3dViewerOptions = viewer.options();
         viewer.options({ autoRotate: !opts.autoRotate });

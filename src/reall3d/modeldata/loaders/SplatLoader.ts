@@ -92,11 +92,6 @@ export async function loadSplat(model: SplatModel) {
 
             const fnParseSplat = async () => {
                 if (cntSplat > maxProcessCnt) {
-                    // const data: Uint8Array = new Uint8Array(maxProcessCnt * SplatDataSize32);
-                    // for (let i = 0; i < maxProcessCnt; i++) {
-                    //     const textdata: Uint8Array = await parseSplatData(value, maxProcessCnt);
-                    //     data.set(value.slice(i * SplatDataSize32, i * SplatDataSize32 + SplatDataSize32), i * SplatDataSize32);
-                    // }
                     const data: Uint8Array = await parseSplatToTexdata(value, maxProcessCnt);
 
                     model.splatData.set(data, model.downloadSplatCount * SplatDataSize32);
@@ -108,10 +103,6 @@ export async function loadSplat(model: SplatModel) {
                     value = value.slice(maxProcessCnt * model.rowLength);
                     setTimeout(fnParseSplat, 100);
                 } else {
-                    // const data: Uint8Array = new Uint8Array(cntSplat * SplatDataSize32);
-                    // for (let i = 0; i < cntSplat; i++) {
-                    //     data.set(value.slice(i * SplatDataSize32, i * SplatDataSize32 + SplatDataSize32), i * SplatDataSize32);
-                    // }
                     const data: Uint8Array = await parseSplatToTexdata(value, cntSplat);
                     model.splatData.set(data, model.downloadSplatCount * SplatDataSize32);
                     model.downloadSplatCount += cntSplat;

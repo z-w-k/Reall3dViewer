@@ -25,7 +25,6 @@ export async function loadBin(model: SplatModel) {
         model.status = ModelStatus.Fetching;
         const signal: AbortSignal = model.abortController.signal;
         const cache = model.opts.fetchReload ? 'reload' : 'default';
-        // const cache = 'reload';
         const req = await fetch(model.opts.url, { mode: 'cors', credentials: 'omit', cache, signal });
         if (req.status != 200) {
             console.warn(`fetch error: ${req.status}`);
@@ -296,7 +295,7 @@ function setSplatData(model: SplatModel, data: Uint8Array) {
             header.MaxZ = z;
             header.MaxRadius = 0;
 
-            cutModel.splatData = new Uint8Array(10240 * SplatDataSize32);
+            cutModel.splatData = new Uint8Array(maxProcessCnt * SplatDataSize32);
             cutModel.splatData.set(data.slice(i * SplatDataSize32, (i + 1) * SplatDataSize32), 0);
             cutModel.downloadSplatCount = 1;
             cutModel.modelSplatCount = cutModel.downloadSplatCount;
@@ -305,7 +304,7 @@ function setSplatData(model: SplatModel, data: Uint8Array) {
         } else {
             if (cutModel.downloadSplatCount < model.opts.limitSplatCount - 1) {
                 if (cutModel.downloadSplatCount === cutModel.splatData.byteLength / SplatDataSize32) {
-                    const splatData = new Uint8Array(cutModel.splatData.byteLength + 10240 * SplatDataSize32);
+                    const splatData = new Uint8Array(cutModel.splatData.byteLength + maxProcessCnt * SplatDataSize32);
                     splatData.set(cutModel.splatData, 0);
                     cutModel.splatData = splatData;
                 }
