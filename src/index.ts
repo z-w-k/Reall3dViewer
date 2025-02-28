@@ -71,7 +71,7 @@ function fnClick(className: string) {
         const maxRenderCountOfMobile = 128 * 10240;
         const maxRenderCountOfPc = (256 + 64) * 10240;
         viewer.reset({ autoRotate, debugMode, pointcloudMode, maxRenderCountOfMobile, maxRenderCountOfPc });
-        viewer.addScene(`https://reall3d.com/demo-models/000-lod-kcc.scene.json`);
+        setTimeout(() => viewer.addScene(`https://reall3d.com/demo-models/000-lod-kcc.scene.json`), 200);
     } else if (className == 'switch-rotate') {
         let opts: Reall3dViewerOptions = viewer.options();
         viewer.options({ autoRotate: !opts.autoRotate });
