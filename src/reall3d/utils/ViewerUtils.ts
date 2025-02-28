@@ -124,7 +124,7 @@ export function initGsViewerOptions(options: Reall3dViewerOptions): Reall3dViewe
     opts.pointcloudMode ??= !opts.bigSceneMode; // 小场景默认点云模式，大场景默认正常模式
     opts.lightFactor ??= 1.1;
     opts.maxRenderCountOfMobile ??= opts.bigSceneMode ? 128 * 10240 : 256 * 10240;
-    opts.maxRenderCountOfPc ??= opts.bigSceneMode ? (256 + 64) * 10240 : 512 * 10240;
+    opts.maxRenderCountOfPc ??= opts.bigSceneMode ? (256 + 128) * 10240 : 512 * 10240;
     opts.maxFetchCount = opts.maxFetchCount ? (opts.maxFetchCount >= 1 && opts.maxFetchCount <= 32 ? opts.maxFetchCount : 16) : 16;
     isMobile && (opts.maxFetchCount = 8);
     opts.debugMode ??= location.protocol === 'http:' || /^test\./.test(location.host); // 生产环境不开启

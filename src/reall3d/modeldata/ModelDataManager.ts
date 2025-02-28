@@ -46,7 +46,7 @@ import {
     WkVersion,
     WkVisibleSplatCount,
 } from '../utils/consts/WkConstants';
-import { isMobile, MobileDownloadLimitSplatCount, PcDownloadLimitSplatCount, SplatDataSize36 } from '../utils/consts/GlobalConstants';
+import { isMobile, MobileDownloadLimitSplatCount, PcDownloadLimitSplatCount, SplatDataSize32 } from '../utils/consts/GlobalConstants';
 import { loadSplatJson } from './loaders/SplatJsonLoader';
 import { SplatMeshOptions } from '../meshs/splatmesh/SplatMeshOptions';
 import { SplatMesh } from '../meshs/splatmesh/SplatMesh';
@@ -286,7 +286,7 @@ class SplatDataManager {
         const opts: SplatMeshOptions = fire(GetOptions);
         let watermarkCount: number = 0;
         if (opts.showWaterMark && this.watermarkData) {
-            watermarkCount = (this.watermarkData.byteLength / SplatDataSize36) | 0;
+            watermarkCount = (this.watermarkData.byteLength / SplatDataSize32) | 0;
         }
 
         for (const model of ary) {
@@ -343,13 +343,13 @@ class SplatDataManager {
         let mergeSplatData: Uint8Array = null;
         if (isBigSceneMode) {
             // 大场景时，合并数据上传
-            mergeSplatData = new Uint8Array(totalRenderSplatCount * SplatDataSize36);
+            mergeSplatData = new Uint8Array(totalRenderSplatCount * SplatDataSize32);
             if (watermarkCount) {
-                mergeSplatData.set(this.watermarkData.slice(0, watermarkCount * SplatDataSize36), 0);
-                readLength = watermarkCount * SplatDataSize36;
+                mergeSplatData.set(this.watermarkData.slice(0, watermarkCount * SplatDataSize32), 0);
+                readLength = watermarkCount * SplatDataSize32;
             }
             for (const model of ary) {
-                tmpLen = model.renderSplatCount * SplatDataSize36;
+                tmpLen = model.renderSplatCount * SplatDataSize32;
                 tmpLen && mergeSplatData.set(model.splatData.slice(0, tmpLen), readLength);
                 readLength += tmpLen;
             }
@@ -359,10 +359,10 @@ class SplatDataManager {
             if (model) {
                 totalVisibleSplatCount = model.downloadSplatCount;
                 let statusLoaded = model.status === ModelStatus.FetchDone || model.status === ModelStatus.FetchAborted;
-                mergeSplatData = new Uint8Array((totalRenderSplatCount + watermarkCount) * SplatDataSize36);
-                mergeSplatData.set(model.splatData.slice(0, model.renderSplatCount * SplatDataSize36), 0);
+                mergeSplatData = new Uint8Array((totalRenderSplatCount + watermarkCount) * SplatDataSize32);
+                mergeSplatData.set(model.splatData.slice(0, model.renderSplatCount * SplatDataSize32), 0);
                 if (statusLoaded && watermarkCount) {
-                    mergeSplatData.set(this.watermarkData.slice(0, watermarkCount * SplatDataSize36), model.renderSplatCount * SplatDataSize36);
+                    mergeSplatData.set(this.watermarkData.slice(0, watermarkCount * SplatDataSize32), model.renderSplatCount * SplatDataSize32);
                     totalVisibleSplatCount += watermarkCount;
                     totalModelSplatCount += watermarkCount;
                 }
@@ -454,7 +454,7 @@ class SplatDataManager {
         const matrix = (this.events.fire(GetOptions) as SplatMeshOptions).matrix || new Matrix4(); // 模型矩阵
         const center: Vector3 = new Vector3(header.CenterX, header.CenterY, header.CenterZ).applyMatrix4(matrix);
         const distance: number = center.distanceTo(cameraPosition);
-        if (distance <= header.MaxRadius * 1.5 || center.distanceTo(cameraLookAt) <= header.MaxRadius * 2) {
+        if (distance <= header.MaxRadius * 1.5 || center.distanceTo(cameraLookAt) <= header.MaxRadius * 4) {
             return { check: true, distance };
         }
 

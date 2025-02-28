@@ -120,6 +120,7 @@ function uploadTexture(buffer: Uint8Array, version: number, renderSplatCount: nu
     const texdata = new Uint32Array(texwidth * texheight * 4);
     const texdata_c = new Uint8Array(texdata.buffer);
     const texdata_f = new Float32Array(texdata.buffer);
+    // texdata_c.set(ui8_buffer, 0);
 
     let minX: number = renderSplatCount ? Infinity : 0;
     let maxX: number = renderSplatCount ? -Infinity : 0;
@@ -133,15 +134,15 @@ function uploadTexture(buffer: Uint8Array, version: number, renderSplatCount: nu
     let rot: number[];
     let tIdx: number = 0;
     for (let i = 0; i < renderSplatCount; i++) {
-        if (ui32_buffer[9 * i + 8] & 65536) {
+        if (ui32_buffer[8 * i + 3] & 65536) {
             wIndex.push(i);
             continue;
         }
 
         // x, y, z, watermark
-        x = f32_buffer[9 * i + 0];
-        y = f32_buffer[9 * i + 1];
-        z = f32_buffer[9 * i + 2];
+        x = f32_buffer[8 * i + 0];
+        y = f32_buffer[8 * i + 1];
+        z = f32_buffer[8 * i + 2];
 
         texture.xyz[3 * tIdx + 0] = x;
         texture.xyz[3 * tIdx + 1] = y;
@@ -155,56 +156,58 @@ function uploadTexture(buffer: Uint8Array, version: number, renderSplatCount: nu
         minZ = Math.min(minZ, z);
         maxZ = Math.max(maxZ, z);
 
-        // x, y, z
+        // texdata
         texdata_f[8 * tIdx + 0] = x;
         texdata_f[8 * tIdx + 1] = y;
         texdata_f[8 * tIdx + 2] = z;
+        texdata[8 * tIdx + 3] = ui32_buffer[8 * i + 3];
+        texdata[8 * tIdx + 4] = ui32_buffer[8 * i + 4];
+        texdata[8 * tIdx + 5] = ui32_buffer[8 * i + 5];
+        texdata[8 * tIdx + 6] = ui32_buffer[8 * i + 6];
+        texdata[8 * tIdx + 7] = ui32_buffer[8 * i + 7];
 
-        // 数据标识
-        texdata[8 * tIdx + 3] = ui32_buffer[9 * i + 8];
+        // // quaternions
+        // scale = [f32_buffer[9 * i + 3], f32_buffer[9 * i + 4], f32_buffer[9 * i + 5]];
+        // rot = [
+        //     (ui8_buffer[36 * i + 28 + 0] - 128) / 128,
+        //     (ui8_buffer[36 * i + 28 + 1] - 128) / 128,
+        //     (ui8_buffer[36 * i + 28 + 2] - 128) / 128,
+        //     (ui8_buffer[36 * i + 28 + 3] - 128) / 128,
+        // ];
 
-        // quaternions
-        scale = [f32_buffer[9 * i + 3], f32_buffer[9 * i + 4], f32_buffer[9 * i + 5]];
-        rot = [
-            (ui8_buffer[36 * i + 28 + 0] - 128) / 128,
-            (ui8_buffer[36 * i + 28 + 1] - 128) / 128,
-            (ui8_buffer[36 * i + 28 + 2] - 128) / 128,
-            (ui8_buffer[36 * i + 28 + 3] - 128) / 128,
-        ];
+        // // Compute the matrix product of S and R (M = S * R)
+        // const M = [
+        //     1.0 - 2.0 * (rot[2] * rot[2] + rot[3] * rot[3]),
+        //     2.0 * (rot[1] * rot[2] + rot[0] * rot[3]),
+        //     2.0 * (rot[1] * rot[3] - rot[0] * rot[2]),
 
-        // Compute the matrix product of S and R (M = S * R)
-        const M = [
-            1.0 - 2.0 * (rot[2] * rot[2] + rot[3] * rot[3]),
-            2.0 * (rot[1] * rot[2] + rot[0] * rot[3]),
-            2.0 * (rot[1] * rot[3] - rot[0] * rot[2]),
+        //     2.0 * (rot[1] * rot[2] - rot[0] * rot[3]),
+        //     1.0 - 2.0 * (rot[1] * rot[1] + rot[3] * rot[3]),
+        //     2.0 * (rot[2] * rot[3] + rot[0] * rot[1]),
 
-            2.0 * (rot[1] * rot[2] - rot[0] * rot[3]),
-            1.0 - 2.0 * (rot[1] * rot[1] + rot[3] * rot[3]),
-            2.0 * (rot[2] * rot[3] + rot[0] * rot[1]),
+        //     2.0 * (rot[1] * rot[3] + rot[0] * rot[2]),
+        //     2.0 * (rot[2] * rot[3] - rot[0] * rot[1]),
+        //     1.0 - 2.0 * (rot[1] * rot[1] + rot[2] * rot[2]),
+        // ].map((k, i) => k * scale[Math.floor(i / 3)]);
 
-            2.0 * (rot[1] * rot[3] + rot[0] * rot[2]),
-            2.0 * (rot[2] * rot[3] - rot[0] * rot[1]),
-            1.0 - 2.0 * (rot[1] * rot[1] + rot[2] * rot[2]),
-        ].map((k, i) => k * scale[Math.floor(i / 3)]);
+        // const sigma = [
+        //     M[0] * M[0] + M[3] * M[3] + M[6] * M[6],
+        //     M[0] * M[1] + M[3] * M[4] + M[6] * M[7],
+        //     M[0] * M[2] + M[3] * M[5] + M[6] * M[8],
+        //     M[1] * M[1] + M[4] * M[4] + M[7] * M[7],
+        //     M[1] * M[2] + M[4] * M[5] + M[7] * M[8],
+        //     M[2] * M[2] + M[5] * M[5] + M[8] * M[8],
+        // ];
 
-        const sigma = [
-            M[0] * M[0] + M[3] * M[3] + M[6] * M[6],
-            M[0] * M[1] + M[3] * M[4] + M[6] * M[7],
-            M[0] * M[2] + M[3] * M[5] + M[6] * M[8],
-            M[1] * M[1] + M[4] * M[4] + M[7] * M[7],
-            M[1] * M[2] + M[4] * M[5] + M[7] * M[8],
-            M[2] * M[2] + M[5] * M[5] + M[8] * M[8],
-        ];
+        // texdata[8 * tIdx + 4] = packHalf2x16(4 * sigma[0], 4 * sigma[1]);
+        // texdata[8 * tIdx + 5] = packHalf2x16(4 * sigma[2], 4 * sigma[3]);
+        // texdata[8 * tIdx + 6] = packHalf2x16(4 * sigma[4], 4 * sigma[5]);
 
-        texdata[8 * tIdx + 4] = packHalf2x16(4 * sigma[0], 4 * sigma[1]);
-        texdata[8 * tIdx + 5] = packHalf2x16(4 * sigma[2], 4 * sigma[3]);
-        texdata[8 * tIdx + 6] = packHalf2x16(4 * sigma[4], 4 * sigma[5]);
-
-        // r, g, b, a
-        texdata_c[4 * (8 * tIdx + 7) + 0] = ui8_buffer[36 * i + 24 + 0];
-        texdata_c[4 * (8 * tIdx + 7) + 1] = ui8_buffer[36 * i + 24 + 1];
-        texdata_c[4 * (8 * tIdx + 7) + 2] = ui8_buffer[36 * i + 24 + 2];
-        texdata_c[4 * (8 * tIdx + 7) + 3] = ui8_buffer[36 * i + 24 + 3];
+        // // r, g, b, a
+        // texdata_c[4 * (8 * tIdx + 7) + 0] = ui8_buffer[36 * i + 24 + 0];
+        // texdata_c[4 * (8 * tIdx + 7) + 1] = ui8_buffer[36 * i + 24 + 1];
+        // texdata_c[4 * (8 * tIdx + 7) + 2] = ui8_buffer[36 * i + 24 + 2];
+        // texdata_c[4 * (8 * tIdx + 7) + 3] = ui8_buffer[36 * i + 24 + 3];
 
         tIdx++;
     }
@@ -212,9 +215,9 @@ function uploadTexture(buffer: Uint8Array, version: number, renderSplatCount: nu
     wIndex.length && (texture.wxyz = []);
     for (let i of wIndex) {
         // x, y, z, watermark
-        x = f32_buffer[9 * i + 0];
-        y = f32_buffer[9 * i + 1];
-        z = f32_buffer[9 * i + 2];
+        x = f32_buffer[8 * i + 0];
+        y = f32_buffer[8 * i + 1];
+        z = f32_buffer[8 * i + 2];
 
         texture.wxyz.push(x, y, z);
 
@@ -226,56 +229,66 @@ function uploadTexture(buffer: Uint8Array, version: number, renderSplatCount: nu
         minZ = Math.min(minZ, z);
         maxZ = Math.max(maxZ, z);
 
-        // x, y, z
+        // texdata
         texdata_f[8 * tIdx + 0] = x;
         texdata_f[8 * tIdx + 1] = y;
         texdata_f[8 * tIdx + 2] = z;
+        texdata[8 * tIdx + 3] = ui32_buffer[8 * i + 3];
+        texdata[8 * tIdx + 4] = ui32_buffer[8 * i + 4];
+        texdata[8 * tIdx + 5] = ui32_buffer[8 * i + 5];
+        texdata[8 * tIdx + 6] = ui32_buffer[8 * i + 6];
+        texdata[8 * tIdx + 7] = ui32_buffer[8 * i + 7];
 
-        // 水印
-        texdata[8 * tIdx + 3] = 65536;
+        // // x, y, z
+        // texdata_f[8 * tIdx + 0] = x;
+        // texdata_f[8 * tIdx + 1] = y;
+        // texdata_f[8 * tIdx + 2] = z;
 
-        // quaternions
-        scale = [f32_buffer[9 * i + 3], f32_buffer[9 * i + 4], f32_buffer[9 * i + 5]];
-        rot = [
-            (ui8_buffer[36 * i + 28 + 0] - 128) / 128,
-            (ui8_buffer[36 * i + 28 + 1] - 128) / 128,
-            (ui8_buffer[36 * i + 28 + 2] - 128) / 128,
-            (ui8_buffer[36 * i + 28 + 3] - 128) / 128,
-        ];
+        // // 水印
+        // texdata[8 * tIdx + 3] = 65536;
 
-        // Compute the matrix product of S and R (M = S * R)
-        const M = [
-            1.0 - 2.0 * (rot[2] * rot[2] + rot[3] * rot[3]),
-            2.0 * (rot[1] * rot[2] + rot[0] * rot[3]),
-            2.0 * (rot[1] * rot[3] - rot[0] * rot[2]),
+        // // quaternions
+        // scale = [f32_buffer[9 * i + 3], f32_buffer[9 * i + 4], f32_buffer[9 * i + 5]];
+        // rot = [
+        //     (ui8_buffer[36 * i + 28 + 0] - 128) / 128,
+        //     (ui8_buffer[36 * i + 28 + 1] - 128) / 128,
+        //     (ui8_buffer[36 * i + 28 + 2] - 128) / 128,
+        //     (ui8_buffer[36 * i + 28 + 3] - 128) / 128,
+        // ];
 
-            2.0 * (rot[1] * rot[2] - rot[0] * rot[3]),
-            1.0 - 2.0 * (rot[1] * rot[1] + rot[3] * rot[3]),
-            2.0 * (rot[2] * rot[3] + rot[0] * rot[1]),
+        // // Compute the matrix product of S and R (M = S * R)
+        // const M = [
+        //     1.0 - 2.0 * (rot[2] * rot[2] + rot[3] * rot[3]),
+        //     2.0 * (rot[1] * rot[2] + rot[0] * rot[3]),
+        //     2.0 * (rot[1] * rot[3] - rot[0] * rot[2]),
 
-            2.0 * (rot[1] * rot[3] + rot[0] * rot[2]),
-            2.0 * (rot[2] * rot[3] - rot[0] * rot[1]),
-            1.0 - 2.0 * (rot[1] * rot[1] + rot[2] * rot[2]),
-        ].map((k, i) => k * scale[Math.floor(i / 3)]);
+        //     2.0 * (rot[1] * rot[2] - rot[0] * rot[3]),
+        //     1.0 - 2.0 * (rot[1] * rot[1] + rot[3] * rot[3]),
+        //     2.0 * (rot[2] * rot[3] + rot[0] * rot[1]),
 
-        const sigma = [
-            M[0] * M[0] + M[3] * M[3] + M[6] * M[6],
-            M[0] * M[1] + M[3] * M[4] + M[6] * M[7],
-            M[0] * M[2] + M[3] * M[5] + M[6] * M[8],
-            M[1] * M[1] + M[4] * M[4] + M[7] * M[7],
-            M[1] * M[2] + M[4] * M[5] + M[7] * M[8],
-            M[2] * M[2] + M[5] * M[5] + M[8] * M[8],
-        ];
+        //     2.0 * (rot[1] * rot[3] + rot[0] * rot[2]),
+        //     2.0 * (rot[2] * rot[3] - rot[0] * rot[1]),
+        //     1.0 - 2.0 * (rot[1] * rot[1] + rot[2] * rot[2]),
+        // ].map((k, i) => k * scale[Math.floor(i / 3)]);
 
-        texdata[8 * tIdx + 4] = packHalf2x16(4 * sigma[0], 4 * sigma[1]);
-        texdata[8 * tIdx + 5] = packHalf2x16(4 * sigma[2], 4 * sigma[3]);
-        texdata[8 * tIdx + 6] = packHalf2x16(4 * sigma[4], 4 * sigma[5]);
+        // const sigma = [
+        //     M[0] * M[0] + M[3] * M[3] + M[6] * M[6],
+        //     M[0] * M[1] + M[3] * M[4] + M[6] * M[7],
+        //     M[0] * M[2] + M[3] * M[5] + M[6] * M[8],
+        //     M[1] * M[1] + M[4] * M[4] + M[7] * M[7],
+        //     M[1] * M[2] + M[4] * M[5] + M[7] * M[8],
+        //     M[2] * M[2] + M[5] * M[5] + M[8] * M[8],
+        // ];
 
-        // r, g, b, a
-        texdata_c[4 * (8 * tIdx + 7) + 0] = ui8_buffer[36 * i + 24 + 0];
-        texdata_c[4 * (8 * tIdx + 7) + 1] = ui8_buffer[36 * i + 24 + 1];
-        texdata_c[4 * (8 * tIdx + 7) + 2] = ui8_buffer[36 * i + 24 + 2];
-        texdata_c[4 * (8 * tIdx + 7) + 3] = ui8_buffer[36 * i + 24 + 3];
+        // texdata[8 * tIdx + 4] = packHalf2x16(4 * sigma[0], 4 * sigma[1]);
+        // texdata[8 * tIdx + 5] = packHalf2x16(4 * sigma[2], 4 * sigma[3]);
+        // texdata[8 * tIdx + 6] = packHalf2x16(4 * sigma[4], 4 * sigma[5]);
+
+        // // r, g, b, a
+        // texdata_c[4 * (8 * tIdx + 7) + 0] = ui8_buffer[36 * i + 24 + 0];
+        // texdata_c[4 * (8 * tIdx + 7) + 1] = ui8_buffer[36 * i + 24 + 1];
+        // texdata_c[4 * (8 * tIdx + 7) + 2] = ui8_buffer[36 * i + 24 + 2];
+        // texdata_c[4 * (8 * tIdx + 7) + 3] = ui8_buffer[36 * i + 24 + 3];
 
         tIdx++;
     }

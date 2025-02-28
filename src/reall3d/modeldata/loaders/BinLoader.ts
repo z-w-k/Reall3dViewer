@@ -2,7 +2,6 @@
 // Copyright (c) 2025 reall3d.com
 // ================================
 import {
-    SplatDataSize36,
     Bin2DataSize,
     BinHeaderSize,
     SplatDataSize32,
@@ -10,7 +9,7 @@ import {
     PcDownloadLimitSplatCount,
     isMobile,
 } from '../../utils/consts/GlobalConstants';
-import { parseBin2Data, parseBinHeader } from '../wasm/WasmBinParser';
+import { parseBinToTexdata, parseBinHeader } from '../wasm/WasmBinParser';
 import { BinHeader } from '../formats/BinFormat';
 import { ModelStatus, SplatModel } from '../ModelData';
 import { ModelOptions } from '../ModelOptions';
@@ -48,7 +47,7 @@ export async function loadBin(model: SplatModel) {
         let rowLength: number;
         let headChunks = [];
         let headChunk = new Uint8Array(BinHeaderSize);
-        let perValue = new Uint8Array(SplatDataSize36);
+        let perValue = new Uint8Array(SplatDataSize32);
         let perByteLen: number = 0;
 
         while (true) {
@@ -88,7 +87,7 @@ export async function loadBin(model: SplatModel) {
                 model.rowLength = rowLength;
                 model.modelSplatCount = (dataSize / rowLength) | 0;
                 !model.meta?.autoCut &&
-                    (model.splatData = new Uint8Array(Math.min(model.modelSplatCount, model.opts.limitSplatCount) * SplatDataSize36));
+                    (model.splatData = new Uint8Array(Math.min(model.modelSplatCount, model.opts.limitSplatCount) * SplatDataSize32));
                 headChunks = null;
                 headChunk = null;
             }
@@ -165,7 +164,7 @@ export async function loadBin(model: SplatModel) {
 
             const fnParseBin2 = async () => {
                 if (cntSplat > maxProcessCnt) {
-                    const data: Uint8Array = await parseBin2Data(value, maxProcessCnt, model.binHeader);
+                    const data: Uint8Array = await parseBinToTexdata(value, maxProcessCnt, model.binHeader);
                     setSplatData(model, data);
                     model.downloadSplatCount += maxProcessCnt;
                     bytesRead += maxProcessCnt * model.rowLength;
@@ -175,7 +174,7 @@ export async function loadBin(model: SplatModel) {
                     value = value.slice(maxProcessCnt * model.rowLength);
                     setTimeout(fnParseBin2, 100);
                 } else {
-                    const data: Uint8Array = await parseBin2Data(value, cntSplat, model.binHeader);
+                    const data: Uint8Array = await parseBinToTexdata(value, cntSplat, model.binHeader);
                     setSplatData(model, data);
                     model.downloadSplatCount += cntSplat;
                     bytesRead += cntSplat * model.rowLength;
@@ -208,9 +207,9 @@ export async function loadBin(model: SplatModel) {
 
             const fnParseSplat = async () => {
                 if (cntSplat > maxProcessCnt) {
-                    const data: Uint8Array = new Uint8Array(maxProcessCnt * SplatDataSize36);
+                    const data: Uint8Array = new Uint8Array(maxProcessCnt * SplatDataSize32);
                     for (let i = 0; i < maxProcessCnt; i++) {
-                        data.set(value.slice(i * SplatDataSize32, i * SplatDataSize32 + SplatDataSize32), i * SplatDataSize36);
+                        data.set(value.slice(i * SplatDataSize32, i * SplatDataSize32 + SplatDataSize32), i * SplatDataSize32);
                     }
                     setSplatData(model, data);
                     model.downloadSplatCount += maxProcessCnt;
@@ -221,9 +220,9 @@ export async function loadBin(model: SplatModel) {
                     value = value.slice(maxProcessCnt * model.rowLength);
                     setTimeout(fnParseSplat, 100);
                 } else {
-                    const data: Uint8Array = new Uint8Array(cntSplat * SplatDataSize36);
+                    const data: Uint8Array = new Uint8Array(cntSplat * SplatDataSize32);
                     for (let i = 0; i < cntSplat; i++) {
-                        data.set(value.slice(i * SplatDataSize32, i * SplatDataSize32 + SplatDataSize32), i * SplatDataSize36);
+                        data.set(value.slice(i * SplatDataSize32, i * SplatDataSize32 + SplatDataSize32), i * SplatDataSize32);
                     }
                     setSplatData(model, data);
                     model.downloadSplatCount += cntSplat;
@@ -247,8 +246,8 @@ function setSplatData(model: SplatModel, data: Uint8Array) {
         console.warn('box is not set, ignore cut');
     }
     if (!isCut) {
-        !model.splatData && (model.splatData = new Uint8Array(model.opts.limitSplatCount * SplatDataSize36));
-        return model.splatData.set(data, model.downloadSplatCount * SplatDataSize36);
+        !model.splatData && (model.splatData = new Uint8Array(model.opts.limitSplatCount * SplatDataSize32));
+        return model.splatData.set(data, model.downloadSplatCount * SplatDataSize32);
     }
 
     let minX = model.binHeader?.MinX;
@@ -269,10 +268,10 @@ function setSplatData(model: SplatModel, data: Uint8Array) {
     const cutAvgSizeZ = (maxZ - minX) / autoCut;
 
     const f32s: Float32Array = new Float32Array(data.buffer);
-    for (let i = 0, count = Math.floor(data.byteLength / SplatDataSize36), x = 0, y = 0, z = 0, key = ''; i < count; i++) {
-        x = f32s[i * 9];
-        y = f32s[i * 9 + 1];
-        z = f32s[i * 9 + 2];
+    for (let i = 0, count = Math.floor(data.byteLength / SplatDataSize32), x = 0, y = 0, z = 0, key = ''; i < count; i++) {
+        x = f32s[i * 8];
+        y = f32s[i * 8 + 1];
+        z = f32s[i * 8 + 2];
         let kx = Math.min(autoCut - 1, Math.floor(Math.max(0, x - minX) / cutAvgSizeX));
         let kz = Math.min(autoCut - 1, Math.floor(Math.max(0, z - minZ) / cutAvgSizeZ));
 
@@ -297,21 +296,21 @@ function setSplatData(model: SplatModel, data: Uint8Array) {
             header.MaxZ = z;
             header.MaxRadius = 0;
 
-            cutModel.splatData = new Uint8Array(10240 * SplatDataSize36);
-            cutModel.splatData.set(data.slice(i * SplatDataSize36, (i + 1) * SplatDataSize36), 0);
+            cutModel.splatData = new Uint8Array(10240 * SplatDataSize32);
+            cutModel.splatData.set(data.slice(i * SplatDataSize32, (i + 1) * SplatDataSize32), 0);
             cutModel.downloadSplatCount = 1;
             cutModel.modelSplatCount = cutModel.downloadSplatCount;
             cutModel.status = ModelStatus.FetchDone;
             model.map.set(key, cutModel);
         } else {
             if (cutModel.downloadSplatCount < model.opts.limitSplatCount - 1) {
-                if (cutModel.downloadSplatCount === cutModel.splatData.byteLength / SplatDataSize36) {
-                    const splatData = new Uint8Array(cutModel.splatData.byteLength + 10240 * SplatDataSize36);
+                if (cutModel.downloadSplatCount === cutModel.splatData.byteLength / SplatDataSize32) {
+                    const splatData = new Uint8Array(cutModel.splatData.byteLength + 10240 * SplatDataSize32);
                     splatData.set(cutModel.splatData, 0);
                     cutModel.splatData = splatData;
                 }
 
-                cutModel.splatData.set(data.slice(i * SplatDataSize36, (i + 1) * SplatDataSize36), cutModel.downloadSplatCount * SplatDataSize36);
+                cutModel.splatData.set(data.slice(i * SplatDataSize32, (i + 1) * SplatDataSize32), cutModel.downloadSplatCount * SplatDataSize32);
 
                 const header = cutModel.binHeader;
                 header.MinX = Math.min(header.MinX, x);

@@ -1,14 +1,9 @@
 // ================================
 // Copyright (c) 2025 reall3d.com
 // ================================
-import {
-    isMobile,
-    MobileDownloadLimitSplatCount,
-    PcDownloadLimitSplatCount,
-    SplatDataSize32,
-    SplatDataSize36,
-} from '../../utils/consts/GlobalConstants';
+import { isMobile, MobileDownloadLimitSplatCount, PcDownloadLimitSplatCount, SplatDataSize32 } from '../../utils/consts/GlobalConstants';
 import { ModelStatus, SplatModel } from '../ModelData';
+import { parseSplatToTexdata } from '../wasm/WasmBinParser';
 
 const maxProcessCnt = isMobile ? 20000 : 50000;
 
@@ -38,9 +33,9 @@ export async function loadSplat(model: SplatModel) {
 
         model.modelSplatCount = maxVertexCount;
         model.downloadSplatCount = 0;
-        model.splatData = new Uint8Array(Math.min(model.modelSplatCount, model.opts.limitSplatCount) * SplatDataSize36);
+        model.splatData = new Uint8Array(Math.min(model.modelSplatCount, model.opts.limitSplatCount) * SplatDataSize32);
 
-        let perValue = new Uint8Array(SplatDataSize36);
+        let perValue = new Uint8Array(SplatDataSize32);
         let perByteLen: number = 0;
 
         while (true) {
@@ -97,11 +92,14 @@ export async function loadSplat(model: SplatModel) {
 
             const fnParseSplat = async () => {
                 if (cntSplat > maxProcessCnt) {
-                    const data: Uint8Array = new Uint8Array(maxProcessCnt * SplatDataSize36);
-                    for (let i = 0; i < maxProcessCnt; i++) {
-                        data.set(value.slice(i * SplatDataSize32, i * SplatDataSize32 + SplatDataSize32), i * SplatDataSize36);
-                    }
-                    model.splatData.set(data, model.downloadSplatCount * SplatDataSize36);
+                    // const data: Uint8Array = new Uint8Array(maxProcessCnt * SplatDataSize32);
+                    // for (let i = 0; i < maxProcessCnt; i++) {
+                    //     const textdata: Uint8Array = await parseSplatData(value, maxProcessCnt);
+                    //     data.set(value.slice(i * SplatDataSize32, i * SplatDataSize32 + SplatDataSize32), i * SplatDataSize32);
+                    // }
+                    const data: Uint8Array = await parseSplatToTexdata(value, maxProcessCnt);
+
+                    model.splatData.set(data, model.downloadSplatCount * SplatDataSize32);
                     model.downloadSplatCount += maxProcessCnt;
                     bytesRead += maxProcessCnt * model.rowLength;
                     model.downloadSize = bytesRead;
@@ -110,11 +108,12 @@ export async function loadSplat(model: SplatModel) {
                     value = value.slice(maxProcessCnt * model.rowLength);
                     setTimeout(fnParseSplat, 100);
                 } else {
-                    const data: Uint8Array = new Uint8Array(cntSplat * SplatDataSize36);
-                    for (let i = 0; i < cntSplat; i++) {
-                        data.set(value.slice(i * SplatDataSize32, i * SplatDataSize32 + SplatDataSize32), i * SplatDataSize36);
-                    }
-                    model.splatData.set(data, model.downloadSplatCount * SplatDataSize36);
+                    // const data: Uint8Array = new Uint8Array(cntSplat * SplatDataSize32);
+                    // for (let i = 0; i < cntSplat; i++) {
+                    //     data.set(value.slice(i * SplatDataSize32, i * SplatDataSize32 + SplatDataSize32), i * SplatDataSize32);
+                    // }
+                    const data: Uint8Array = await parseSplatToTexdata(value, cntSplat);
+                    model.splatData.set(data, model.downloadSplatCount * SplatDataSize32);
                     model.downloadSplatCount += cntSplat;
                     bytesRead += cntSplat * model.rowLength;
                     model.downloadSize = bytesRead;

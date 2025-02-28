@@ -3,8 +3,8 @@
 // ================================
 import { GetGaussianText, HttpQueryGaussianText } from '../../events/EventConstants';
 import { Events } from '../../events/Events';
-import { HalfChars, SplatDataSize36 } from '../../utils/consts/GlobalConstants';
-import { genWatermarkSplatData } from '../wasm/WasmBinParser';
+import { HalfChars, SplatDataSize32 } from '../../utils/consts/GlobalConstants';
+import { parseWordToTexdata } from '../wasm/WasmBinParser';
 
 export function setupGaussianText(events: Events) {
     const fire = (key: number, ...args: any): any => events.fire(key, ...args);
@@ -53,11 +53,11 @@ export function setupGaussianText(events: Events) {
             gsCount += wordJson.length;
         }
 
-        const data = new Uint8Array(gsCount * SplatDataSize36);
+        const data = new Uint8Array(gsCount * SplatDataSize32);
         let i = 0;
         for (let wordJson of wordsJson) {
             for (let nums of wordJson) {
-                data.set(await genWatermarkSplatData(nums[0], nums[1], isY, isNgativeY), SplatDataSize36 * i++);
+                data.set(await parseWordToTexdata(nums[0], nums[1], isY, isNgativeY), SplatDataSize32 * i++);
             }
         }
         return data;
