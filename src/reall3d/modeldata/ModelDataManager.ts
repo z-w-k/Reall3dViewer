@@ -28,6 +28,7 @@ import {
     GetSplatMesh,
     OnRenderDataUpdateDone,
     GetCameraLookAt,
+    RunLoopByFrame,
 } from '../events/EventConstants';
 import { Matrix4, Vector3, Vector4 } from 'three';
 import { Events } from '../events/Events';
@@ -80,19 +81,22 @@ class SplatDataManager {
 
         events.on(OnRenderDataUpdateDone, (dataTime: number) => (dataTime < 0 || dataTime >= this.lastPostDataTime) && (this.doingPostData = false));
 
-        let delay = isMobile ? (events.fire(IsBigSceneMode) ? 1000 : 300) : events.fire(IsBigSceneMode) ? 200 : 100;
+        let delay = isMobile ? (events.fire(IsBigSceneMode) ? 300 : 150) : events.fire(IsBigSceneMode) ? 200 : 100;
+        let lastTime = Date.now();
         setTimeout(() => {
             !this.disposed &&
                 events.fire(
-                    RunLoopByTime,
+                    RunLoopByFrame,
                     () => {
+                        if (Date.now() - lastTime < delay) return;
+
                         if (!this.doingPostData || Date.now() - this.lastPostDataTime >= 5 * 1000) {
                             this.doingPostData = true;
                             this.doingPostData = this.getRenderSplatData();
                         }
+                        lastTime = Date.now();
                     },
                     () => !this.disposed,
-                    delay,
                 );
         }, 300);
     }
@@ -388,7 +392,7 @@ class SplatDataManager {
 
         if (!isBigSceneMode && ary.length && (ary[0].status === ModelStatus.FetchDone || ary[0].status === ModelStatus.FetchAborted)) {
             this.postDataDone = true;
-            setTimeout(() => this.map.clear(), 5000);
+            setTimeout(() => this.map?.clear(), 5000);
         }
 
         const worker: Worker = fire(GetWorker);
