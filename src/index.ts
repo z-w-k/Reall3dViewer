@@ -9,14 +9,16 @@ import { Reall3dViewerOptions } from './reall3d/viewer/Reall3dViewerOptions';
 
 const params: URLSearchParams = new URLSearchParams(location.search);
 let url = params.get('url');
+const debugMode = !!params.get('debug');
 
 let viewer: Reall3dViewer;
 if (url) {
-    viewer = new Reall3dViewer();
+    viewer = new Reall3dViewer({ debugMode });
     viewer.addModel(url);
+    debugMode && initDevMode();
 } else {
     viewer = new Reall3dViewer({ debugMode: true });
-    viewer.addModel(`https://reall3d.com/demo-models/jtstjg.bin`);
+    viewer.addModel(`https://reall3d.com/demo-models/yz.bin`);
 
     initDevMode();
 }
