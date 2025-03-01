@@ -98,13 +98,13 @@ export function setupCommonUtils(events: Events) {
         totalRenderSplatCount && (renderSplatCount = totalRenderSplatCount);
         loading = false;
 
-        if (fire(GetOptions).debugMode) {
+        if (totalRenderSplatCount !== undefined) {
             (async () => {
                 const wrap: HTMLElement = document.querySelector('#gsviewer #progressBarWrap');
                 wrap && (wrap.style.display = 'none');
             })();
             (async () => document.querySelector('#gsviewer .logo')?.classList.remove('loading'))();
-        } else {
+
             // @ts-ignore
             totalRenderSplatCount !== undefined && parent?.onProgress && parent.onProgress(0, '100%', 9); // 用自定义的 9 代表完全加载完成
         }
@@ -291,39 +291,3 @@ export function initSplatMeshOptions(options: SplatMeshOptions): SplatMeshOption
 }
 
 export const decodeB64 = atob;
-
-// ------------------
-const _floatView: Float32Array = new Float32Array(1);
-const _int32View: Int32Array = new Int32Array(_floatView.buffer);
-function floatToHalf(float: number): number {
-    _floatView[0] = float;
-    const f = _int32View[0];
-
-    const sign = (f >> 31) & 0x0001;
-    const exp = (f >> 23) & 0x00ff;
-    let frac = f & 0x007fffff;
-
-    let newExp;
-    if (exp == 0) {
-        newExp = 0;
-    } else if (exp < 113) {
-        newExp = 0;
-        frac |= 0x00800000;
-        frac = frac >> (113 - exp);
-        if (frac & 0x01000000) {
-            newExp = 1;
-            frac = 0;
-        }
-    } else if (exp < 142) {
-        newExp = exp - 112;
-    } else {
-        newExp = 31;
-        frac = 0;
-    }
-
-    return (sign << 15) | (newExp << 10) | (frac >> 13);
-}
-export function packHalf2x16(x: number, y: number): number {
-    return (floatToHalf(x) | (floatToHalf(y) << 16)) >>> 0;
-}
-// ------------------

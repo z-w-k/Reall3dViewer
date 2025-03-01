@@ -1,7 +1,6 @@
 // ================================
 // Copyright (c) 2025 reall3d.com
 // ================================
-import { packHalf2x16 } from '../utils/CommonUtils';
 import {
     WkActivePoints,
     WkBinVersion,
@@ -166,49 +165,6 @@ function uploadTexture(buffer: Uint8Array, version: number, renderSplatCount: nu
         texdata[8 * tIdx + 6] = ui32_buffer[8 * i + 6];
         texdata[8 * tIdx + 7] = ui32_buffer[8 * i + 7];
 
-        // // quaternions
-        // scale = [f32_buffer[9 * i + 3], f32_buffer[9 * i + 4], f32_buffer[9 * i + 5]];
-        // rot = [
-        //     (ui8_buffer[36 * i + 28 + 0] - 128) / 128,
-        //     (ui8_buffer[36 * i + 28 + 1] - 128) / 128,
-        //     (ui8_buffer[36 * i + 28 + 2] - 128) / 128,
-        //     (ui8_buffer[36 * i + 28 + 3] - 128) / 128,
-        // ];
-
-        // // Compute the matrix product of S and R (M = S * R)
-        // const M = [
-        //     1.0 - 2.0 * (rot[2] * rot[2] + rot[3] * rot[3]),
-        //     2.0 * (rot[1] * rot[2] + rot[0] * rot[3]),
-        //     2.0 * (rot[1] * rot[3] - rot[0] * rot[2]),
-
-        //     2.0 * (rot[1] * rot[2] - rot[0] * rot[3]),
-        //     1.0 - 2.0 * (rot[1] * rot[1] + rot[3] * rot[3]),
-        //     2.0 * (rot[2] * rot[3] + rot[0] * rot[1]),
-
-        //     2.0 * (rot[1] * rot[3] + rot[0] * rot[2]),
-        //     2.0 * (rot[2] * rot[3] - rot[0] * rot[1]),
-        //     1.0 - 2.0 * (rot[1] * rot[1] + rot[2] * rot[2]),
-        // ].map((k, i) => k * scale[Math.floor(i / 3)]);
-
-        // const sigma = [
-        //     M[0] * M[0] + M[3] * M[3] + M[6] * M[6],
-        //     M[0] * M[1] + M[3] * M[4] + M[6] * M[7],
-        //     M[0] * M[2] + M[3] * M[5] + M[6] * M[8],
-        //     M[1] * M[1] + M[4] * M[4] + M[7] * M[7],
-        //     M[1] * M[2] + M[4] * M[5] + M[7] * M[8],
-        //     M[2] * M[2] + M[5] * M[5] + M[8] * M[8],
-        // ];
-
-        // texdata[8 * tIdx + 4] = packHalf2x16(4 * sigma[0], 4 * sigma[1]);
-        // texdata[8 * tIdx + 5] = packHalf2x16(4 * sigma[2], 4 * sigma[3]);
-        // texdata[8 * tIdx + 6] = packHalf2x16(4 * sigma[4], 4 * sigma[5]);
-
-        // // r, g, b, a
-        // texdata_c[4 * (8 * tIdx + 7) + 0] = ui8_buffer[36 * i + 24 + 0];
-        // texdata_c[4 * (8 * tIdx + 7) + 1] = ui8_buffer[36 * i + 24 + 1];
-        // texdata_c[4 * (8 * tIdx + 7) + 2] = ui8_buffer[36 * i + 24 + 2];
-        // texdata_c[4 * (8 * tIdx + 7) + 3] = ui8_buffer[36 * i + 24 + 3];
-
         tIdx++;
     }
 
@@ -238,57 +194,6 @@ function uploadTexture(buffer: Uint8Array, version: number, renderSplatCount: nu
         texdata[8 * tIdx + 5] = ui32_buffer[8 * i + 5];
         texdata[8 * tIdx + 6] = ui32_buffer[8 * i + 6];
         texdata[8 * tIdx + 7] = ui32_buffer[8 * i + 7];
-
-        // // x, y, z
-        // texdata_f[8 * tIdx + 0] = x;
-        // texdata_f[8 * tIdx + 1] = y;
-        // texdata_f[8 * tIdx + 2] = z;
-
-        // // 水印
-        // texdata[8 * tIdx + 3] = 65536;
-
-        // // quaternions
-        // scale = [f32_buffer[9 * i + 3], f32_buffer[9 * i + 4], f32_buffer[9 * i + 5]];
-        // rot = [
-        //     (ui8_buffer[36 * i + 28 + 0] - 128) / 128,
-        //     (ui8_buffer[36 * i + 28 + 1] - 128) / 128,
-        //     (ui8_buffer[36 * i + 28 + 2] - 128) / 128,
-        //     (ui8_buffer[36 * i + 28 + 3] - 128) / 128,
-        // ];
-
-        // // Compute the matrix product of S and R (M = S * R)
-        // const M = [
-        //     1.0 - 2.0 * (rot[2] * rot[2] + rot[3] * rot[3]),
-        //     2.0 * (rot[1] * rot[2] + rot[0] * rot[3]),
-        //     2.0 * (rot[1] * rot[3] - rot[0] * rot[2]),
-
-        //     2.0 * (rot[1] * rot[2] - rot[0] * rot[3]),
-        //     1.0 - 2.0 * (rot[1] * rot[1] + rot[3] * rot[3]),
-        //     2.0 * (rot[2] * rot[3] + rot[0] * rot[1]),
-
-        //     2.0 * (rot[1] * rot[3] + rot[0] * rot[2]),
-        //     2.0 * (rot[2] * rot[3] - rot[0] * rot[1]),
-        //     1.0 - 2.0 * (rot[1] * rot[1] + rot[2] * rot[2]),
-        // ].map((k, i) => k * scale[Math.floor(i / 3)]);
-
-        // const sigma = [
-        //     M[0] * M[0] + M[3] * M[3] + M[6] * M[6],
-        //     M[0] * M[1] + M[3] * M[4] + M[6] * M[7],
-        //     M[0] * M[2] + M[3] * M[5] + M[6] * M[8],
-        //     M[1] * M[1] + M[4] * M[4] + M[7] * M[7],
-        //     M[1] * M[2] + M[4] * M[5] + M[7] * M[8],
-        //     M[2] * M[2] + M[5] * M[5] + M[8] * M[8],
-        // ];
-
-        // texdata[8 * tIdx + 4] = packHalf2x16(4 * sigma[0], 4 * sigma[1]);
-        // texdata[8 * tIdx + 5] = packHalf2x16(4 * sigma[2], 4 * sigma[3]);
-        // texdata[8 * tIdx + 6] = packHalf2x16(4 * sigma[4], 4 * sigma[5]);
-
-        // // r, g, b, a
-        // texdata_c[4 * (8 * tIdx + 7) + 0] = ui8_buffer[36 * i + 24 + 0];
-        // texdata_c[4 * (8 * tIdx + 7) + 1] = ui8_buffer[36 * i + 24 + 1];
-        // texdata_c[4 * (8 * tIdx + 7) + 2] = ui8_buffer[36 * i + 24 + 2];
-        // texdata_c[4 * (8 * tIdx + 7) + 3] = ui8_buffer[36 * i + 24 + 3];
 
         tIdx++;
     }
