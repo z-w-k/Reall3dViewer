@@ -4,11 +4,12 @@
 
 # Reall3dViewer
 
-Reall3dViewer is a 3D Gaussian Splatting renderer built on Three.js. Crafting an exceptional renderer is no small feat, which is why we've chosen to open-source our project. We hope to harness the collective wisdom and efforts of the community to drive the advancement of 3DGS applications together!
+`Reall3dViewer` is a 3D Gaussian Splatting renderer built on Three.js. Crafting an exceptional renderer is no small feat, which is why we've chosen to open-source our project. We hope to harness the collective wisdom and efforts of the community to drive the advancement of 3DGS applications together!
 
 <br>
 
 <p align="center">
+    <a href="https://github.com/reall3d-com/Reall3dViewer/blob/master/README_ZH.md"><img src="https://img.shields.io/badge/Readme-Chinese-brightgreen.svg"></a>
     <a href="https://github.com/microsoft/TypeScript"><img src="https://img.shields.io/badge/Lang-typescript-brightgreen.svg"></a>
     <a href="https://github.com/mrdoob/three.js"><img src="https://img.shields.io/badge/Base-threejs-brightgreen.svg"></a>
     <a href="https://repo-sam.inria.fr/fungraph/3d-gaussian-splatting/"><img src="https://img.shields.io/badge/Model-3DGS-brightgreen.svg"></a>
