@@ -262,7 +262,7 @@ function setSplatData(model: SplatModel, data: Uint8Array) {
 
     let autoCut: number = model.meta.autoCut; // 按推荐参数切
     autoCut = Math.max(autoCut, 2); // 至少切 4 块
-    isMobile && (autoCut = Math.min(autoCut, 4)); // 手机最多切 16 块
+    autoCut = Math.min(autoCut, 100); // 最多切 10000 块
     const cutAvgSizeX = (maxX - minX) / autoCut;
     const cutAvgSizeZ = (maxZ - minX) / autoCut;
 

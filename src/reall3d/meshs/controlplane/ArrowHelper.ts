@@ -30,10 +30,6 @@ export class ArrowHelper extends Object3D {
         this.position.copy(origin);
 
         const lineMaterial = new MeshBasicMaterial({ color: color, toneMapped: false });
-        // lineMaterial.transparent = true;
-        // lineMaterial.opacity = 0.99;
-        // lineMaterial.depthTest = false;
-        // lineMaterial.depthWrite = false;
         lineMaterial.side = DoubleSide;
         this.line = new Mesh(lineGeometry, lineMaterial);
         this.line.matrixAutoUpdate = false;
@@ -42,10 +38,6 @@ export class ArrowHelper extends Object3D {
         this.add(this.line);
 
         const coneMaterial = new MeshBasicMaterial({ color: color, toneMapped: false });
-        // coneMaterial.transparent = true;
-        // coneMaterial.opacity = 0.99;
-        // coneMaterial.depthTest = false;
-        // coneMaterial.depthWrite = false;
         coneMaterial.side = DoubleSide;
         this.cone = new Mesh(coneGeometry, coneMaterial);
         this.cone.matrixAutoUpdate = false;

@@ -15,7 +15,7 @@ let viewer: Reall3dViewer;
 if (url) {
     viewer = new Reall3dViewer({ debugMode });
     viewer.addModel(url);
-    debugMode && initDevMode();
+    debugMode && initDevMode(true);
 } else {
     viewer = new Reall3dViewer({ debugMode: true });
     viewer.addModel(`https://reall3d.com/demo-models/yz.bin`);
@@ -24,18 +24,20 @@ if (url) {
 }
 
 // 以下仅开发模式使用
-function initDevMode() {
+function initDevMode(infoOnly = false) {
     document.querySelectorAll('.prd-mode').forEach(dom => dom['style'].removeProperty('display'));
     let spans: NodeListOf<HTMLSpanElement> = document.querySelectorAll('#gsviewer .operation span');
     let jsHeapSizeLimit = (performance['memory'] || { usedJSHeapSize: 0, totalJSHeapSize: 0, jsHeapSizeLimit: 0 }).jsHeapSizeLimit;
     !jsHeapSizeLimit && document.querySelectorAll('.tr-pc-only').forEach(dom => dom.classList.toggle('hidden'));
     document.querySelectorAll('.dev-panel').forEach(dom => dom['style'].removeProperty('display'));
-    Array.from(spans).forEach(span => {
-        span.addEventListener('click', function (e: MouseEvent) {
-            let target: HTMLSpanElement = e.target as HTMLSpanElement;
-            fnClick(target.className);
+    !infoOnly &&
+        Array.from(spans).forEach(span => {
+            span.addEventListener('click', function (e: MouseEvent) {
+                let target: HTMLSpanElement = e.target as HTMLSpanElement;
+                fnClick(target.className);
+            });
         });
-    });
+    infoOnly && document.querySelectorAll('.operation').forEach(dom => (dom['style'].display = 'none'));
 
     const gstext: HTMLInputElement = document.querySelector('.gstext');
     if (gstext) {
@@ -117,8 +119,5 @@ function fnClick(className: string) {
         viewer.fire(4);
     } else if (className == 'fly-save') {
         viewer.fire(5);
-        // } else if (className == 'show-map') {
-        // 地图
-        // window.open('', '_blank');
     }
 }

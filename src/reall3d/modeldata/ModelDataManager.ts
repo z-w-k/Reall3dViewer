@@ -16,7 +16,6 @@ import {
     OnFetching,
     LoaderModelStart,
     GetWorker,
-    RunLoopByTime,
     OnFetchStop,
     Information,
     IsBigSceneMode,
@@ -117,6 +116,7 @@ class SplatDataManager {
             const model = new SplatModel(opts, meta);
             if (!fire(LoaderModelStart, model)) {
                 console.error('Unsupported format:', opts.format);
+                fire(OnFetchStop, 0);
                 return;
             }
 
