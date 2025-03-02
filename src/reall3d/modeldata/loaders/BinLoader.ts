@@ -147,7 +147,7 @@ export async function loadBin(model: SplatModel) {
     async function parseBin2AndSetSplatData(model: SplatModel, perByteLen: number, perValue: Uint8Array, newValue: Uint8Array): Promise<number> {
         return new Promise(async resolve => {
             let cntSplat = ((perByteLen + newValue.byteLength) / model.rowLength) | 0;
-            const leave: number = (perByteLen + newValue.byteLength) % model.rowLength;
+            let leave: number = (perByteLen + newValue.byteLength) % model.rowLength;
             let value: Uint8Array;
             if (perByteLen) {
                 value = new Uint8Array(cntSplat * model.rowLength);
@@ -159,6 +159,12 @@ export async function loadBin(model: SplatModel) {
 
             if (!model.meta?.autoCut && model.downloadSplatCount + cntSplat > model.opts.limitSplatCount) {
                 cntSplat = model.opts.limitSplatCount - model.downloadSplatCount;
+                leave = 0;
+            }
+            const downloadLimitSplatCount = isMobile ? MobileDownloadLimitSplatCount : PcDownloadLimitSplatCount;
+            if (model.meta?.autoCut && model.downloadSplatCount + cntSplat > downloadLimitSplatCount) {
+                cntSplat = downloadLimitSplatCount - model.downloadSplatCount;
+                leave = 0;
             }
 
             const fnParseBin2 = async () => {

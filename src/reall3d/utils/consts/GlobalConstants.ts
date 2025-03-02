@@ -10,5 +10,5 @@ export const SplatDataSize36 = 36;
 export const SplatDataSize32 = 32;
 export const Bin2DataSize = 20;
 export const WasmBlockSize: number = 64 * 1024;
-export const MobileDownloadLimitSplatCount = 1000 * 10000; // 移动端高斯点数下载限制
-export const PcDownloadLimitSplatCount = 10000 * 10000; // PC端高斯点数下载限制
+export const MobileDownloadLimitSplatCount = 1024 * 10000; // 移动端高斯点数下载限制
+export const PcDownloadLimitSplatCount = 10240 * 10000; // PC端高斯点数下载限制
