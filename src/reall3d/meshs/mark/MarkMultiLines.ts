@@ -202,6 +202,7 @@ export class MarkMultiLines extends Line2 {
         if (that.data.points.length < 6) {
             // 不足1条线时销毁删除
             that.dispose();
+            return;
         } else {
             // 删除多余的标签
             while (that.css3dTags.length > that.data.points.length / 3 - 1) {
