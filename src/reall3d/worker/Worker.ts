@@ -71,7 +71,6 @@ let viewProj: number[];
 let lastViewProj: number[] = [];
 let distances: Int32Array; // new Int32Array(0);
 
-let lastDataVersion: number = 0;
 let lastSortVersion: number = 0;
 let isBigSceneMode: boolean, binVer: number, topY: number, maxRadius: number;
 
@@ -99,8 +98,6 @@ function uploadTexture(buffer: Uint8Array, version: number, renderSplatCount: nu
     if (texture.xyz && !texture.textureReady) return false; // 没准备好
     if (!renderSplatCount && !texture.xyz) return false; // 初期无可渲染
 
-    lastDataVersion = version;
-
     texture.textureReady = false;
     texture.version = version;
     texture.xyz = new Float32Array(renderSplatCount * 3);
@@ -112,14 +109,11 @@ function uploadTexture(buffer: Uint8Array, version: number, renderSplatCount: nu
 
     const f32_buffer = new Float32Array(buffer);
     const ui32_buffer = new Uint32Array(buffer);
-    const ui8_buffer = new Uint8Array(buffer);
 
     const texwidth = 1024 * 2;
     const texheight = Math.ceil((2 * renderSplatCount) / texwidth);
     const texdata = new Uint32Array(texwidth * texheight * 4);
-    const texdata_c = new Uint8Array(texdata.buffer);
     const texdata_f = new Float32Array(texdata.buffer);
-    // texdata_c.set(ui8_buffer, 0);
 
     let minX: number = renderSplatCount ? Infinity : 0;
     let maxX: number = renderSplatCount ? -Infinity : 0;
@@ -129,8 +123,6 @@ function uploadTexture(buffer: Uint8Array, version: number, renderSplatCount: nu
     let maxZ: number = renderSplatCount ? -Infinity : 0;
 
     let x: number, y: number, z: number;
-    let scale: number[];
-    let rot: number[];
     let tIdx: number = 0;
     for (let i = 0; i < renderSplatCount; i++) {
         if (ui32_buffer[8 * i + 3] & 65536) {
@@ -343,9 +335,6 @@ function computeDepth(svp: number[], x: number, y: number, z: number): number {
     // return (svp[2] * x + svp[6] * y + svp[10] * z) * -4096;
     return -(svp[2] * x + svp[6] * y + svp[10] * z);
     // return -(svp[2] * x + svp[6] * y + svp[10] * z + svp[14]);
-
-    // return -(svp[3] * x + -svp[7] * y + -svp[11] * z); // map
-    // return -(svp[3] * x + -svp[7] * y + -svp[11] * z + svp[15]); // map
 }
 
 function getDepth(texture: Texture, sortViewProj: number[]): any {
