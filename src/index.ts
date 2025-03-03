@@ -62,7 +62,7 @@ function fnClick(className: string) {
         setTimeout(() => viewer.addModel(`https://reall3d.com/demo-models/jtstjg.bin`), 50); // Let it GC
     } else if (className == 'demo3') {
         viewer.reset({ debugMode: true });
-        setTimeout(() => viewer.addModel(`https://reall3d.com/demo-models/djj.bin`), 50); // Let it GC
+        setTimeout(() => viewer.addModel(`https://reall3d.com/demo-models/djj.sp20`), 50); // Let it GC
     } else if (className == 'demo4') {
         viewer.reset({ debugMode: true });
         setTimeout(() => viewer.addModel(`https://reall3d.com/demo-models/bzg.bin`), 50); // Let it GC
