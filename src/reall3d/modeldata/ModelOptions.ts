@@ -11,9 +11,9 @@ export interface ModelOptions {
     url: string;
 
     /**
-     *  模型格式（splat | bin | json），默认自动识别
+     *  模型格式（splat | sp20 | bin | json），默认自动识别
      */
-    format?: 'splat' | 'bin' | 'json' | undefined;
+    format?: 'splat' | 'sp20' | 'bin' | 'json' | undefined;
 
     /**
      *  是否单纯数据

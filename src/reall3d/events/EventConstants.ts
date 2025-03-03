@@ -131,9 +131,6 @@ export const SplatUpdateShowWaterMark = i++;
 /** Splat更新调试效果 */
 export const SplatUpdateDebugEffect = i++;
 
-/** 取点数据大小 */
-export const GetSplatDataSize = i++;
-
 /** Splat几何体销毁 */
 export const SplatGeometryDispose = i++;
 /** Splat材质销毁 */

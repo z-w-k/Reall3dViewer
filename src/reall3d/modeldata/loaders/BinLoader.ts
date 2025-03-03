@@ -2,7 +2,7 @@
 // Copyright (c) 2025 reall3d.com
 // ================================
 import {
-    Bin2DataSize,
+    SplatDataSize20,
     BinHeaderSize,
     SplatDataSize32,
     MobileDownloadLimitSplatCount,
@@ -34,7 +34,7 @@ export async function loadBin(model: SplatModel) {
         const reader = req.body.getReader();
         const contentLength = parseInt(req.headers.get('content-length') || '0');
         const dataSize = contentLength - BinHeaderSize;
-        if (dataSize < Bin2DataSize) {
+        if (dataSize < SplatDataSize20) {
             console.warn('data empty', model.opts.url);
             model.status === ModelStatus.Fetching && (model.status = ModelStatus.Invalid);
             return;
@@ -59,7 +59,7 @@ export async function loadBin(model: SplatModel) {
                 for (let i = 0; i < headChunks.length; i++) {
                     size += headChunks[i].byteLength;
                 }
-                if (size < BinHeaderSize + Bin2DataSize) {
+                if (size < BinHeaderSize + SplatDataSize20) {
                     continue;
                 }
                 let cnt = 0;
@@ -82,7 +82,7 @@ export async function loadBin(model: SplatModel) {
                 }
 
                 const header = model.parseBinHeaderData(rs);
-                rowLength = header.Version === 1 ? SplatDataSize32 : Bin2DataSize;
+                rowLength = header.Version === 1 ? SplatDataSize32 : SplatDataSize20;
                 model.rowLength = rowLength;
                 model.modelSplatCount = (dataSize / rowLength) | 0;
                 !model.meta?.autoCut &&
@@ -245,7 +245,7 @@ export async function loadBin(model: SplatModel) {
 
 function setSplatData(model: SplatModel, data: Uint8Array) {
     let isCut: boolean = !!model.meta?.autoCut;
-    if (isCut && (model.opts.format === 'splat' || model.meta?.models?.length > 1) && !model.meta?.box) {
+    if (isCut && (model.opts.format === 'splat' || model.opts.format === 'sp20' || model.meta?.models?.length > 1) && !model.meta?.box) {
         isCut = false;
         model.meta.autoCut = 0; // 硬改纠正自动裁剪
         console.warn('box is not set, ignore cut');

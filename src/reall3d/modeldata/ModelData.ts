@@ -92,6 +92,8 @@ export class SplatModel {
                 this.opts.format = 'bin';
             } else if (opts.url?.endsWith('.splat')) {
                 this.opts.format = 'splat';
+            } else if (opts.url?.endsWith('.sp20')) {
+                this.opts.format = 'sp20';
             } else if (opts.url?.endsWith('.json')) {
                 this.opts.format = 'json';
             } else {

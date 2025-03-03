@@ -50,6 +50,7 @@ import { isMobile, MobileDownloadLimitSplatCount, PcDownloadLimitSplatCount, Spl
 import { loadSplatJson } from './loaders/SplatJsonLoader';
 import { SplatMeshOptions } from '../meshs/splatmesh/SplatMeshOptions';
 import { SplatMesh } from '../meshs/splatmesh/SplatMesh';
+import { loadSplat20 } from './loaders/Splat20Loader';
 
 class SplatDataManager {
     private disposed: boolean;
@@ -171,7 +172,13 @@ class SplatDataManager {
 
             if (model.status === ModelStatus.CancelFetch || model.status === ModelStatus.FetchFailed || model.status === ModelStatus.Invalid) {
                 dels.push(model.opts.url);
-            } else if (model.opts.format === 'splat' || model.opts.format === 'bin' || model.opts.format === 'json' || model.opts.dataOnly) {
+            } else if (
+                model.opts.format === 'splat' ||
+                model.opts.format === 'sp20' ||
+                model.opts.format === 'bin' ||
+                model.opts.format === 'json' ||
+                model.opts.dataOnly
+            ) {
                 !model.meta?.autoCut && cacheModels.push(model);
                 !model.opts.dataOnly && totalFiles++;
             }
@@ -560,6 +567,8 @@ export function setupSplatDataManager(events: Events) {
             loadBin(model);
         } else if (model.opts.format === 'splat') {
             loadSplat(model);
+        } else if (model.opts.format === 'sp20') {
+            loadSplat20(model);
         } else if (model.opts.format === 'json') {
             loadSplatJson(model);
         } else {

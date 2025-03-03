@@ -25,11 +25,10 @@ import {
     IsCameraChangedNeedLoadData,
     GetCamera,
     CommonUtilsDispose,
-    GetSplatDataSize,
 } from '../events/EventConstants';
 import { Object3D, PerspectiveCamera, ShaderChunk, Vector3 } from 'three';
 import { SplatMeshOptions } from '../meshs/splatmesh/SplatMeshOptions';
-import { SplatDataSize36, Bin2DataSize, isMobile, ViewerVersion } from './consts/GlobalConstants';
+import { isMobile, ViewerVersion } from './consts/GlobalConstants';
 
 export function setupCommonUtils(events: Events) {
     let disposed: boolean = false;
@@ -149,8 +148,6 @@ export function setupCommonUtils(events: Events) {
 
     on(EncodeBase64, (str: string): string => btoa(str));
     on(DecodeBase64, (str: string): string => atob(str));
-
-    on(GetSplatDataSize, (binVer: number) => (binVer === 2 ? Bin2DataSize : SplatDataSize36));
 
     const epsilon = 0.001;
     let lastLoadDataPosition: Vector3 = new Vector3();
