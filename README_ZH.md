@@ -21,7 +21,7 @@
 
 ## 特点
 - [x] 友好支持移动端
-- [x] 支持`.splat`以及优化的`.bin`格式
+- [x] 支持`.splat`、`.sp20`以及优化的`.bin`格式
 - [x] 支持标注测量
 - [x] 支持文字水印
 - [x] 支持大场景渲染
@@ -41,6 +41,11 @@ npm run build
 
 # open a web browser to render your 3dgs model
 # http://hostname:port/index.html?url=your-model-link-address
+
+# The .sp20 format is similar to .splat, but it reduces the file size by 37.5%
+# .sp20 file can be obtained through conversion using the gsbox
+# https://github.com/gotoeasy/gsbox
+gsbox ply2splat20 -i /path/to/input.ply -o /path/to/output.sp20
 ```
 
 ## 履历
