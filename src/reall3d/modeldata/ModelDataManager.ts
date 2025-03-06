@@ -405,17 +405,20 @@ class SplatDataManager {
         const worker: Worker = fire(GetWorker);
         const time = Date.now();
         that.lastPostDataTime = time;
-        worker.postMessage({
-            [WkSplatDataBuffer]: mergeSplatData.buffer,
-            [WkRenderSplatCount]: totalRenderSplatCount,
-            [WkVisibleSplatCount]: totalVisibleSplatCount,
-            [WkModelSplatCount]: totalModelSplatCount,
-            [WkIsBigSceneMode]: isBigSceneMode,
-            [WkBinVersion]: binVer,
-            [WkTopY]: topY,
-            [WkMaxRadius]: maxRadius,
-            [WkVersion]: time,
-        });
+        worker.postMessage(
+            {
+                [WkSplatDataBuffer]: mergeSplatData.buffer,
+                [WkRenderSplatCount]: totalRenderSplatCount,
+                [WkVisibleSplatCount]: totalVisibleSplatCount,
+                [WkModelSplatCount]: totalModelSplatCount,
+                [WkIsBigSceneMode]: isBigSceneMode,
+                [WkBinVersion]: binVer,
+                [WkTopY]: topY,
+                [WkMaxRadius]: maxRadius,
+                [WkVersion]: time,
+            },
+            [mergeSplatData.buffer],
+        );
 
         fire(Information, { scene: isBigSceneMode ? 'big' : binVer ? `small (v${binVer})` : `small (${ary[0]?.opts.format || 'splat'})` });
         return true;

@@ -137,9 +137,9 @@ export function setupCommonUtils(events: Events) {
     });
 
     on(Vector3ToString, (v: Vector3): string => {
-        let x = v.x.toFixed(5).split('.');
-        let y = v.y.toFixed(5).split('.');
-        let z = v.z.toFixed(5).split('.');
+        let x = v.x.toFixed(3).split('.');
+        let y = v.y.toFixed(3).split('.');
+        let z = v.z.toFixed(3).split('.');
         if (x[1] === '000' || x[1] === '00000') x[1] = '0';
         if (y[1] === '000' || y[1] === '00000') y[1] = '0';
         if (z[1] === '000' || z[1] === '00000') z[1] = '0';

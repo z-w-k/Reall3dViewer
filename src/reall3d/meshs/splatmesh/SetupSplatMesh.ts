@@ -149,7 +149,7 @@ export function setupSplatMesh(events: Events) {
             indexAttribute.needsUpdate = true;
             geometry.instanceCount = datas.length;
             fire(NotifyViewerNeedUpdate);
-            fire(Information, { sortTime: `${sortTime}` });
+            fire(Information, { sortTime: `${sortTime} / ${Date.now() - sortStartTime}` });
         });
 
         on(GetSplatGeometry, () => geometry);
@@ -201,7 +201,7 @@ export function setupSplatMesh(events: Events) {
             dataTexture.onUpdate = () => {
                 fire(SplatTextureReady, index, version, renderSplatCount);
                 fire(OnTextureReadySplatCount, renderSplatCount);
-                fire(Information, { updateSceneData: `${Date.now() - start}` });
+                fire(Information, { updateSceneData: `${Date.now() - start} / ${Date.now() - version}` });
             };
             dataTexture.internalFormat = 'RGBA32UI';
             dataTexture.needsUpdate = true;
