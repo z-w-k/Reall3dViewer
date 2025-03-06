@@ -8,8 +8,9 @@ import {
     MobileDownloadLimitSplatCount,
     PcDownloadLimitSplatCount,
     isMobile,
+    SplatDataSize18,
 } from '../../utils/consts/GlobalConstants';
-import { parseBinToTexdata, parseBinHeader } from '../wasm/WasmBinParser';
+import { parseBinToTexdata, parseBinHeader, parseSplatToTexdata } from '../wasm/WasmBinParser';
 import { BinHeader } from '../formats/BinFormat';
 import { ModelStatus, SplatModel } from '../ModelData';
 import { ModelOptions } from '../ModelOptions';
@@ -34,7 +35,7 @@ export async function loadBin(model: SplatModel) {
         const reader = req.body.getReader();
         const contentLength = parseInt(req.headers.get('content-length') || '0');
         const dataSize = contentLength - BinHeaderSize;
-        if (dataSize < SplatDataSize20) {
+        if (dataSize < SplatDataSize18) {
             console.warn('data empty', model.opts.url);
             model.status === ModelStatus.Fetching && (model.status = ModelStatus.Invalid);
             return;
@@ -73,7 +74,7 @@ export async function loadBin(model: SplatModel) {
                     }
                 }
 
-                const rs: number[] = await parseBinHeader(headChunk);
+                const rs: any = await parseBinHeader(headChunk);
                 if (!rs) {
                     model.abortController.abort();
                     model.status === ModelStatus.Fetching && (model.status = ModelStatus.Invalid);
@@ -82,7 +83,7 @@ export async function loadBin(model: SplatModel) {
                 }
 
                 const header = model.parseBinHeaderData(rs);
-                rowLength = header.Version === 1 ? SplatDataSize32 : SplatDataSize20;
+                rowLength = header.Version === 1 ? SplatDataSize32 : header.Version === 2 ? SplatDataSize20 : SplatDataSize18;
                 model.rowLength = rowLength;
                 model.modelSplatCount = (dataSize / rowLength) | 0;
                 !model.meta?.autoCut &&
@@ -91,7 +92,20 @@ export async function loadBin(model: SplatModel) {
                 headChunk = null;
             }
 
-            if (model.binHeader.Version === 2) {
+            if (model.binHeader.Version === 3) {
+                if (perByteLen + value.byteLength < rowLength) {
+                    // 不足1点不必解析
+                    perValue.set(value, perByteLen);
+                    perByteLen += value.byteLength;
+
+                    bytesRead += value.length;
+                    model.downloadSize = bytesRead;
+                } else {
+                    // 解析并设定数据
+                    perByteLen = await parseBin3AndSetSplatData(model, perByteLen, perValue, value);
+                    perByteLen && perValue.set(value.slice(value.byteLength - perByteLen), 0);
+                }
+            } else if (model.binHeader.Version === 2) {
                 if (perByteLen + value.byteLength < rowLength) {
                     // 不足1点不必解析
                     perValue.set(value, perByteLen);
@@ -144,6 +158,55 @@ export async function loadBin(model: SplatModel) {
         model.status === ModelStatus.Fetching && (model.status = ModelStatus.FetchDone);
     }
 
+    async function parseBin3AndSetSplatData(model: SplatModel, perByteLen: number, perValue: Uint8Array, newValue: Uint8Array): Promise<number> {
+        return new Promise(async resolve => {
+            let cntSplat = ((perByteLen + newValue.byteLength) / model.rowLength) | 0;
+            let leave: number = (perByteLen + newValue.byteLength) % model.rowLength;
+            let value: Uint8Array;
+            if (perByteLen) {
+                value = new Uint8Array(cntSplat * model.rowLength);
+                value.set(perValue.slice(0, perByteLen), 0);
+                value.set(newValue.slice(0, newValue.byteLength - leave), perByteLen);
+            } else {
+                value = newValue.slice(0, cntSplat * model.rowLength);
+            }
+
+            if (!model.meta?.autoCut && model.downloadSplatCount + cntSplat > model.opts.limitSplatCount) {
+                cntSplat = model.opts.limitSplatCount - model.downloadSplatCount;
+                leave = 0;
+            }
+            const downloadLimitSplatCount = isMobile ? MobileDownloadLimitSplatCount : PcDownloadLimitSplatCount;
+            if (model.meta?.autoCut && model.downloadSplatCount + cntSplat > downloadLimitSplatCount) {
+                cntSplat = downloadLimitSplatCount - model.downloadSplatCount;
+                leave = 0;
+            }
+
+            const fnParseBin3 = async () => {
+                if (cntSplat > maxProcessCnt) {
+                    const data: Uint8Array = await parseBinToTexdata(value, maxProcessCnt, model.binHeader);
+                    setSplatData(model, data);
+                    model.downloadSplatCount += maxProcessCnt;
+                    bytesRead += maxProcessCnt * model.rowLength;
+                    model.downloadSize = bytesRead;
+
+                    cntSplat -= maxProcessCnt;
+                    value = value.slice(maxProcessCnt * model.rowLength);
+                    setTimeout(fnParseBin3, 100);
+                } else {
+                    const data: Uint8Array = await parseBinToTexdata(value, cntSplat, model.binHeader);
+                    setSplatData(model, data);
+                    model.downloadSplatCount += cntSplat;
+                    bytesRead += cntSplat * model.rowLength;
+                    model.downloadSize = bytesRead;
+
+                    resolve(leave);
+                }
+            };
+
+            await fnParseBin3();
+        });
+    }
+
     async function parseBin2AndSetSplatData(model: SplatModel, perByteLen: number, perValue: Uint8Array, newValue: Uint8Array): Promise<number> {
         return new Promise(async resolve => {
             let cntSplat = ((perByteLen + newValue.byteLength) / model.rowLength) | 0;
@@ -192,11 +255,10 @@ export async function loadBin(model: SplatModel) {
             await fnParseBin2();
         });
     }
-
     async function parseSplatAndSetSplatData(model: SplatModel, perByteLen: number, perValue: Uint8Array, newValue: Uint8Array): Promise<number> {
         return new Promise(async resolve => {
             let cntSplat = ((perByteLen + newValue.byteLength) / model.rowLength) | 0;
-            const leave: number = (perByteLen + newValue.byteLength) % model.rowLength;
+            let leave: number = (perByteLen + newValue.byteLength) % model.rowLength;
             let value: Uint8Array;
             if (perByteLen) {
                 value = new Uint8Array(cntSplat * model.rowLength);
@@ -206,16 +268,19 @@ export async function loadBin(model: SplatModel) {
                 value = newValue.slice(0, cntSplat * model.rowLength);
             }
 
-            if (model.downloadSplatCount + cntSplat > model.opts.limitSplatCount) {
+            if (!model.meta?.autoCut && model.downloadSplatCount + cntSplat > model.opts.limitSplatCount) {
                 cntSplat = model.opts.limitSplatCount - model.downloadSplatCount;
+                leave = 0;
+            }
+            const downloadLimitSplatCount = isMobile ? MobileDownloadLimitSplatCount : PcDownloadLimitSplatCount;
+            if (model.meta?.autoCut && model.downloadSplatCount + cntSplat > downloadLimitSplatCount) {
+                cntSplat = downloadLimitSplatCount - model.downloadSplatCount;
+                leave = 0;
             }
 
             const fnParseSplat = async () => {
                 if (cntSplat > maxProcessCnt) {
-                    const data: Uint8Array = new Uint8Array(maxProcessCnt * SplatDataSize32);
-                    for (let i = 0; i < maxProcessCnt; i++) {
-                        data.set(value.slice(i * SplatDataSize32, i * SplatDataSize32 + SplatDataSize32), i * SplatDataSize32);
-                    }
+                    const data: Uint8Array = await parseSplatToTexdata(value, maxProcessCnt);
                     setSplatData(model, data);
                     model.downloadSplatCount += maxProcessCnt;
                     bytesRead += maxProcessCnt * model.rowLength;
@@ -225,10 +290,7 @@ export async function loadBin(model: SplatModel) {
                     value = value.slice(maxProcessCnt * model.rowLength);
                     setTimeout(fnParseSplat, 100);
                 } else {
-                    const data: Uint8Array = new Uint8Array(cntSplat * SplatDataSize32);
-                    for (let i = 0; i < cntSplat; i++) {
-                        data.set(value.slice(i * SplatDataSize32, i * SplatDataSize32 + SplatDataSize32), i * SplatDataSize32);
-                    }
+                    const data: Uint8Array = await parseSplatToTexdata(value, cntSplat);
                     setSplatData(model, data);
                     model.downloadSplatCount += cntSplat;
                     bytesRead += cntSplat * model.rowLength;
@@ -243,7 +305,7 @@ export async function loadBin(model: SplatModel) {
     }
 }
 
-function setSplatData(model: SplatModel, data: Uint8Array) {
+export function setSplatData(model: SplatModel, data: Uint8Array) {
     let isCut: boolean = !!model.meta?.autoCut;
     if (isCut && (model.opts.format === 'splat' || model.opts.format === 'sp20' || model.meta?.models?.length > 1) && !model.meta?.box) {
         isCut = false;
@@ -257,28 +319,37 @@ function setSplatData(model: SplatModel, data: Uint8Array) {
 
     let minX = model.binHeader?.MinX;
     let maxX = model.binHeader?.MaxX;
+    let minY = model.binHeader?.MinY;
+    let maxY = model.binHeader?.MaxY;
     let minZ = model.binHeader?.MinZ;
     let maxZ = model.binHeader?.MaxZ;
     if (model.meta.box) {
         minX = model.meta.box.minX;
         maxX = model.meta.box.maxX;
+        minY = model.meta.box.minY;
+        maxY = model.meta.box.maxY;
         minZ = model.meta.box.minZ;
         maxZ = model.meta.box.maxZ;
+    }
+    if (minY > maxY) {
+        let t = minY;
+        minY = maxY;
+        maxY = t;
     }
 
     let autoCut: number = model.meta.autoCut; // 按推荐参数切
     autoCut = Math.max(autoCut, 2); // 至少切 4 块
     autoCut = Math.min(autoCut, 100); // 最多切 10000 块
-    const cutAvgSizeX = (maxX - minX) / autoCut;
-    const cutAvgSizeZ = (maxZ - minX) / autoCut;
 
     const f32s: Float32Array = new Float32Array(data.buffer);
     for (let i = 0, count = Math.floor(data.byteLength / SplatDataSize32), x = 0, y = 0, z = 0, key = ''; i < count; i++) {
         x = f32s[i * 8];
         y = f32s[i * 8 + 1];
         z = f32s[i * 8 + 2];
-        let kx = Math.min(autoCut - 1, Math.floor(Math.max(0, x - minX) / cutAvgSizeX));
-        let kz = Math.min(autoCut - 1, Math.floor(Math.max(0, z - minZ) / cutAvgSizeZ));
+        let kx = Math.min(autoCut - 1, Math.floor((Math.max(0, x - minX) / (maxX - minX)) * autoCut));
+        let kz = model.meta.cutXZ
+            ? Math.min(autoCut - 1, Math.floor((Math.max(0, y - minY) / (maxY - minY)) * autoCut))
+            : Math.min(autoCut - 1, Math.floor((Math.max(0, z - minZ) / (maxZ - minZ)) * autoCut));
 
         key = `${kx}-${kz}`;
         let cutModel = model.map.get(key);

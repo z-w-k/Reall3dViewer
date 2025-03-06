@@ -45,6 +45,7 @@ import {
     AddFlyPosition,
     ClearFlyPosition,
     MetaMarkSaveData,
+    PrintInfo,
 } from './EventConstants';
 import { Reall3dViewerOptions } from '../viewer/Reall3dViewerOptions';
 import { SplatMesh } from '../meshs/splatmesh/SplatMesh';
@@ -159,6 +160,9 @@ export function setupEventListener(events: Events) {
             keySet.clear();
         } else if (keySet.has('Minus')) {
             fire(ClearFlyPosition);
+            keySet.clear();
+        } else if (keySet.has('KeyI')) {
+            fire(PrintInfo);
             keySet.clear();
         }
     });

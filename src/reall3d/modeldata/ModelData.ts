@@ -108,7 +108,7 @@ export class SplatModel {
      * @param data 文件头数据
      * @returns Bin文件头信息
      */
-    public parseBinHeaderData(rs: number[]): BinHeader {
+    public parseBinHeaderData(rs: any): BinHeader {
         const header = new BinHeader(rs);
 
         this.binHeader = header;

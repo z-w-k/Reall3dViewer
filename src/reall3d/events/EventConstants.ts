@@ -366,3 +366,6 @@ export const TweenFlyDisable = i++;
 export const GetSplatMesh = i++;
 /** 渲染数据更新完成 */
 export const OnRenderDataUpdateDone = i++;
+
+/** 打印信息（开发调试用） */
+export const PrintInfo = i++;

@@ -204,7 +204,7 @@ class SplatDataManager {
             }
         }
 
-        fire(Information, { totalSplatCount, models: `${downloaded} / ${totalFiles}, ${downloading} downloading` });
+        fire(Information, { models: `${downloaded} / ${totalFiles}, ${downloading} downloading` });
 
         // 判断是否跳过以提高性能
         if (isBigSceneMode) {

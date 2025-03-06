@@ -71,9 +71,13 @@ export class BinHeader {
     /** 反转Y */
     public F15: boolean;
 
-    constructor(rs?: number[]) {
-        if (!rs) return;
+    public readonly ui8s: Uint8Array; // size 200
 
+    constructor(param?: any) {
+        if (!param) return;
+
+        const rs: number[] = param.rs;
+        this.ui8s = param.ui8s;
         let k = 0;
         let m = 40;
         let n = 50;
@@ -104,7 +108,7 @@ export class BinHeader {
             this.MaxZ = rs[n++];
             this.TopY = rs[n++];
             this.MaxRadius = rs[n++];
-        } else if (ver === 2) {
+        } else if (ver === 2 || ver === 3) {
             this.F0 = !!rs[k++];
             this.F1 = !!rs[k++];
             this.F2 = !!rs[k++];

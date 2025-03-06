@@ -2,7 +2,7 @@
 // Copyright (c) 2025 reall3d.com
 // ================================
 import '../style/style.less';
-import { Scene, Matrix4, AmbientLight, WebGLRenderer } from 'three';
+import { Scene, AmbientLight, WebGLRenderer } from 'three';
 import {
     ClearMarkPoint,
     CommonUtilsDispose,
@@ -50,6 +50,8 @@ import {
     GetCamera,
     ViewerNeedUpdate,
     MetaMarkRemoveData,
+    PrintInfo,
+    GetCameraInfo,
 } from '../events/EventConstants';
 import { SplatMesh } from '../meshs/splatmesh/SplatMesh';
 import { ModelOptions } from '../modeldata/ModelOptions';
@@ -105,6 +107,7 @@ export class Reall3dViewer {
         const scene: Scene = initScene(opts);
         initCamera(opts);
         const controls: Controls = initControls(opts);
+        controls.target.fromArray(opts.lookAt);
 
         const events = new Events();
         opts.viewerEvents = events;
@@ -176,6 +179,7 @@ export class Reall3dViewer {
         );
         on(OnViewerAfterUpdate, () => {}, true);
         on(ViewerDispose, () => this.dispose());
+        on(PrintInfo, () => console.info(fire(GetCameraInfo)), true);
 
         let watermark: string = '';
         on(OnSetWaterMark, (text: string = '') => {
@@ -292,8 +296,7 @@ export class Reall3dViewer {
         fetch(sceneUrl, { mode: 'cors', credentials: 'omit', cache: 'reload' })
             .then(response => (!response.ok ? {} : response.json()))
             .then((data: any) => {
-                const opts: Reall3dViewerOptions = this.events.fire(GetOptions);
-                this.reset({ ...opts, bigSceneMode: !!data.autoCut || data.models.length > 1 });
+                this.reset({ ...data.options });
                 this.splatMesh.meta = data;
                 for (let i = 0, max = data.models.length; i < max; i++) {
                     const modelOpts: ModelOptions = data.models[i];

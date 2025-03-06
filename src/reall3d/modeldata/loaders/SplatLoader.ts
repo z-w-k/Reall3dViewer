@@ -4,6 +4,7 @@
 import { isMobile, MobileDownloadLimitSplatCount, PcDownloadLimitSplatCount, SplatDataSize32 } from '../../utils/consts/GlobalConstants';
 import { ModelStatus, SplatModel } from '../ModelData';
 import { parseSplatToTexdata } from '../wasm/WasmBinParser';
+import { setSplatData } from './BinLoader';
 
 const maxProcessCnt = isMobile ? 20000 : 50000;
 
@@ -86,7 +87,7 @@ export async function loadSplat(model: SplatModel) {
                 value = newValue.slice(0, cntSplat * model.rowLength);
             }
 
-            if (model.downloadSplatCount + cntSplat > model.opts.limitSplatCount) {
+            if (!model.meta?.autoCut && model.downloadSplatCount + cntSplat > model.opts.limitSplatCount) {
                 cntSplat = model.opts.limitSplatCount - model.downloadSplatCount;
                 leave = 0;
             }
@@ -99,8 +100,7 @@ export async function loadSplat(model: SplatModel) {
             const fnParseSplat = async () => {
                 if (cntSplat > maxProcessCnt) {
                     const data: Uint8Array = await parseSplatToTexdata(value, maxProcessCnt);
-
-                    model.splatData.set(data, model.downloadSplatCount * SplatDataSize32);
+                    setSplatData(model, data);
                     model.downloadSplatCount += maxProcessCnt;
                     bytesRead += maxProcessCnt * model.rowLength;
                     model.downloadSize = bytesRead;
@@ -110,7 +110,7 @@ export async function loadSplat(model: SplatModel) {
                     setTimeout(fnParseSplat, 100);
                 } else {
                     const data: Uint8Array = await parseSplatToTexdata(value, cntSplat);
-                    model.splatData.set(data, model.downloadSplatCount * SplatDataSize32);
+                    setSplatData(model, data);
                     model.downloadSplatCount += cntSplat;
                     bytesRead += cntSplat * model.rowLength;
                     model.downloadSize = bytesRead;
