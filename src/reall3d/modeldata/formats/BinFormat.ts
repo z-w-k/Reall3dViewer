@@ -71,13 +71,10 @@ export class BinHeader {
     /** 反转Y */
     public F15: boolean;
 
-    public readonly ui8s: Uint8Array; // size 200
-
     constructor(param?: any) {
         if (!param) return;
 
         const rs: number[] = param.rs;
-        this.ui8s = param.ui8s;
         let k = 0;
         let m = 40;
         let n = 50;
