@@ -79,7 +79,7 @@ import { setupApi } from '../api/SetupApi';
 import { MarkData } from '../meshs/mark/data/MarkData';
 import { setupCommonUtils } from '../utils/CommonUtils';
 import { setupTween } from '../tween/SetupTween';
-import { ViewerVersion } from '../utils/consts/GlobalConstants';
+import { isMobile, ViewerVersion } from '../utils/consts/GlobalConstants';
 
 /**
  * 高斯渲染器
@@ -297,6 +297,7 @@ export class Reall3dViewer {
             .then(response => (!response.ok ? {} : response.json()))
             .then((data: any) => {
                 this.reset({ ...data.options });
+                isMobile && (data.options.position || data.options.lookAt) && this.events.fire(GetControls)._dollyOut(0.75); // 手机适当缩小
                 this.splatMesh.meta = data;
                 for (let i = 0, max = data.models.length; i < max; i++) {
                     const modelOpts: ModelOptions = data.models[i];
