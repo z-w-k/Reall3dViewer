@@ -24,46 +24,8 @@ import {
     WkSortStartTime,
 } from '../utils/consts/WkConstants';
 
-interface Texture {
-    /** 索引（0 | 1） */
-    index: number;
-    /** 纹理版本（毫秒时间戳） */
-    version?: number;
-    /** 坐标数据 */
-    xyz?: Float32Array;
-    /** 水印坐标数据 */
-    wxyz?: number[];
-    /** 纹理数据就绪标志 */
-    textureReady?: boolean;
-    /** 纹理数据就绪时间点 */
-    textureReadyTime?: number;
-    /** 是否活动状态 */
-    active?: boolean;
-
-    /** 包围盒极限点 */
-    minX?: number;
-    /** 包围盒极限点 */
-    maxX?: number;
-    /** 包围盒极限点 */
-    minY?: number;
-    /** 包围盒极限点 */
-    maxY?: number;
-    /** 包围盒极限点 */
-    minZ?: number;
-    /** 包围盒极限点 */
-    maxZ?: number;
-
-    // 例：共 m 个模型处理中，其中 v 个模型下载有数据且当前可见，有 r 个合并后的Splat待渲染
-    /** 待渲染的Splat数量 */
-    renderSplatCount?: number;
-    /** 可见且可用的Splat数量 */
-    visibleSplatCount?: number;
-    /** 所有处理中的模型Splat数量合计 */
-    modelSplatCount?: number;
-}
-
-let texture0: Texture = { index: 0 };
-let texture1: Texture = { index: 1 };
+let texture0: SplatTexture = { index: 0 };
+let texture1: SplatTexture = { index: 1 };
 
 let sortRunning: boolean;
 const Epsilon: number = navigator.userAgent.includes('Mobi') ? 0.01 : 0.002;
@@ -82,7 +44,7 @@ function setCommonParams(isBigScene, verBin, topy, radius) {
 }
 
 function uploadTexture(buffer: Uint8Array, version: number, renderSplatCount: number, visibleSplatCount: number, modelSplatCount: number) {
-    let texture: Texture;
+    let texture: SplatTexture;
     if (isBigSceneMode) {
         if (!texture0.xyz) {
             texture = texture0;
@@ -218,7 +180,7 @@ function uploadTexture(buffer: Uint8Array, version: number, renderSplatCount: nu
 }
 
 function runSort(sortViewProj: number[]) {
-    let texture: Texture = texture0;
+    let texture: SplatTexture = texture0;
     if (isBigSceneMode) {
         if (!texture0.textureReady && !texture1.textureReady) {
             return;
@@ -302,8 +264,8 @@ function runSort(sortViewProj: number[]) {
 
         // 水印
         if (waterCnt) {
-            // COUNT = Math.min(Math.max((dataCount / 10) | 0, 512), 65535);
-            COUNT = Math.min(dataCount, 65535);
+            COUNT = Math.min(Math.max((dataCount / 8) | 0, 512), 65535);
+            // COUNT = Math.min(dataCount, 65535);
             depthInv = (COUNT - 1) / (maxDepth - minDepth);
             counters = new Int32Array(COUNT);
             for (let i = 0, idx = 0; i < waterCnt; i++) {
@@ -337,7 +299,7 @@ function computeDepth(svp: number[], x: number, y: number, z: number): number {
     // return -(svp[2] * x + svp[6] * y + svp[10] * z + svp[14]);
 }
 
-function getDepth(texture: Texture, sortViewProj: number[]): any {
+function getDepth(texture: SplatTexture, sortViewProj: number[]): any {
     let maxDepth = -Infinity;
     let minDepth = Infinity;
     let dep = 0;
@@ -385,7 +347,7 @@ const throttledSort = () => {
 };
 
 let xyzVersion: number = 0;
-function postActivePoints(texture?: Texture) {
+function postActivePoints(texture?: SplatTexture) {
     let f32XYZ: Float32Array;
     if (!texture) {
         xyzVersion = 0;

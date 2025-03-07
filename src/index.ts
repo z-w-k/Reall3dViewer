@@ -68,7 +68,7 @@ function fnClick(className: string) {
         setTimeout(() => viewer.addModel(`https://reall3d.com/demo-models/bzg.bin`), 50); // Let it GC
     } else if (className == 'big-lod') {
         // 大场景LOD
-        setTimeout(() => viewer.addScene(`https://reall3d.com/demo-models/002-lod-kcc.scene.json`), 50); // Let it GC
+        setTimeout(() => viewer.addScene(`https://reall3d.com/demo-models/000-lod-kcc.scene.json`), 50); // Let it GC
     } else if (className == 'switch-rotate') {
         let opts: Reall3dViewerOptions = viewer.options();
         viewer.options({ autoRotate: !opts.autoRotate });
