@@ -84,19 +84,7 @@ export async function parseBinToTexdata(data: Uint8Array, splatCount: number, he
 
     const wasmMemory = new Uint8Array(memory.buffer);
     wasmMemory.set(data.slice(0, splatCount * splatSize), splatCount * (dataSize - splatSize));
-    const code: number = dataParser(
-        0,
-        splatCount,
-        header.Version,
-        header.FactorPosition,
-        header.FactorScale,
-        header.MinX,
-        header.MaxX,
-        header.MinY,
-        header.MaxY,
-        header.MinZ,
-        header.MaxZ,
-    );
+    const code: number = dataParser(0, splatCount, ...header.getWasmTexdataParams());
     if (code) {
         console.error('bin data parser failed:', code);
         return new Uint8Array(0);

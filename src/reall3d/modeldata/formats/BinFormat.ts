@@ -158,4 +158,22 @@ export class BinHeader {
             this.FactorScale = rs[n++]; // v2
         }
     }
+
+    public getWasmTexdataParams(): number[] {
+        const me = this;
+        return [
+            me.Version,
+            me.FactorPosition,
+            me.FactorScale,
+            me.MinX,
+            me.MaxX,
+            me.MinY,
+            me.MaxY,
+            me.MinZ,
+            me.MaxZ,
+            me.TopY,
+            me.ParentId,
+            me.AuthHashCode,
+        ];
+    }
 }
