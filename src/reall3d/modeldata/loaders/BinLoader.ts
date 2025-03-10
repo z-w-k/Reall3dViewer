@@ -8,7 +8,7 @@ import {
     MobileDownloadLimitSplatCount,
     PcDownloadLimitSplatCount,
     isMobile,
-    SplatDataSize18,
+    SplatDataSize16,
 } from '../../utils/consts/GlobalConstants';
 import { parseBinToTexdata, parseBinHeader, parseSplatToTexdata } from '../wasm/WasmBinParser';
 import { BinHeader } from '../formats/BinFormat';
@@ -35,7 +35,7 @@ export async function loadBin(model: SplatModel) {
         const reader = req.body.getReader();
         const contentLength = parseInt(req.headers.get('content-length') || '0');
         const dataSize = contentLength - BinHeaderSize;
-        if (dataSize < SplatDataSize18) {
+        if (dataSize < SplatDataSize16) {
             console.warn('data empty', model.opts.url);
             model.status === ModelStatus.Fetching && (model.status = ModelStatus.Invalid);
             return;
@@ -83,7 +83,7 @@ export async function loadBin(model: SplatModel) {
                 }
 
                 const header = model.parseBinHeaderData(rs);
-                rowLength = header.Version === 1 ? SplatDataSize32 : header.Version === 2 ? SplatDataSize20 : SplatDataSize18;
+                rowLength = header.Version === 1 ? SplatDataSize32 : header.Version === 2 ? SplatDataSize20 : SplatDataSize16;
                 model.rowLength = rowLength;
                 model.modelSplatCount = (dataSize / rowLength) | 0;
                 !model.meta?.autoCut &&

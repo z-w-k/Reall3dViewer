@@ -397,10 +397,11 @@ class SplatDataManager {
             binVer = ary[0].binHeader.Version;
         }
 
-        if (!isBigSceneMode && ary.length && (ary[0].status === ModelStatus.FetchDone || ary[0].status === ModelStatus.FetchAborted)) {
-            this.postDataDone = true;
-            setTimeout(() => this.map?.clear(), 5000);
-        }
+        // 方便动态输入文字水印时重新合并，实际不需要时打开注释
+        // if (!isBigSceneMode && ary.length && (ary[0].status === ModelStatus.FetchDone || ary[0].status === ModelStatus.FetchAborted)) {
+        //     this.postDataDone = true;
+        //     setTimeout(() => this.map?.clear(), 5000);
+        // }
 
         const worker: Worker = fire(GetWorker);
         const time = Date.now();
