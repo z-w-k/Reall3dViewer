@@ -333,6 +333,7 @@ export class Reall3dViewer {
                     const modelOpts: ModelOptions = data.models[i];
                     this.addModel(modelOpts);
                 }
+                this.events.fire(OnSetWaterMark, data.watermark || '');
             })
             .catch(e => {
                 console.error(e.message);
