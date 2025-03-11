@@ -191,6 +191,36 @@ export class Reall3dViewer {
         fire(Information, { scale: `1 : ${fire(GetOptions).meterScale} m` });
 
         this.initGsApi();
+
+        !opts.disableDropLocalFile && this.enableDropLocalFile(); // 默认支持拖拽本地文件进行渲染
+    }
+
+    private enableDropLocalFile(): void {
+        const that = this;
+        document.addEventListener('dragover', function (e) {
+            e.preventDefault();
+            e.stopPropagation();
+        });
+        document.addEventListener('drop', function (e) {
+            e.preventDefault();
+            e.stopPropagation();
+            let file = e.dataTransfer.files[0];
+
+            const url: any = URL.createObjectURL(file);
+            let format: 'bin' | 'splat' | 'sp20';
+            if (file.name.endsWith('.bin')) {
+                format = 'bin';
+            } else if (file.name.endsWith('.splat')) {
+                format = 'splat';
+            } else if (file.name.endsWith('.sp20')) {
+                format = 'sp20';
+            } else {
+                return console.error('unknow format!', file.name);
+            }
+
+            that.reset({ debugMode: true });
+            that.addModel({ url, format });
+        });
     }
 
     /**

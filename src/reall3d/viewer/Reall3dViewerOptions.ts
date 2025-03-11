@@ -173,4 +173,9 @@ export interface Reall3dViewerOptions {
      * 米单位比例尺（1单位长度等于多少米），默认1
      */
     meterScale?: number | undefined;
+
+    /**
+     * 是否禁止直接拖拽本地文件进行查看，默认false
+     */
+    disableDropLocalFile?: boolean | undefined;
 }
