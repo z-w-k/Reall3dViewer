@@ -8,7 +8,7 @@ export function setupApi(events: Events) {
 
     on(HttpPostMetaData, (meta: string, url: string) => {
         // TODO post meta data to server here
-        console.log(meta);
+        console.info(meta);
     });
 
     on(HttpQueryGaussianText, (text: string) => {

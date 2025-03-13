@@ -347,7 +347,7 @@ export function setSplatData(model: SplatModel, data: Uint8Array) {
         y = f32s[i * 8 + 1];
         z = f32s[i * 8 + 2];
         let kx = Math.min(autoCut - 1, Math.floor((Math.max(0, x - minX) / (maxX - minX)) * autoCut));
-        let kz = Math.min(autoCut - 1, Math.floor((Math.max(0, y - minY) / (maxY - minY)) * autoCut));
+        let kz = Math.min(autoCut - 1, Math.floor((Math.max(0, z - minZ) / (maxZ - minZ)) * autoCut));
 
         key = `${kx}-${kz}`;
         let cutModel = model.map.get(key);
