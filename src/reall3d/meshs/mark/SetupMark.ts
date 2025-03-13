@@ -29,7 +29,6 @@ import {
     SetCameraInfo,
     MetaSaveSmallSceneCameraInfo,
     GetCameraInfo,
-    GetPcCameraInfoCache,
     UpdateAllMarkByMeterScale,
     ReComputePlansArea,
     Information,
@@ -37,9 +36,8 @@ import {
     GetCachedWaterMark,
     MetaSaveWatermark,
     OnSetFlyPositions,
-    GetFlyPositionArray,
     OnSetFlyTargets,
-    GetFlyTargetArray,
+    GetSplatMesh,
 } from './../../events/EventConstants';
 import { MarkMultiLines } from './MarkMultiLines';
 import { CSS3DRenderer } from 'three/examples/jsm/Addons.js';
@@ -54,7 +52,8 @@ import { MarkDataSinglePoint } from './data/MarkDataSinglePoint';
 import { MarkDataMultiPlans } from './data/MarkDataMultiPlans';
 import { MarkDataMultiLines } from './data/MarkDataMultiLines';
 import { MarkDataDistanceLine } from './data/MarkDataDistanceLine';
-import { CameraInfo } from '../../controls/SetupCameraControls';
+import { MetaData } from '../../modeldata/ModelData';
+import { SplatMesh } from '../splatmesh/SplatMesh';
 
 export function setupMark(events: Events) {
     const on = (key: number, fn?: Function, multiFn?: boolean): Function | Function[] => events.on(key, fn, multiFn);
@@ -105,9 +104,6 @@ export function setupMark(events: Events) {
     });
 
     on(MetaSaveSmallSceneCameraInfo, async (): Promise<boolean> => {
-        if (fire(GetOptions).bigSceneMode) return false;
-        if (fire(GetOptions).offset) return false; // TODO 大平移场景暂不考虑
-
         const marks = [];
         fire(GetScene).traverse((child: any) => {
             if (child.isMark) {
@@ -115,19 +111,17 @@ export function setupMark(events: Events) {
                 data && marks.push(data);
             }
         });
-        const cameraInfo: CameraInfo = fire(GetCameraInfo);
-        const meterScale: number = fire(GetOptions).meterScale;
-        const watermark: string = fire(GetCachedWaterMark);
-        const flyPositions: number[] = fire(GetFlyPositionArray);
-        const flyTargets: number[] = fire(GetFlyTargetArray);
-        const metaData = { meterScale, cameraInfo };
-        marks.length && (metaData['marks'] = marks);
-        watermark && (metaData['watermark'] = watermark);
-        flyPositions.length && (metaData['flyPositions'] = flyPositions);
-        flyTargets.length && (metaData['flyTargets'] = flyTargets);
-        const meta = JSON.stringify(metaData, null, 2);
 
-        return await fire(HttpPostMetaData, meta, fire(GetOptions).url);
+        const meta: MetaData = fire(GetSplatMesh).meta || {};
+        if (marks.length) {
+            meta.marks = marks;
+        } else {
+            delete meta.marks;
+        }
+        meta.cameraInfo = fire(GetCameraInfo);
+        const metaJson = JSON.stringify(meta, null, 2);
+
+        return await fire(HttpPostMetaData, metaJson, fire(GetOptions).url);
     });
 
     on(MetaMarkSaveData, async (): Promise<boolean> => {
@@ -138,36 +132,24 @@ export function setupMark(events: Events) {
                 data && marks.push(data);
             }
         });
-        const cameraInfo: CameraInfo = fire(GetPcCameraInfoCache);
-        const meterScale: number = fire(GetOptions).meterScale;
-        const watermark: string = fire(GetCachedWaterMark);
-        const flyPositions: number[] = fire(GetFlyPositionArray);
-        const flyTargets: number[] = fire(GetFlyTargetArray);
-        const metaData = { meterScale };
-        cameraInfo && (metaData['cameraInfo'] = cameraInfo);
-        marks.length && (metaData['marks'] = marks);
-        watermark && (metaData['watermark'] = watermark);
-        flyPositions.length && (metaData['flyPositions'] = flyPositions);
-        flyTargets.length && (metaData['flyTargets'] = flyTargets);
-        const meta = JSON.stringify(metaData, null, 2);
 
-        return await fire(HttpPostMetaData, meta, fire(GetOptions).url);
+        const meta: MetaData = fire(GetSplatMesh).meta || {};
+        if (marks.length) {
+            meta.marks = marks;
+        } else {
+            delete meta.marks;
+        }
+        const metaJson = JSON.stringify(meta, null, 2);
+
+        return await fire(HttpPostMetaData, metaJson, fire(GetOptions).url);
     });
 
     on(MetaMarkRemoveData, async (): Promise<boolean> => {
-        const cameraInfo: CameraInfo = fire(GetPcCameraInfoCache);
-        const meterScale: number = fire(GetOptions).meterScale;
-        const watermark: string = fire(GetCachedWaterMark);
-        const flyPositions: number[] = fire(GetFlyPositionArray);
-        const flyTargets: number[] = fire(GetFlyTargetArray);
-        const metaData = { meterScale };
-        cameraInfo && (metaData['cameraInfo'] = cameraInfo);
-        watermark && (metaData['watermark'] = watermark);
-        flyPositions.length && (metaData['flyPositions'] = flyPositions);
-        flyTargets.length && (metaData['flyTargets'] = flyTargets);
-        const meta = JSON.stringify(metaData, null, 2);
+        const meta: MetaData = fire(GetSplatMesh).meta || {};
+        delete meta.marks;
+        const metaJson = JSON.stringify(meta, null, 2);
 
-        const rs = await fire(HttpPostMetaData, meta, fire(GetOptions).url);
+        const rs = await fire(HttpPostMetaData, metaJson, fire(GetOptions).url);
 
         const marks: WeakRef<any>[] = [];
         markMap.forEach(item => marks.push(item));
@@ -185,20 +167,11 @@ export function setupMark(events: Events) {
                 data && marks.push(data);
             }
         });
-        const cameraInfo: CameraInfo = fire(GetPcCameraInfoCache);
-        const meterScale: number = fire(GetOptions).meterScale;
-        const watermark: string = fire(GetCachedWaterMark);
-        const flyPositions: number[] = fire(GetFlyPositionArray);
-        const flyTargets: number[] = fire(GetFlyTargetArray);
-        const metaData = { meterScale };
-        cameraInfo && (metaData['cameraInfo'] = cameraInfo);
-        marks.length && (metaData['marks'] = marks);
-        watermark && (metaData['watermark'] = watermark);
-        flyPositions.length && (metaData['flyPositions'] = flyPositions);
-        flyTargets.length && (metaData['flyTargets'] = flyTargets);
-        const meta = JSON.stringify(metaData, null, 2);
+        const meta: MetaData = fire(GetSplatMesh).meta || {};
+        meta.watermark = fire(GetCachedWaterMark) || '';
 
-        return await fire(HttpPostMetaData, meta, fire(GetOptions).url);
+        const metaJson = JSON.stringify(meta, null, 2);
+        return await fire(HttpPostMetaData, metaJson, fire(GetOptions).url);
     });
 
     on(LoadSmallSceneMetaData, () => {
@@ -210,14 +183,17 @@ export function setupMark(events: Events) {
             } else {
                 let metaUrl = opts.url.substring(0, opts.url.lastIndexOf('.')) + '.meta.json'; // xxx/abc.bin => xxx/abc.meta.json
                 fetch(metaUrl, { mode: 'cors', credentials: 'omit', cache: 'reload' })
-                    .then(response => (!response.ok ? [] : response.json()))
-                    .then((data: any) => {
-                        if (data.meterScale) {
-                            fire(GetOptions).meterScale = data.meterScale;
+                    .then(response => (!response.ok ? {} : response.json()))
+                    .then((metaData: MetaData) => {
+                        const splatMesh: SplatMesh = fire(GetSplatMesh);
+                        splatMesh.meta = metaData;
+
+                        if (metaData.meterScale) {
+                            fire(GetOptions).meterScale = metaData.meterScale;
                             fire(Information, { scale: `1 : ${fire(GetOptions).meterScale} m` });
                         }
-                        fire(SetCameraInfo, data);
-                        const marks = data.marks || [];
+                        fire(SetCameraInfo, metaData);
+                        const marks = metaData.marks || [];
 
                         // 初始化标注，隐藏待激活显示
                         marks.forEach((data: MarkData) => {
@@ -253,9 +229,9 @@ export function setupMark(events: Events) {
                             }
                         });
 
-                        fire(OnSetWaterMark, data.watermark || '');
-                        fire(OnSetFlyPositions, data.flyPositions || []);
-                        fire(OnSetFlyTargets, data.flyTargets || []);
+                        fire(OnSetWaterMark, metaData.watermark || '');
+                        fire(OnSetFlyPositions, metaData.flyPositions || []);
+                        fire(OnSetFlyTargets, metaData.flyTargets || []);
 
                         resolve(true);
                     })

@@ -31,7 +31,7 @@ import {
 } from '../events/EventConstants';
 import { Matrix4, Vector3, Vector4 } from 'three';
 import { Events } from '../events/Events';
-import { ModelStatus, SplatModel } from './ModelData';
+import { MetaData, ModelStatus, SplatModel } from './ModelData';
 import { ModelOptions } from './ModelOptions';
 import { loadBin } from './loaders/BinLoader';
 import { loadSplat } from './loaders/SplatLoader';
@@ -107,7 +107,7 @@ class SplatDataManager {
         const fire = (key: number, ...args: any): any => this.events.fire(key, ...args);
         const MaxRenderCount: number = fire(GetMaxRenderCount);
         const isBigSceneMode: boolean = fire(IsBigSceneMode);
-        const meta: any = (fire(GetSplatMesh) as SplatMesh).meta || {};
+        const meta: MetaData = (fire(GetSplatMesh) as SplatMesh).meta || {};
 
         // 小场景
         if (!isBigSceneMode) {

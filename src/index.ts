@@ -18,7 +18,7 @@ if (url) {
     debugMode && initDevMode(true);
 } else {
     viewer = new Reall3dViewer({ debugMode: true });
-    viewer.addModel(`https://reall3d.com/demo-models/yz.bin`);
+    viewer.addModel(`https://reall3d.com/demo-models/drrlf.bin`);
 
     initDevMode();
 }
@@ -93,9 +93,9 @@ function fnClick(className: string) {
     } else if (className == 'mark-hide') {
         viewer.options({ markVisible: false });
     } else if (className == 'mark-save') {
-        viewer.fire(5);
-    } else if (className == 'mark-del') {
         viewer.fire(6);
+    } else if (className == 'mark-del') {
+        viewer.fire(7);
     } else if (className == 'mark-point') {
         viewer.options({ markMode: true, markType: 'point' });
     } else if (className == 'mark-lines') {

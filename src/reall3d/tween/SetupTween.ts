@@ -5,10 +5,14 @@ import { Events } from '../events/Events';
 import {
     AddFlyPosition,
     ClearFlyPosition,
+    FlySavePositions,
     GetControls,
     GetFlyPositionArray,
     GetFlyPositions,
     GetFlyTargetArray,
+    GetOptions,
+    GetSplatMesh,
+    HttpPostMetaData,
     OnSetFlyPositions,
     OnSetFlyTargets,
     OnViewerAfterUpdate,
@@ -21,6 +25,7 @@ import {
 import { Easing, Tween } from '@tweenjs/tween.js';
 import { Controls } from '../controls/Controls';
 import { CatmullRomCurve3, Vector3 } from 'three';
+import { MetaData } from '../modeldata/ModelData';
 export function setupTween(events: Events) {
     const fire = (key: number, ...args: any): any => events.fire(key, ...args);
     const on = (key: number, fn?: Function, multiFn?: boolean): Function | Function[] => events.on(key, fn, multiFn);
@@ -66,6 +71,25 @@ export function setupTween(events: Events) {
     on(ClearFlyPosition, () => {
         flyPositions.length = 0;
         flyTargets.length = 0;
+    });
+    on(FlySavePositions, async () => {
+        const meta: MetaData = fire(GetSplatMesh).meta || {};
+        if (flyPositions.length) {
+            const positions: number[] = [];
+            const targets: number[] = [];
+            for (let i = 0, max = flyPositions.length; i < max; i++) {
+                positions.push(...flyPositions[i].toArray());
+                targets.push(...flyTargets[i].toArray());
+            }
+            meta.flyPositions = positions;
+            meta.flyTargets = targets;
+        } else {
+            delete meta.flyPositions;
+            delete meta.flyTargets;
+        }
+        const metaJson = JSON.stringify(meta, null, 2);
+
+        return await fire(HttpPostMetaData, metaJson, fire(GetOptions).url);
     });
 
     on(TweenFlyOnce, (idx: number = 0) => {

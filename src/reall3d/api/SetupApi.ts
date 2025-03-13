@@ -6,7 +6,7 @@ import { HttpPostMetaData, HttpQueryGaussianText } from '../events/EventConstant
 export function setupApi(events: Events) {
     const on = (key: number, fn?: Function, multiFn?: boolean): Function | Function[] => events.on(key, fn, multiFn);
 
-    on(HttpPostMetaData, (meta: string, modelUrl: string) => {
+    on(HttpPostMetaData, (meta: string, url: string) => {
         // TODO post meta data to server here
         console.log(meta);
     });

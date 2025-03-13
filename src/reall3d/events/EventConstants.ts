@@ -348,6 +348,8 @@ export const GetFlyPositionArray = i++;
 export const GetFlyTargetArray = i++;
 /** 添加相机飞行轨迹点 */
 export const AddFlyPosition = i++;
+/** 保存相机飞行轨迹点 */
+export const FlySavePositions = i++;
 /** 清空相机飞行轨迹点 */
 export const ClearFlyPosition = i++;
 /** 设定相机飞行轨迹 */

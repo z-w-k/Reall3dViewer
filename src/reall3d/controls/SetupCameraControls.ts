@@ -29,6 +29,7 @@ import { Events } from '../events/Events';
 import { GetCamera } from '../events/EventConstants';
 import { Controls } from './Controls';
 import { isMobile } from '../utils/consts/GlobalConstants';
+import { MetaData } from '../modeldata/ModelData';
 
 /**
  * 相机参数信息
@@ -111,7 +112,7 @@ export function setupCameraControls(events: Events) {
     on(SetSmallSceneCameraNotReady, (): boolean => (cameraReady = false));
 
     let pcCameraInfo: CameraInfo;
-    on(SetCameraInfo, (metaData?: any) => {
+    on(SetCameraInfo, (metaData?: MetaData) => {
         pcCameraInfo = metaData?.cameraInfo;
         if (pcCameraInfo) {
             // 忽略 fov,near,far,aspect 参数

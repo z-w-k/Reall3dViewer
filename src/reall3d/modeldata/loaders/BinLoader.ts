@@ -339,7 +339,7 @@ export function setSplatData(model: SplatModel, data: Uint8Array) {
 
     let autoCut: number = model.meta.autoCut; // 按推荐参数切
     autoCut = Math.max(autoCut, 2); // 至少切 4 块
-    autoCut = Math.min(autoCut, 100); // 最多切 10000 块
+    autoCut = Math.min(autoCut, 50); // 最多切 2500 块
 
     const f32s: Float32Array = new Float32Array(data.buffer);
     for (let i = 0, count = Math.floor(data.byteLength / SplatDataSize32), x = 0, y = 0, z = 0, key = ''; i < count; i++) {
@@ -347,9 +347,7 @@ export function setSplatData(model: SplatModel, data: Uint8Array) {
         y = f32s[i * 8 + 1];
         z = f32s[i * 8 + 2];
         let kx = Math.min(autoCut - 1, Math.floor((Math.max(0, x - minX) / (maxX - minX)) * autoCut));
-        let kz = model.meta.cutXZ
-            ? Math.min(autoCut - 1, Math.floor((Math.max(0, y - minY) / (maxY - minY)) * autoCut))
-            : Math.min(autoCut - 1, Math.floor((Math.max(0, z - minZ) / (maxZ - minZ)) * autoCut));
+        let kz = Math.min(autoCut - 1, Math.floor((Math.max(0, y - minY) / (maxY - minY)) * autoCut));
 
         key = `${kx}-${kz}`;
         let cutModel = model.map.get(key);

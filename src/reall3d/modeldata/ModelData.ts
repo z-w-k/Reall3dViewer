@@ -1,28 +1,9 @@
 // ================================
 // Copyright (c) 2025 reall3d.com
 // ================================
+import { CameraInfo } from '../controls/SetupCameraControls';
 import { BinHeader } from './formats/BinFormat';
 import { ModelOptions } from './ModelOptions';
-
-/**
- * 模型状态
- */
-export enum ModelStatus {
-    /** 就绪 */
-    FetchReady = 0,
-    /** 请求中 */
-    Fetching,
-    /** 正常完成 */
-    FetchDone,
-    /** 请求前被取消 */
-    CancelFetch,
-    /** 请求途中被中断 */
-    FetchAborted,
-    /** 请求失败 */
-    FetchFailed,
-    /** 无效的模型格式或数据 */
-    Invalid,
-}
 
 /**
  * Splat模型
@@ -77,11 +58,11 @@ export class SplatModel {
     /** 大场景时的合并数量（临时计算用） */
     public allocatedPoints: number = 0;
 
-    public meta: any;
+    public meta: MetaData;
     public map: Map<string, SplatModel>;
     public set: Set<SplatModel>;
 
-    constructor(opts: ModelOptions, meta: any = {}) {
+    constructor(opts: ModelOptions, meta: MetaData = {}) {
         this.opts = { ...opts };
 
         this.meta = meta;
@@ -114,4 +95,75 @@ export class SplatModel {
         this.binHeader = header;
         return this.binHeader;
     }
+}
+
+/**
+ * 模型状态
+ */
+export enum ModelStatus {
+    /** 就绪 */
+    FetchReady = 0,
+    /** 请求中 */
+    Fetching,
+    /** 正常完成 */
+    FetchDone,
+    /** 请求前被取消 */
+    CancelFetch,
+    /** 请求途中被中断 */
+    FetchAborted,
+    /** 请求失败 */
+    FetchFailed,
+    /** 无效的模型格式或数据 */
+    Invalid,
+}
+
+/**
+ * 元数据
+ */
+export interface MetaData {
+    /** 名称 */
+    name?: string;
+    /** 版本 */
+    version?: string;
+
+    /** 是否自动旋转 */
+    autoRotate?: boolean;
+    /** 是否调试模式 */
+    debugMode?: boolean;
+    /** 是否点云模式 */
+    pointcloudMode?: boolean;
+    /** 移动端最大渲染数量 */
+    maxRenderCountOfMobile?: number;
+    /** PC端最大渲染数量 */
+    maxRenderCountOfPc?: number;
+
+    /** 米比例尺 */
+    meterScale?: number;
+    /** 文字水印 */
+    watermark?: string;
+    /** 相机参数 */
+    cameraInfo?: CameraInfo;
+    /** 标注 */
+    marks?: any[];
+    /** 飞翔相机位置点 */
+    flyPositions?: number[];
+    /** 飞翔相机注视点 */
+    flyTargets?: number[];
+
+    // -------------- for large scene --------------
+    /** 自动切割数量 */
+    autoCut?: number;
+    /** 变换矩阵 */
+    transform?: number[];
+    /** 包围盒 */
+    box?: {
+        minX: number;
+        maxX: number;
+        minY: number;
+        maxY: number;
+        minZ: number;
+        maxZ: number;
+    };
+    /** 模型地址数组 */
+    models?: ModelOptions[];
 }

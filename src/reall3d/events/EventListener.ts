@@ -161,6 +161,9 @@ export function setupEventListener(events: Events) {
         } else if (keySet.has('Minus')) {
             fire(ClearFlyPosition);
             keySet.clear();
+        } else if (keySet.has('KeyY')) {
+            fire(MetaSaveSmallSceneCameraInfo);
+            keySet.clear();
         } else if (keySet.has('KeyI')) {
             fire(PrintInfo);
             keySet.clear();

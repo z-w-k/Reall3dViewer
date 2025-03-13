@@ -52,6 +52,8 @@ import {
     MetaMarkRemoveData,
     PrintInfo,
     GetCameraInfo,
+    GetSplatMesh,
+    FlySavePositions,
 } from '../events/EventConstants';
 import { SplatMesh } from '../meshs/splatmesh/SplatMesh';
 import { ModelOptions } from '../modeldata/ModelOptions';
@@ -80,6 +82,7 @@ import { MarkData } from '../meshs/mark/data/MarkData';
 import { setupCommonUtils } from '../utils/CommonUtils';
 import { setupTween } from '../tween/SetupTween';
 import { isMobile, ViewerVersion } from '../utils/consts/GlobalConstants';
+import { MetaData } from '../modeldata/ModelData';
 
 /**
  * 高斯渲染器
@@ -153,6 +156,7 @@ export class Reall3dViewer {
         setupTween(events);
 
         this.splatMesh = new SplatMesh(copyGsViewerOptions(opts));
+        on(GetSplatMesh, () => this.splatMesh);
         scene.add(this.splatMesh);
         setupControlPlane(events);
 
@@ -179,7 +183,7 @@ export class Reall3dViewer {
         );
         on(OnViewerAfterUpdate, () => {}, true);
         on(ViewerDispose, () => this.dispose());
-        on(PrintInfo, () => console.info(fire(GetCameraInfo)), true);
+        on(PrintInfo, () => console.info(JSON.stringify(fire(GetSplatMesh).meta || {}, null, 2)));
 
         let watermark: string = '';
         on(OnSetWaterMark, (text: string = '') => {
@@ -243,8 +247,9 @@ export class Reall3dViewer {
         n === 2 && this.events.fire(AddFlyPosition);
         n === 3 && this.events.fire(TweenFly);
         n === 4 && this.events.fire(ClearFlyPosition);
-        n === 5 && this.events.fire(MetaMarkSaveData);
-        n === 6 && this.events.fire(MetaMarkRemoveData);
+        n === 5 && this.events.fire(FlySavePositions);
+        n === 6 && this.events.fire(MetaMarkSaveData);
+        n === 7 && this.events.fire(MetaMarkRemoveData);
     }
 
     /**
@@ -302,14 +307,6 @@ export class Reall3dViewer {
     }
 
     /**
-     * 保存相机参数信息（小场景适用）
-     */
-    public saveCameraInfo() {
-        if (this.disposed) return;
-        this.events.fire(MetaSaveSmallSceneCameraInfo);
-    }
-
-    /**
      * 光圈过渡切换显示
      * @returns
      */
@@ -325,15 +322,17 @@ export class Reall3dViewer {
     public addScene(sceneUrl: string) {
         fetch(sceneUrl, { mode: 'cors', credentials: 'omit', cache: 'reload' })
             .then(response => (!response.ok ? {} : response.json()))
-            .then((data: any) => {
-                this.reset({ ...data.options });
-                isMobile && (data.options.position || data.options.lookAt) && this.events.fire(GetControls)._dollyOut(0.75); // 手机适当缩小
-                this.splatMesh.meta = data;
-                for (let i = 0, max = data.models.length; i < max; i++) {
-                    const modelOpts: ModelOptions = data.models[i];
+            .then((metaData: MetaData) => {
+                const opts: Reall3dViewerOptions = { ...metaData, ...(metaData.cameraInfo || {}) };
+                opts.bigSceneMode = true;
+                this.reset({ ...opts });
+                isMobile && (metaData.cameraInfo?.position || metaData.cameraInfo?.lookAt) && this.events.fire(GetControls)._dollyOut(0.75); // 手机适当缩小
+                this.splatMesh.meta = metaData;
+                for (let i = 0, max = metaData.models.length; i < max; i++) {
+                    const modelOpts: ModelOptions = metaData.models[i];
                     this.addModel(modelOpts);
                 }
-                this.events.fire(OnSetWaterMark, data.watermark || '');
+                this.events.fire(OnSetWaterMark, metaData.watermark || '');
             })
             .catch(e => {
                 console.error(e.message);
@@ -355,32 +354,13 @@ export class Reall3dViewer {
         if (!modelOpts.url) return console.error('model url is empty');
 
         const opts: Reall3dViewerOptions = this.events.fire(GetOptions);
-        !opts.bigSceneMode && (opts.url = modelOpts.url);
-        !opts.bigSceneMode && this.events.fire(SetSmallSceneCameraNotReady);
-        this.events.fire(LoadSmallSceneMetaData);
+        if (!opts.bigSceneMode) {
+            opts.url = modelOpts.url;
+            this.events.fire(SetSmallSceneCameraNotReady);
+            await this.events.fire(LoadSmallSceneMetaData);
+        }
         this.splatMesh.addModel(modelOpts);
         this.events.fire(GetControls).updateRotateAxis();
-    }
-
-    /**
-     * 删除渲染中的指定高斯模型
-     * @param url 高斯模型地址
-     */
-    public removeModel(url: string): void {
-        if (this.disposed) return;
-        const opts: Reall3dViewerOptions = this.events.fire(GetOptions);
-        !opts.bigSceneMode && (opts.url = '');
-        this.splatMesh.removeModel(url);
-    }
-
-    /**
-     * 删除渲染中的全部高斯模型
-     */
-    public removeAll(): void {
-        if (this.disposed) return;
-        const opts: Reall3dViewerOptions = this.events.fire(GetOptions);
-        !opts.bigSceneMode && (opts.url = '');
-        this.splatMesh.removeAll();
     }
 
     /**

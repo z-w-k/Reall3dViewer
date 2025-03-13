@@ -45,10 +45,11 @@ import { setupApi } from '../../api/SetupApi';
 import { initSplatMeshOptions } from '../../utils/ViewerUtils';
 import { setupCommonUtils } from '../../utils/CommonUtils';
 import { setupWorker } from '../../worker/SetupWorker';
+import { MetaData } from '../../modeldata/ModelData';
 
 export class SplatMesh extends Mesh {
     public readonly isSplatMesh: boolean = true;
-    public meta: any;
+    public meta: MetaData;
     private disposed: boolean = false;
     private events: Events;
     private opts: SplatMeshOptions;
