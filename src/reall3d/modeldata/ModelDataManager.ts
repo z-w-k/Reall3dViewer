@@ -81,7 +81,7 @@ class SplatDataManager {
 
         events.on(OnRenderDataUpdateDone, (dataTime: number) => (dataTime < 0 || dataTime >= this.lastPostDataTime) && (this.doingPostData = false));
 
-        let delay = isMobile ? (events.fire(IsBigSceneMode) ? 800 : 400) : events.fire(IsBigSceneMode) ? 400 : 200;
+        let delay = isMobile ? (events.fire(IsBigSceneMode) ? 1000 : 500) : events.fire(IsBigSceneMode) ? 400 : 200;
         let lastTime = Date.now();
         setTimeout(() => {
             !this.disposed &&
