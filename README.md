@@ -64,6 +64,10 @@ npm run build
 gsbox ply2splat20 -i /path/to/input.ply -o /path/to/output.sp20
 ```
 
+## TODO
+- Continuously optimize and enhance rendering performance
+- Design more optimized model format and tool
+
 ## Release History
 https://github.com/reall3d-com/Reall3dViewer/releases
 
