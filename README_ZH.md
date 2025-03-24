@@ -33,7 +33,7 @@ https://reall3d.com/reall3dviewer/index.html
 <br>
 
 <p align="center">
-    <a href="https://reall3d.com/reall3dviewer/index.html?url=/demo-models/demo-lod-kcc.scene.json">
+    <a href="https://reall3d.com/reall3dviewer/index.html?url=/demo-models/demo-lod-kcc-30m-points.scene.json">
         <img src="https://gotoeasy.github.io/reall3d/kcc-lod.png"/>
         <br>
         点击打开
