@@ -39,8 +39,8 @@ https://reall3d.com/reall3dviewer/index.html
         Click to Open
     </a>
     <br>
-     High-performance rendering of large scenes based on dynamic Level of Detail (LOD)<br>
-    Smooth visual experience on consumer-grade devices for scenes with up to 100 million points
+    High-performance rendering of large scenes based on dynamic Level of Detail (LOD)<br>
+    Large scene of 100 million points can also provide a smooth visual experience on consumer grade devices
 <p>
 
 
