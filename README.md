@@ -4,7 +4,7 @@
 
 # Reall3dViewer
 
-`Reall3dViewer` is a 3D Gaussian Splatting viewer built on Three.js. Crafting an exceptional 3DGS viewer is no small feat, which is why we've chosen to open-source our project. We hope to harness the collective wisdom and efforts of the community to drive the advancement of 3DGS applications together!
+`Reall3dViewer` is a 3D Gaussian Splatting renderer built on Three.js. Crafting an exceptional renderer is no small feat, which is why we've chosen to open-source our project. We hope to harness the collective wisdom and efforts of the community to drive the advancement of 3DGS applications together!
 
 <br>
 
@@ -29,6 +29,22 @@
 
 ## Live demo
 https://reall3d.com/reall3dviewer/index.html
+
+<br>
+
+<p align="center">
+    <a href="https://reall3d.com/reall3dviewer/index.html?url=/demo-models/demo-lod-kcc.scene.json">
+        <img src="https://gotoeasy.github.io/reall3d/kcc-lod.png"/>
+        <br>
+        Click to Open
+    </a>
+    <br>
+     High-performance rendering of large scenes based on dynamic Level of Detail (LOD)<br>
+    Smooth visual experience on consumer-grade devices for scenes with up to 100 million points
+<p>
+
+
+<br>
 
 
 ## Basic Usage

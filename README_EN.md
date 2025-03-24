@@ -30,6 +30,22 @@
 ## Live demo
 https://reall3d.com/reall3dviewer/index.html
 
+<br>
+
+<p align="center">
+    <a href="https://reall3d.com/reall3dviewer/index.html?url=/demo-models/demo-lod-kcc.scene.json">
+        <img src="https://gotoeasy.github.io/reall3d/kcc-lod.png"/>
+        <br>
+        Click to Open
+    </a>
+    <br>
+     High-performance rendering of large scenes based on dynamic Level of Detail (LOD)<br>
+    Smooth visual experience on consumer-grade devices for scenes with up to 100 million points
+<p>
+
+
+<br>
+
 
 ## Basic Usage
 ```shell

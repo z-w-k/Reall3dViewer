@@ -30,6 +30,21 @@
 ## 在线演示
 https://reall3d.com/reall3dviewer/index.html
 
+<br>
+
+<p align="center">
+    <a href="https://reall3d.com/reall3dviewer/index.html?url=/demo-models/003-lod-kcc.scene.json">
+        <img src="https://gotoeasy.github.io/reall3d/kcc-lod.png"/>
+        <br>
+        点击打开
+    </a>
+    <br>
+    基于动态LOD实现高性能的大场景渲染<br>
+    1亿个点的大场景也可以在消费级设备上有流畅的视觉体验
+<p>
+
+
+<br>
 
 ## 用法
 ```shell
@@ -47,6 +62,11 @@ npm run build
 # https://github.com/gotoeasy/gsbox
 gsbox ply2splat20 -i /path/to/input.ply -o /path/to/output.sp20
 ```
+
+## TODO
+- 持续优化增强渲染性能
+- 设计更加优化的模型格式及工具
+
 
 ## 履历
 https://github.com/reall3d-com/Reall3dViewer/releases
