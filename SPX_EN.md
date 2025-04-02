@@ -1,4 +1,4 @@
-## `spx` File Format Specification
+## SPX File Format Specification
 The `.spx` format is a `3DGS` model format designed to be fleXible, eXtensible, and eXclusive.
 
 
