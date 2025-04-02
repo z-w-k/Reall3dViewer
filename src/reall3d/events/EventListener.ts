@@ -40,8 +40,8 @@ import {
     MetaSaveSmallSceneCameraInfo,
     MarkFinish,
     CancelCurrentMark,
-    TweenFly,
-    TweenFlyDisable,
+    Flying,
+    FlyDisable,
     AddFlyPosition,
     ClearFlyPosition,
     MetaMarkSaveData,
@@ -87,7 +87,7 @@ export function setupEventListener(events: Events) {
     });
     on(StopAutoRotate, (flyDisable: boolean = true) => {
         fire(GetControls).autoRotate = fire(GetOptions).autoRotate = false;
-        flyDisable && fire(TweenFlyDisable);
+        flyDisable && fire(FlyDisable);
     });
 
     on(RotateAt, (rotateLeft: boolean = true) => {
@@ -153,7 +153,7 @@ export function setupEventListener(events: Events) {
             fire(ControlPlaneSwitchVisible, true);
             keySet.clear();
         } else if (keySet.has('KeyP')) {
-            fire(TweenFly);
+            fire(Flying);
             keySet.clear();
         } else if (keySet.has('Equal')) {
             fire(AddFlyPosition);

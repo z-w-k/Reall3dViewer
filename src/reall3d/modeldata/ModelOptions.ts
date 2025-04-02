@@ -11,22 +11,17 @@ export interface ModelOptions {
     url: string;
 
     /**
-     *  模型格式（splat | sp20 | bin | json），默认自动识别
+     *  模型格式（splat | sp20 | bin），默认自动识别
      */
-    format?: 'splat' | 'sp20' | 'bin' | 'json' | undefined;
-
-    /**
-     *  是否单纯数据
-     */
-    dataOnly?: boolean | undefined;
+    format?: 'splat' | 'sp20' | 'bin' | 'spx';
 
     /**
      *  是否重新下载
      */
-    fetchReload?: boolean | undefined;
+    fetchReload?: boolean;
 
     /**
      *  限制高斯点数
      */
-    limitSplatCount?: number | undefined;
+    downloadLimitSplatCount?: number;
 }

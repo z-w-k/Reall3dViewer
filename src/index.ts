@@ -18,7 +18,7 @@ if (url) {
     debugMode && initDevMode(true);
 } else {
     viewer = new Reall3dViewer({ debugMode: true });
-    viewer.addModel(`https://reall3d.com/demo-models/yz.bin`);
+    viewer.addModel(`https://reall3d.com/demo-models/yz.spx`);
 
     initDevMode();
 }
@@ -57,19 +57,19 @@ function fnClick(className: string) {
         document.querySelector('#gsviewer .op-show').innerHTML = txt;
     } else if (className == 'demo1') {
         viewer.reset({ debugMode: true });
-        setTimeout(() => viewer.addModel(`https://reall3d.com/demo-models/yz.bin`), 50); // Let it GC
+        setTimeout(() => viewer.addModel(`https://reall3d.com/demo-models/yz.spx`), 50); // Let it GC
     } else if (className == 'demo2') {
         viewer.reset({ debugMode: true });
-        setTimeout(() => viewer.addModel(`https://reall3d.com/demo-models/jtstjg.bin`), 50); // Let it GC
+        setTimeout(() => viewer.addModel(`https://reall3d.com/demo-models/jtstjg.spx`), 50); // Let it GC
     } else if (className == 'demo3') {
         viewer.reset({ debugMode: true });
-        setTimeout(() => viewer.addModel(`https://reall3d.com/demo-models/djj.bin`), 50); // Let it GC
+        setTimeout(() => viewer.addModel(`https://reall3d.com/demo-models/djj.spx`), 50); // Let it GC
     } else if (className == 'demo4') {
         viewer.reset({ debugMode: true });
-        setTimeout(() => viewer.addModel(`https://reall3d.com/demo-models/bzg.bin`), 50); // Let it GC
+        setTimeout(() => viewer.addModel(`https://reall3d.com/demo-models/bzg.spx`), 50); // Let it GC
     } else if (className == 'big-lod') {
-        // 大场景LOD
-        setTimeout(() => viewer.addScene(`https://reall3d.com/demo-models/000-lod-kcc.scene.json`), 50); // Let it GC
+        // TODO 大场景LOD，重构改进使用spx
+        // setTimeout(() => viewer.addScene(`https://reall3d.com/demo-models/lod-demo-spx.scene.json`), 50); // Let it GC
     } else if (className == 'switch-rotate') {
         let opts: Reall3dViewerOptions = viewer.options();
         viewer.options({ autoRotate: !opts.autoRotate });

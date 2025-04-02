@@ -174,74 +174,54 @@ export function setupMark(events: Events) {
         return await fire(HttpPostMetaData, metaJson, fire(GetOptions).url);
     });
 
-    on(LoadSmallSceneMetaData, () => {
-        return new Promise(resolve => {
-            const opts: Reall3dViewerOptions = fire(GetOptions);
-            if (opts.bigSceneMode) {
-                fire(SetCameraInfo, null);
-                resolve(false);
-            } else {
-                let metaUrl = opts.url.substring(0, opts.url.lastIndexOf('.')) + '.meta.json'; // xxx/abc.bin => xxx/abc.meta.json
-                fetch(metaUrl, { mode: 'cors', credentials: 'omit', cache: 'reload' })
-                    .then(response => (!response.ok ? {} : response.json()))
-                    .then((metaData: MetaData) => {
-                        const splatMesh: SplatMesh = fire(GetSplatMesh);
-                        splatMesh.meta = metaData;
+    on(LoadSmallSceneMetaData, (metaData: MetaData) => {
+        const opts: Reall3dViewerOptions = fire(GetOptions);
+        if (opts.bigSceneMode) return fire(SetCameraInfo, null); // TODO
 
-                        if (metaData.meterScale) {
-                            fire(GetOptions).meterScale = metaData.meterScale;
-                            fire(Information, { scale: `1 : ${fire(GetOptions).meterScale} m` });
-                        }
-                        fire(SetCameraInfo, metaData);
-                        const marks = metaData.marks || [];
+        if (metaData.meterScale) {
+            fire(GetOptions).meterScale = metaData.meterScale;
+            fire(Information, { scale: `1 : ${fire(GetOptions).meterScale} m` });
+        }
+        fire(SetCameraInfo, metaData);
+        const marks = metaData.marks || [];
 
-                        // 初始化标注，隐藏待激活显示
-                        marks.forEach((data: MarkData) => {
-                            if (data.type === 'MarkSinglePoint') {
-                                // 单点
-                                const mark = new MarkSinglePoint(events, data);
-                                mark.visible = false;
-                                fire(GetScene).add(mark);
-                            } else if (data.type === 'MarkDistanceLine') {
-                                // 测量距离
-                                const mark = new MarkDistanceLine(events);
-                                mark.draw(data);
-                                mark.visible = false;
-                                fire(GetScene).add(mark);
-                            } else if (data.type === 'MarkMultiLines') {
-                                // 折线
-                                const mark = new MarkMultiLines(events);
-                                mark.draw(data, true);
-                                mark.visible = false;
-                                fire(GetScene).add(mark);
-                            } else if (data.type === 'MarkMultiPlans') {
-                                // 多面
-                                const mark = new MarkMultiPlans(events);
-                                mark.draw(data, true);
-                                mark.visible = false;
-                                fire(GetScene).add(mark);
-                            } else if (data.type === 'MarkCirclePlan') {
-                                // 圆面
-                                const mark = new MarkCirclePlan(events);
-                                mark.draw(data);
-                                mark.visible = false;
-                                fire(GetScene).add(mark);
-                            }
-                        });
-
-                        fire(OnSetWaterMark, metaData.watermark || '');
-                        fire(OnSetFlyPositions, metaData.flyPositions || []);
-                        fire(OnSetFlyTargets, metaData.flyTargets || []);
-
-                        resolve(true);
-                    })
-                    .catch(e => {
-                        console.error(e.message);
-                        fire(SetCameraInfo, null);
-                        resolve(false);
-                    });
+        // 初始化标注，隐藏待激活显示
+        marks.forEach((data: MarkData) => {
+            if (data.type === 'MarkSinglePoint') {
+                // 单点
+                const mark = new MarkSinglePoint(events, data);
+                mark.visible = false;
+                fire(GetScene).add(mark);
+            } else if (data.type === 'MarkDistanceLine') {
+                // 测量距离
+                const mark = new MarkDistanceLine(events);
+                mark.draw(data);
+                mark.visible = false;
+                fire(GetScene).add(mark);
+            } else if (data.type === 'MarkMultiLines') {
+                // 折线
+                const mark = new MarkMultiLines(events);
+                mark.draw(data, true);
+                mark.visible = false;
+                fire(GetScene).add(mark);
+            } else if (data.type === 'MarkMultiPlans') {
+                // 多面
+                const mark = new MarkMultiPlans(events);
+                mark.draw(data, true);
+                mark.visible = false;
+                fire(GetScene).add(mark);
+            } else if (data.type === 'MarkCirclePlan') {
+                // 圆面
+                const mark = new MarkCirclePlan(events);
+                mark.draw(data);
+                mark.visible = false;
+                fire(GetScene).add(mark);
             }
         });
+
+        fire(OnSetWaterMark, metaData.watermark || '');
+        fire(OnSetFlyPositions, metaData.flyPositions || []);
+        fire(OnSetFlyTargets, metaData.flyTargets || []);
     });
 
     on(MarkFinish, () => {

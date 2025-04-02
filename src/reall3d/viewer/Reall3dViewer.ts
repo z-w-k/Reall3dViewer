@@ -1,3 +1,4 @@
+import { IsBigSceneMode, OnSetFlyPositions, OnSetFlyTargets, SplatDataManagerDispose } from './../events/EventConstants';
 // ================================
 // Copyright (c) 2025 reall3d.com
 // ================================
@@ -38,9 +39,9 @@ import {
     GetCachedWaterMark,
     MetaSaveWatermark,
     AddFlyPosition,
-    TweenFly,
+    Flying,
     ClearFlyPosition,
-    TweenFlyDisable,
+    FlyDisable,
     GetScene,
     OnViewerBeforeUpdate,
     GetOptions,
@@ -80,7 +81,7 @@ import { setupMark } from '../meshs/mark/SetupMark';
 import { setupApi } from '../api/SetupApi';
 import { MarkData } from '../meshs/mark/data/MarkData';
 import { setupCommonUtils } from '../utils/CommonUtils';
-import { setupTween } from '../tween/SetupTween';
+import { setupFlying } from '../controls/SetupFlying';
 import { isMobile, ViewerVersion } from '../utils/consts/GlobalConstants';
 import { MetaData } from '../modeldata/ModelData';
 
@@ -124,6 +125,7 @@ export class Reall3dViewer {
         on(GetScene, () => scene);
         on(GetControls, () => controls);
         on(GetCamera, () => controls.object);
+        on(IsBigSceneMode, () => opts.bigSceneMode);
         on(ViewerSetPointcloudMode, (pointMode: boolean) => (opts.pointcloudMode = pointMode));
 
         const aryUpdaters: any[] = [];
@@ -138,7 +140,7 @@ export class Reall3dViewer {
                 RunLoopByTime,
                 () => {
                     !this.disposed && (this.needUpdate = true);
-                    oUpdater.count++ >= 100 && (oUpdater.stop = true);
+                    oUpdater.count++ >= 150 && (oUpdater.stop = true);
                 },
                 () => !this.disposed && !oUpdater.stop,
                 10,
@@ -153,7 +155,7 @@ export class Reall3dViewer {
         setupEventListener(events);
         setupRaycaster(events);
         setupFocusMarker(events);
-        setupTween(events);
+        setupFlying(events);
 
         this.splatMesh = new SplatMesh(copyGsViewerOptions(opts));
         on(GetSplatMesh, () => this.splatMesh);
@@ -211,8 +213,10 @@ export class Reall3dViewer {
             let file = e.dataTransfer.files[0];
 
             const url: any = URL.createObjectURL(file);
-            let format: 'bin' | 'splat' | 'sp20';
-            if (file.name.endsWith('.bin')) {
+            let format: 'spx' | 'bin' | 'splat' | 'sp20';
+            if (file.name.endsWith('.spx')) {
+                format = 'spx';
+            } else if (file.name.endsWith('.bin')) {
                 format = 'bin';
             } else if (file.name.endsWith('.splat')) {
                 format = 'splat';
@@ -245,7 +249,7 @@ export class Reall3dViewer {
     public fire(n: number, p1?: any, p2?: any): void {
         n === 1 && this.splatMesh.fire(SplatUpdateShowWaterMark, p1); // 显示/隐藏水印
         n === 2 && this.events.fire(AddFlyPosition);
-        n === 3 && this.events.fire(TweenFly);
+        n === 3 && this.events.fire(Flying);
         n === 4 && this.events.fire(ClearFlyPosition);
         n === 5 && this.events.fire(FlySavePositions);
         n === 6 && this.events.fire(MetaMarkSaveData);
@@ -319,24 +323,50 @@ export class Reall3dViewer {
      * 添加场景
      * @param sceneUrl 场景地址
      */
-    public addScene(sceneUrl: string) {
-        fetch(sceneUrl, { mode: 'cors', credentials: 'omit', cache: 'reload' })
-            .then(response => (!response.ok ? {} : response.json()))
-            .then((metaData: MetaData) => {
-                const opts: Reall3dViewerOptions = { ...metaData, ...(metaData.cameraInfo || {}) };
-                opts.bigSceneMode = true;
-                this.reset({ ...opts });
-                isMobile && (metaData.cameraInfo?.position || metaData.cameraInfo?.lookAt) && this.events.fire(GetControls)._dollyOut(0.75); // 手机适当缩小
-                this.splatMesh.meta = metaData;
-                for (let i = 0, max = metaData.models.length; i < max; i++) {
-                    const modelOpts: ModelOptions = metaData.models[i];
-                    this.addModel(modelOpts);
-                }
-                this.events.fire(OnSetWaterMark, metaData.watermark || '');
-            })
-            .catch(e => {
-                console.error(e.message);
-            });
+    public async addScene(sceneUrl: string) {
+        if (this.disposed) return;
+        const fire = (key: number, ...args: any): any => this.events.fire(key, ...args);
+
+        let meta: MetaData = {};
+        try {
+            const res = await fetch(sceneUrl, { mode: 'cors', credentials: 'omit', cache: 'reload' });
+            if (res.status === 200) {
+                meta = await res.json();
+            } else {
+                return console.error('scene file fetch failed, status:', res.status);
+            }
+        } catch (e) {
+            return console.error('scene file fetch failed', e.message);
+        }
+
+        if (!meta.url) return console.error('missing model file url');
+        if (!meta.url.endsWith('.bin') && !meta.url.endsWith('.spx'))
+            return console.error('The format is unsupported in the large scene mode', meta.url);
+
+        // 重置
+        const opts: Reall3dViewerOptions = { ...meta, ...(meta.cameraInfo || {}) };
+        meta.autoCut = Math.min(Math.max(meta.autoCut || 0, 0), 50); // 限制0~50
+        opts.bigSceneMode = meta.autoCut > 1; // 切割多块的为大场景
+        this.reset({ ...opts });
+
+        !opts.bigSceneMode && delete meta.autoCut; // 小场景或没有配置成切割多块，都不支持切割
+
+        // 按元数据调整更新相机、标注等信息
+        this.splatMesh.meta = meta;
+        isMobile && (meta.cameraInfo?.position || meta.cameraInfo?.lookAt) && this.events.fire(GetControls)._dollyOut(0.75); // 手机适当缩小
+
+        if (opts.bigSceneMode) {
+            fire(OnSetFlyPositions, meta.flyPositions || []);
+            fire(OnSetFlyTargets, meta.flyTargets || []);
+        } else {
+            fire(SetSmallSceneCameraNotReady);
+            fire(LoadSmallSceneMetaData, meta);
+        }
+
+        // 加载模型
+        this.splatMesh.addModel({ url: meta.url }, meta);
+        await fire(OnSetWaterMark, meta.watermark);
+        fire(GetControls).updateRotateAxis();
     }
 
     /**
@@ -345,6 +375,9 @@ export class Reall3dViewer {
      */
     public async addModel(urlOpts: string | ModelOptions): Promise<void> {
         if (this.disposed) return;
+        const fire = (key: number, ...args: any): any => this.events.fire(key, ...args);
+
+        // 参数整理
         let modelOpts: ModelOptions;
         if (Object.prototype.toString.call(urlOpts) === '[object String]') {
             modelOpts = { url: urlOpts as string };
@@ -353,14 +386,49 @@ export class Reall3dViewer {
         }
         if (!modelOpts.url) return console.error('model url is empty');
 
-        const opts: Reall3dViewerOptions = this.events.fire(GetOptions);
-        if (!opts.bigSceneMode) {
-            opts.url = modelOpts.url;
-            this.events.fire(SetSmallSceneCameraNotReady);
-            await this.events.fire(LoadSmallSceneMetaData);
+        // 检查设定格式
+        if (!modelOpts.format) {
+            if (modelOpts.url.endsWith('.spx')) {
+                modelOpts.format = 'spx';
+            } else if (modelOpts.url.endsWith('.bin')) {
+                modelOpts.format = 'bin';
+            } else if (modelOpts.url.endsWith('.splat')) {
+                modelOpts.format = 'splat';
+            } else if (modelOpts.url.endsWith('.sp20')) {
+                modelOpts.format = 'sp20';
+            } else {
+                console.error('unknow format!', modelOpts.url);
+                return;
+            }
         }
-        this.splatMesh.addModel(modelOpts);
-        this.events.fire(GetControls).updateRotateAxis();
+
+        // 获取元数据
+        const opts: Reall3dViewerOptions = fire(GetOptions);
+        let meta: MetaData = {};
+        if (modelOpts.url.startsWith('http')) {
+            const metaUrl = modelOpts.url.substring(0, modelOpts.url.lastIndexOf('.')) + '.meta.json'; // xxx/abc.bin => xxx/abc.meta.json
+            try {
+                const res = await fetch(metaUrl, { mode: 'cors', credentials: 'omit', cache: 'reload' });
+                if (res.status === 200) {
+                    meta = await res.json();
+                } else {
+                    console.warn('meta file fetch failed, status:', res.status);
+                }
+            } catch (e) {
+                console.warn('meta file fetch failed', e.message);
+            }
+        }
+
+        // 按元数据调整更新相机、标注等信息
+        if (!opts.bigSceneMode || (meta.autoCut || 0) < 2) {
+            delete meta.autoCut; // 小场景或没有配置成切割多块，都不支持切割
+            fire(SetSmallSceneCameraNotReady);
+            fire(LoadSmallSceneMetaData, meta);
+        }
+
+        // 加载模型
+        this.splatMesh.addModel(modelOpts, meta);
+        fire(GetControls).updateRotateAxis();
     }
 
     /**
@@ -371,7 +439,7 @@ export class Reall3dViewer {
 
         const switchAutoRotate = () => {
             setTimeout(() => window.focus());
-            fire(TweenFlyDisable);
+            fire(FlyDisable);
             fire(GetControls).autoRotate = fire(GetOptions).autoRotate = !fire(GetOptions).autoRotate;
         };
         const changePointCloudMode = (pointcloudMode: boolean = true) => {

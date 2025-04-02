@@ -4,7 +4,7 @@
 import { GetGaussianText, HttpQueryGaussianText } from '../../events/EventConstants';
 import { Events } from '../../events/Events';
 import { HalfChars, SplatDataSize32 } from '../../utils/consts/GlobalConstants';
-import { parseWordToTexdata } from '../wasm/WasmBinParser';
+import { parseWordToTexdata } from '../wasm/WasmParser';
 
 export function setupGaussianText(events: Events) {
     const fire = (key: number, ...args: any): any => events.fire(key, ...args);

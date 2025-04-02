@@ -82,7 +82,7 @@ export function setupCommonUtils(events: Events) {
             (async () => {
                 const wrap: HTMLElement = document.querySelector('#gsviewer #progressBarWrap');
                 if (wrap) {
-                    wrap.style.display = fire(IsBigSceneMode) ? 'none' : 'block';
+                    wrap.style.display = 'block';
                     const dom: HTMLElement = document.querySelector('#gsviewer #progressBar');
                     dom && (dom.style.width = `0%`);
                 }
@@ -112,11 +112,10 @@ export function setupCommonUtils(events: Events) {
         loading = true;
 
         if (fire(GetOptions).debugMode) {
-            !fire(IsBigSceneMode) &&
-                (async () => {
-                    const dom: HTMLElement = document.querySelector('#gsviewer #progressBar');
-                    dom && (dom.style.width = `${per}%`);
-                })();
+            (async () => {
+                const dom: HTMLElement = document.querySelector('#gsviewer #progressBar');
+                dom && (dom.style.width = `${per}%`);
+            })();
         } else {
             // @ts-ignore
             parent?.onProgress && parent.onProgress(per, `${per}%`);
@@ -201,8 +200,6 @@ export function setupCommonUtils(events: Events) {
             renderSplatCount,
             visibleSplatCount,
             modelSplatCount,
-            models,
-            renderModels,
             fps,
             realFps,
             sortTime,
@@ -212,21 +209,23 @@ export function setupCommonUtils(events: Events) {
             lookAt,
             worker,
             scene,
-            updateSceneData,
+            // updateSceneData,
             scale,
+            cuts,
         }: Partial<Record<string, any>> = {}) => {
             if (!fire(IsDebugMode)) return;
 
             renderSplatCount !== undefined && setInfo('renderSplatCount', `${renderSplatCount}`);
             visibleSplatCount !== undefined && setInfo('visibleSplatCount', `${visibleSplatCount}`);
             modelSplatCount !== undefined && setInfo('modelSplatCount', `${modelSplatCount}`);
-            models && setInfo('models', models);
-            renderModels !== undefined && setInfo('renderModels', renderModels);
+            // models && setInfo('models', models);
+            // renderModels !== undefined && setInfo('renderModels', renderModels);
             fps !== undefined && setInfo('fps', fps);
             realFps !== undefined && setInfo('realFps', `raw ${realFps}`);
-            sortTime !== undefined && setInfo('sort', `(${formatDate(new Date(), 1)})　${sortTime} ms`);
+            sortTime !== undefined && setInfo('sort', `${sortTime} ms`);
+            fire(IsBigSceneMode) ? cuts !== undefined && setInfo('cuts', `（${cuts} cuts）`) : setInfo('cuts', '');
             worker && setInfo('worker', `${worker}`);
-            updateSceneData && setInfo('updateSceneData', `（up ${updateSceneData} ms）`);
+            // updateSceneData && setInfo('updateSceneData', `（up ${updateSceneData} ms）`);
             scene && setInfo('scene', scene);
             fov && setInfo('fov', fov);
             position && setInfo('position', position);
@@ -254,21 +253,6 @@ export function setupCommonUtils(events: Events) {
         let dom: HTMLDivElement = document.querySelector(`#gsviewer .debug .${name}`);
         dom && (dom.innerText = txt);
     }
-    function formatDate(now: Date = new Date(), formatType: number = 1) {
-        const year = now.getFullYear();
-        const month = (100 + now.getMonth() + 1 + '').substring(1);
-        const day = (100 + now.getDate() + '').substring(1);
-        const hours = (100 + now.getHours() + '').substring(1);
-        const minutes = (100 + now.getMinutes() + '').substring(1);
-        const seconds = (100 + now.getSeconds() + '').substring(1);
-        const milliseconds = (1000 + now.getMilliseconds() + '').substring(1);
-        if (formatType === 1) {
-            return `${hours}:${minutes}:${seconds}.${milliseconds}`;
-        } else if (formatType === 2) {
-            return `${seconds}.${milliseconds}`;
-        }
-        return `${year}-${month}-${day} ${hours}:${minutes}:${seconds}.${milliseconds}`;
-    }
 }
 
 export const shaderChunk = ShaderChunk;
@@ -279,8 +263,8 @@ export function initSplatMeshOptions(options: SplatMeshOptions): SplatMeshOption
     // 默认参数校验设定
     opts.pointcloudMode ??= !opts.bigSceneMode; // 小场景默认点云模式，大场景默认正常模式
     opts.lightFactor ??= 1.0;
-    opts.maxRenderCountOfMobile ??= opts.bigSceneMode ? 64 * 2 * 10240 : 98 * 2 * 10240;
-    opts.maxRenderCountOfPc ??= opts.bigSceneMode ? 256 * 10240 : 256 * 2 * 10240;
+    opts.maxRenderCountOfMobile ??= opts.bigSceneMode ? 256 * 10000 : (256 + 32) * 10000;
+    opts.maxRenderCountOfPc ??= opts.bigSceneMode ? (256 + 64) * 10000 : (256 + 128) * 10000;
     opts.maxFetchCount = opts.maxFetchCount ? (opts.maxFetchCount >= 1 && opts.maxFetchCount <= 32 ? opts.maxFetchCount : 16) : 16;
     opts.debugMode ??= location.protocol === 'http:' || /^test\./.test(location.host); // 生产环境不开启
 
@@ -288,3 +272,27 @@ export function initSplatMeshOptions(options: SplatMeshOptions): SplatMeshOption
 }
 
 export const decodeB64 = atob;
+
+/** 是否3天内 */
+export function isNeedReload(yyyymmdd: number = 0): boolean {
+    const date = new Date();
+    date.setDate(date.getDate() - 3);
+    return yyyymmdd >= date.getFullYear() * 10000 + (date.getMonth() + 1) * 100 + date.getDate();
+}
+
+export async function unGzip(data: Uint8Array): Promise<Uint8Array> {
+    try {
+        const stream = new ReadableStream({
+            async start(controller: any) {
+                controller.enqueue(data);
+                controller.close();
+            },
+        });
+
+        const rs = new Response(stream.pipeThrough(new DecompressionStream('gzip')));
+        return new Uint8Array(await rs.arrayBuffer());
+    } catch (error) {
+        console.error('unGzip Failed:', error);
+        return null;
+    }
+}

@@ -36,7 +36,7 @@ import {
     GetSplatMesh,
     GetCameraLookAt,
 } from '../../events/EventConstants';
-import { setupSplatDataManager } from '../../modeldata/ModelDataManager';
+import { setupSplatTextureManager } from '../../modeldata/SplatTexdataManager';
 import { SplatMeshOptions } from './SplatMeshOptions';
 import { ModelOptions } from '../../modeldata/ModelOptions';
 import { setupSplatMesh } from './SetupSplatMesh';
@@ -44,7 +44,7 @@ import { setupGaussianText } from '../../modeldata/text/SetupGaussianText';
 import { setupApi } from '../../api/SetupApi';
 import { initSplatMeshOptions } from '../../utils/ViewerUtils';
 import { setupCommonUtils } from '../../utils/CommonUtils';
-import { setupWorker } from '../../worker/SetupWorker';
+import { setupWorker } from '../../sorter/SetupSorter';
 import { MetaData } from '../../modeldata/ModelData';
 
 export class SplatMesh extends Mesh {
@@ -89,7 +89,7 @@ export class SplatMesh extends Mesh {
         setupCommonUtils(events);
         setupWorker(events);
         setupSplatMesh(events);
-        setupSplatDataManager(events);
+        setupSplatTextureManager(events);
         setupGaussianText(events);
         setupApi(events);
 
@@ -105,7 +105,7 @@ export class SplatMesh extends Mesh {
             fire(SplatUpdatePerformanceNow, performance.now());
         };
         this.onAfterRender = () => {
-            (fire(IsFetching) || fire(SplatDataManagerDataChanged, 3000)) && fire(NotifyViewerNeedUpdate); // 下载中或3秒内有数据变化，则通知更新
+            fire(SplatDataManagerDataChanged, 10000) && fire(NotifyViewerNeedUpdate); // 纹理数据更新后10秒内总是要刷新
         };
     }
 
@@ -134,30 +134,13 @@ export class SplatMesh extends Mesh {
 
     /**
      * 添加渲染指定高斯模型
-     * @param url 高斯模型地址
      * @param opts 高斯模型选项
+     * @param meta 元数据
      */
-    public async addModel(opts: ModelOptions): Promise<void> {
+    public async addModel(opts: ModelOptions, meta: MetaData): Promise<void> {
         if (this.disposed) return;
-        this.events.fire(SplatDataManagerAddModel, opts);
-    }
-
-    /**
-     * 删除渲染中的指定高斯模型
-     * @param url 高斯模型地址
-     */
-    public removeModel(url: string): void {
-        if (this.disposed) return;
-        this.events.fire(SplatDataManagerRemoveModel, url);
-    }
-
-    /**
-     * 删除渲染中的全部高斯模型
-     */
-    public removeAll(): void {
-        if (this.disposed) return;
-        this.events.fire(SplatDataManagerRemoveAll);
-        this.opts.url = null;
+        this.meta = meta;
+        this.events.fire(SplatDataManagerAddModel, opts, meta);
     }
 
     public fire(key: number, ...args: any): any {

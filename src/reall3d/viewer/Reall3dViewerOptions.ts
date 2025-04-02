@@ -45,11 +45,6 @@ export interface Reall3dViewerOptions {
     bigSceneMode?: boolean;
 
     /**
-     * 模型下载的最大并发请求数，默认 16，可在1~32之间调整，范围外的设定会按默认值 16 处理
-     */
-    maxFetchCount?: number | undefined;
-
-    /**
      * 模型地址，默认 undefined，
      */
     url?: string | undefined;
@@ -86,12 +81,6 @@ export interface Reall3dViewerOptions {
      *  画布元素或其选择器，默认选择器为'#gsviewer-canvas'，未指定时将在容器节点里面自动创建
      */
     canvas?: HTMLCanvasElement | string | undefined;
-
-    /**
-     * 是否自动更新渲染，默认true
-     * 支持通过viewer.options()动态更新
-     */
-    selfDrivenMode?: boolean | undefined;
 
     /**
      * 相机视场，默认 45

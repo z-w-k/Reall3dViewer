@@ -1,6 +1,7 @@
 // ================================
 // Copyright (c) 2025 reall3d.com
 // ================================
+import { PerspectiveCamera, Scene, Vector3, WebGLRenderer } from 'three';
 import { Events } from '../events/Events';
 import {
     ComputeFps,
@@ -21,11 +22,9 @@ import {
     GetCameraLookAt,
     GetCameraLookUp,
 } from '../events/EventConstants';
-import { PerspectiveCamera, Scene, Vector3, WebGLRenderer } from 'three';
 import { SplatMeshOptions } from '../meshs/splatmesh/SplatMeshOptions';
 import { Controls } from '../controls/Controls';
 import { Reall3dViewerOptions } from '../viewer/Reall3dViewerOptions';
-import { isMobile } from './consts/GlobalConstants';
 
 export function setupViewerUtils(events: Events) {
     let disposed: boolean = false;
@@ -93,10 +92,6 @@ export function initSplatMeshOptions(options: SplatMeshOptions): SplatMeshOption
     opts.bigSceneMode ??= false;
     opts.pointcloudMode ??= !opts.bigSceneMode; // 小场景默认点云模式，大场景默认正常模式
     opts.lightFactor ??= 1.0;
-    // opts.maxRenderCountOfMobile ??= opts.bigSceneMode ? 64 * 2 * 10240 : 98 * 2 * 10240;
-    // opts.maxRenderCountOfPc ??= opts.bigSceneMode ? 128 * 10240 : 256 * 2 * 10240;
-    // opts.maxFetchCount = opts.maxFetchCount ? (opts.maxFetchCount >= 1 && opts.maxFetchCount <= 32 ? opts.maxFetchCount : 16) : 16;
-    // opts.debugMode ??= location.protocol === 'http:' || /^test\./.test(location.host); // 生产环境不开启
     opts.name ??= '';
     opts.showWaterMark ??= true;
 
@@ -107,7 +102,6 @@ export function initGsViewerOptions(options: Reall3dViewerOptions): Reall3dViewe
     const opts: Reall3dViewerOptions = { ...options };
 
     // 默认参数校验设定
-    opts.selfDrivenMode ??= true;
     opts.position = opts.position ? [...opts.position] : [0, -5, 15];
     opts.lookAt = opts.lookAt ? [...opts.lookAt] : [0, 0, 0];
     opts.lookUp = opts.lookUp ? [...opts.lookUp] : [0, -1, 0];
@@ -123,10 +117,8 @@ export function initGsViewerOptions(options: Reall3dViewerOptions): Reall3dViewe
     opts.bigSceneMode ??= false;
     opts.pointcloudMode ??= !opts.bigSceneMode; // 小场景默认点云模式，大场景默认正常模式
     opts.lightFactor ??= 1.1;
-    opts.maxRenderCountOfMobile ??= opts.bigSceneMode ? 128 * 10240 : 256 * 10240;
-    opts.maxRenderCountOfPc ??= opts.bigSceneMode ? (256 + 128) * 10240 : 512 * 10240;
-    opts.maxFetchCount = opts.maxFetchCount ? (opts.maxFetchCount >= 1 && opts.maxFetchCount <= 32 ? opts.maxFetchCount : 16) : 16;
-    isMobile && (opts.maxFetchCount = 8);
+    opts.maxRenderCountOfMobile ??= opts.bigSceneMode ? 256 * 10000 : (256 + 128) * 10240;
+    opts.maxRenderCountOfPc ??= opts.bigSceneMode ? (256 + 64) * 10000 : (256 + 128) * 10000;
     opts.debugMode ??= location.protocol === 'http:' || /^test\./.test(location.host); // 生产环境不开启
     opts.markMode ??= false;
     opts.markVisible ??= true;
@@ -216,7 +208,6 @@ export function copyGsViewerOptions(gsViewerOptions: Reall3dViewerOptions): Spla
     opts.camera = gsViewerOptions.camera;
     opts.controls = gsViewerOptions.controls;
     opts.bigSceneMode = gsViewerOptions.bigSceneMode;
-    opts.maxFetchCount = gsViewerOptions.maxFetchCount;
     opts.url = gsViewerOptions.url;
     opts.pointcloudMode = gsViewerOptions.pointcloudMode;
     opts.maxRenderCountOfMobile = gsViewerOptions.maxRenderCountOfMobile;

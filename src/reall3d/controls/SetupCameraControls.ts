@@ -1,13 +1,7 @@
 // ================================
 // Copyright (c) 2025 reall3d.com
 // ================================
-import {
-    GetCameraFov,
-    GetPcCameraInfoCache,
-    IsSmallSceneCameraReady,
-    OnViewerDisposeResetVars,
-    SetSmallSceneCameraNotReady,
-} from './../events/EventConstants';
+import { GetCameraFov, IsSmallSceneCameraReady, OnViewerDisposeResetVars, SetSmallSceneCameraNotReady } from './../events/EventConstants';
 import {
     GetCameraInfo,
     GetCameraLookAt,
@@ -128,7 +122,6 @@ export function setupCameraControls(events: Events) {
         }
         cameraReady = true;
     });
-    on(GetPcCameraInfoCache, () => pcCameraInfo);
     on(
         OnViewerDisposeResetVars,
         () => {
@@ -147,9 +140,6 @@ export function setupCameraControls(events: Events) {
     let lastCameraDirection: Vector3 = new Vector3();
     let lastCameraFov: number = 0;
     on(IsCameraChangedNeedUpdate, () => {
-        if (fire(GetOptions).bigSceneMode) {
-            return true;
-        }
         const camera: PerspectiveCamera = fire(GetControls).object;
         const fov = camera.fov;
         const position = camera.position.clone();

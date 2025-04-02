@@ -4,7 +4,7 @@
 
 # Reall3dViewer
 
-`Reall3dViewer` is a 3D Gaussian Splatting renderer built on Three.js. Crafting an exceptional renderer is no small feat, which is why we've chosen to open-source our project. We hope to harness the collective wisdom and efforts of the community to drive the advancement of 3DGS applications together!
+`Reall3dViewer` is a 3D Gaussian Splatting viewer built on Three.js. Crafting an exceptional 3DGS viewer is no small feat, which is why we've chosen to open-source our project. We hope to harness the collective wisdom and efforts of the community to drive the advancement of 3DGS applications together!
 
 <br>
 
@@ -20,31 +20,13 @@
 <br>
 
 ## Features
-- [x] Mobile friendly
-- [x] Support `.splat`,`.sp20` and optimized `.bin` formats
+- [x] Support `.splat` and optimized `.spx` formats
 - [x] Support mark and measurement
 - [x] Support text watermark
-- [x] Support large scene rendering
 
 
 ## Live demo
 https://reall3d.com/reall3dviewer/index.html
-
-<br>
-
-<p align="center">
-    <a href="https://reall3d.com/reall3dviewer/index.html?url=/demo-models/demo-lod-kcc-30m-points.scene.json">
-        <img src="https://gotoeasy.github.io/reall3d/kcc-lod.png"/>
-        <br>
-        Click to Open
-    </a>
-    <br>
-    High-performance rendering of large scenes based on dynamic Level of Detail (LOD)<br>
-    Large scene of 100 million points can also provide a smooth visual experience on consumer grade devices
-<p>
-
-
-<br>
 
 
 ## Basic Usage
@@ -58,15 +40,14 @@ npm run build
 # open a web browser to render your 3dgs model
 # http://hostname:port/index.html?url=your-model-link-address
 
-# The .sp20 format is similar to .splat, but it reduces the file size by 37.5%
-# .sp20 file can be obtained through conversion using the gsbox
+# .spx file can be obtained through conversion using the gsbox
 # https://github.com/gotoeasy/gsbox
-gsbox ply2splat20 -i /path/to/input.ply -o /path/to/output.sp20
+gsbox p2x -i /path/to/input.ply -o /path/to/output.spx
 ```
 
 ## TODO
 - Continuously optimize and enhance rendering performance
-- Design more optimized model format and tool
+- Design more optimized model format `.spx` and tool
 
 ## Release History
 https://github.com/reall3d-com/Reall3dViewer/releases

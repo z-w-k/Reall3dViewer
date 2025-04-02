@@ -32,8 +32,6 @@ export const GetCamera = i++;
 export const GetControls = i++;
 /** 取得当前相机参数信息 */
 export const GetCameraInfo = i++;
-/** 取得PC使用的缓存相机参数信息 */
-export const GetPcCameraInfoCache = i++;
 /** 更新设定相机参数 */
 export const SetCameraInfo = i++;
 /** 相机是否就绪（小场景适用） */
@@ -207,8 +205,6 @@ export const OnTextureReadySplatCount = i++;
 /** 数据是否已下载结束并准备就绪（小场景适用） */
 export const IsSmallSceneRenderDataReady = i++;
 
-/** 纹理就绪 */
-export const SplatTextureReady = i++;
 /** 是否可以更新纹理 */
 export const CanUpdateTexture = i++;
 
@@ -357,17 +353,19 @@ export const OnSetFlyPositions = i++;
 /** 设定相机飞行视点轨迹 */
 export const OnSetFlyTargets = i++;
 /** 相机飞行控制 */
-export const TweenFly = i++;
+export const Flying = i++;
 /** 相机飞行控制(仅一次) */
-export const TweenFlyOnce = i++;
+export const FlyOnce = i++;
 /** 允许相机飞行控制 */
-export const TweenFlyEnable = i++;
+export const FlyEnable = i++;
 /** 禁止相机飞行控制 */
-export const TweenFlyDisable = i++;
+export const FlyDisable = i++;
 /** 取SplatMesh实例 */
 export const GetSplatMesh = i++;
-/** 渲染数据更新完成 */
-export const OnRenderDataUpdateDone = i++;
 
 /** 打印信息（开发调试用） */
 export const PrintInfo = i++;
+/** 上传纹理 */
+export const UploadSplatTexture = i++;
+/** 上传纹理完成 */
+export const UploadSplatTextureDone = i++;

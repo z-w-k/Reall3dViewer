@@ -39,7 +39,25 @@ export const WkMaxRenderCount = `$${n++}`;
 export const WkBinVersion = `$${n++}`;
 /** 视图投影矩阵 */
 export const WkViewProjection = `$${n++}`;
-/** 当前活动中的点 */
-export const WkActivePoints = `$${n++}`;
 /** 上传纹理的版本 */
 export const WkUploadTextureVersion = `$${n++}`;
+/** 排序用已就绪的坐标 */
+export const WkXyz = `$${n++}`;
+/** 排序用已就绪的水印坐标 */
+export const WkWxyz = `$${n++}`;
+/** 包围盒 */
+export const WkMinX = `$${n++}`;
+/** 包围盒 */
+export const WkMaxX = `$${n++}`;
+/** 包围盒 */
+export const WkMinY = `$${n++}`;
+/** 包围盒 */
+export const WkMaxY = `$${n++}`;
+/** 包围盒 */
+export const WkMinZ = `$${n++}`;
+/** 包围盒 */
+export const WkMaxZ = `$${n++}`;
+/** 初始化 */
+export const WkInit = `$${n++}`;
+/** 水印数量 */
+export const WkWatermarkCount = `$${n++}`;

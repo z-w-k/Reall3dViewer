@@ -20,31 +20,14 @@
 <br>
 
 ## 特点
-- [x] 友好支持移动端
-- [x] 支持`.splat`、`.sp20`以及优化的`.bin`格式
+- [x] 支持`.splat`以及优化的`.spx`格式
 - [x] 支持标注测量
 - [x] 支持文字水印
-- [x] 支持大场景渲染
 
 
 ## 在线演示
 https://reall3d.com/reall3dviewer/index.html
 
-<br>
-
-<p align="center">
-    <a href="https://reall3d.com/reall3dviewer/index.html?url=/demo-models/demo-lod-kcc-30m-points.scene.json">
-        <img src="https://gotoeasy.github.io/reall3d/kcc-lod.png"/>
-        <br>
-        点击打开
-    </a>
-    <br>
-    基于动态LOD实现高性能的大场景渲染<br>
-    1亿个点的大场景也可以在消费级设备上有流畅的视觉体验
-<p>
-
-
-<br>
 
 ## 用法
 ```shell
@@ -65,9 +48,7 @@ gsbox ply2splat20 -i /path/to/input.ply -o /path/to/output.sp20
 
 ## TODO
 - 持续优化增强渲染性能
-- 设计更加优化的模型格式及工具
-
-
+- 设计更加优化的模型格式`.spx`及工具
 ## 履历
 https://github.com/reall3d-com/Reall3dViewer/releases
 
