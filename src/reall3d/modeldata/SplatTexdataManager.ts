@@ -44,7 +44,7 @@ export function setupSplatTextureManager(events: Events) {
 
     on(SetGaussianText, async (text: string, isY: boolean = true, isNgativeY: boolean = true) => {
         try {
-            textWatermarkData = text ? await fire(GetGaussianText, text, isY, isNgativeY) : null;
+            textWatermarkData = await fire(GetGaussianText, text, isY, isNgativeY);
             splatModel && (splatModel.textWatermarkVersion = Date.now());
         } catch (e) {
             console.info('failed to generate watermark');

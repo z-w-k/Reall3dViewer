@@ -11,7 +11,7 @@ export function setupApi(events: Events) {
         console.info(meta);
     });
 
-    on(HttpQueryGaussianText, (text: string) => {
+    on(HttpQueryGaussianText, (text: string = '') => {
         const url = 'https://reall3d.com/gsfont/api/getGaussianText';
         const formData = new FormData();
         formData.append('text', text.substring(0, 100)); // 限制查取最大100字
