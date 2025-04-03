@@ -55,7 +55,8 @@ Data blocks consist of a fixed header followed by customizable content.
 
 ## Open Data Block Formats
 
-- ✅  Format `20` (Open Standard)
+✅  Format `20` (Open Standard)
+
 | Byte Offset | Type      | Field Name            | Description                                                                 |
 |-------------|-----------|-----------------------|-----------------------------------------------------------------------------|
 | 0–3         | uint32    | `*`Gaussian Count     | Number of Gaussians                                                         |
