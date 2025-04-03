@@ -4,9 +4,10 @@ The `.spx` format is a `3DGS` model format designed to be fleXible, eXtensible, 
 
 <br>
 
-- [x] `Efficient & Flexible` Optimized file header structure, flexible data blocks, and effective compression
+
+- [x] `Flexible` Optimized file header structure, flexible data blocks, and effective compression
 - [x] `Extensible` Open format with reserved fields for future expansion
-- [x] `Protected Data` Custom format identifiers for proprietary data protection
+- [x] `Exclusive` Custom format identifiers for proprietary data protection
 
 
 
@@ -48,12 +49,15 @@ Data blocks consist of a fixed header followed by customizable content.
 | Byte Offset | Type      | Field Name            | Description                                                                 |
 |-------------|-----------|-----------------------|-----------------------------------------------------------------------------|
 | 0–3         | uint32    | `*`Count              | Number of Gaussians in this block                                           |
-| 4–7         | uint32    | `*`Format ID          | Identifies data layout (0–255 = open formats; >255 = proprietary)           |
+| 4–7         | uint32    | `*`Format ID          | Identifies data layout (0–255 = open formats; >255 = exclusive)           |
 | 8–n         | bytes     | `*`Data               | Structured per Format ID                                                    |
 
 ---
 
-## Open Data Block Formats
+## Open Block Content Formats
+
+he data block format encompasses both open and exclusive formats. The reserved range from 0 to 255 is designated for defining the open format, while other values are employed for exclusive formats.
+
 
 ✅  Format `20` (Open Standard)
 
