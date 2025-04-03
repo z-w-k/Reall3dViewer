@@ -272,10 +272,10 @@ export function initSplatMeshOptions(options: SplatMeshOptions): SplatMeshOption
 
 export const decodeB64 = atob;
 
-/** 是否3天内 */
+/** 是否7天内 */
 export function isNeedReload(yyyymmdd: number = 0): boolean {
     const date = new Date();
-    date.setDate(date.getDate() - 3);
+    date.setDate(date.getDate() - 7);
     return yyyymmdd >= date.getFullYear() * 10000 + (date.getMonth() + 1) * 100 + date.getDate();
 }
 

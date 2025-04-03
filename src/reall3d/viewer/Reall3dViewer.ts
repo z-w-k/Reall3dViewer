@@ -410,6 +410,8 @@ export class Reall3dViewer {
             }
         }
 
+        meta.url = modelOpts.url; // 小场景元数据的url仅变量用途
+
         // 按元数据调整更新相机、标注等信息
         delete meta.autoCut; // 小场景没有切割
         fire(SetSmallSceneCameraNotReady);

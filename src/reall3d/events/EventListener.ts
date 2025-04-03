@@ -44,8 +44,8 @@ import {
     FlyDisable,
     AddFlyPosition,
     ClearFlyPosition,
-    MetaMarkSaveData,
     PrintInfo,
+    GetSplatMesh,
 } from './EventConstants';
 import { Reall3dViewerOptions } from '../viewer/Reall3dViewerOptions';
 import { SplatMesh } from '../meshs/splatmesh/SplatMesh';
@@ -166,6 +166,9 @@ export function setupEventListener(events: Events) {
             keySet.clear();
         } else if (keySet.has('KeyI')) {
             fire(PrintInfo);
+            keySet.clear();
+        } else if (keySet.has('F2')) {
+            !opts.bigSceneMode && window.open('/editor/index.html?url=' + encodeURIComponent((fire(GetSplatMesh) as SplatMesh).meta.url));
             keySet.clear();
         }
     });
