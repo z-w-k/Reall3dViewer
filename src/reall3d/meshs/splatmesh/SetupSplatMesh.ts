@@ -196,7 +196,7 @@ export function setupSplatMesh(events: Events) {
                 texture.textureReady = true;
                 texture.textureReadyTime = Date.now();
                 notifyWorkerTextureReady(texture);
-                fire(OnTextureReadySplatCount, texture.renderSplatCount); // TODO
+                fire(OnTextureReadySplatCount, texture.renderSplatCount); // 用于判断小场景是否可以开始光圈过渡
             };
             dataTexture.internalFormat = 'RGBA32UI';
             dataTexture.needsUpdate = true;
@@ -426,16 +426,6 @@ export function setupSplatMesh(events: Events) {
         const data: any = e.data;
         if (data[WkSplatIndex]) {
             fire(SplatUpdateSplatIndex, data[WkSplatIndex], data[WkIndex], data[WkSortTime], data[WkSortStartTime], data[WkRenderSplatCount]);
-
-            // if (fire(GetOptions).viewerEvents) {
-            //     if (fire(GetOptions).viewerEvents?.fire(IsSmallSceneCameraReady)) {
-            //         fire(SplatUpdateSplatIndex, data[WkSplatIndex], data[WkIndex], data[WkSortTime], data[WkSortStartTime]);
-            //         fire(Information, { renderSplatCount: data[WkRenderSplatCount] });
-            //     }
-            // } else {
-            //     fire(SplatUpdateSplatIndex, data[WkSplatIndex], data[WkIndex]);
-            //     fire(Information, { renderSplatCount: data[WkRenderSplatCount] });
-            // }
         }
     };
 

@@ -55,11 +55,6 @@ export interface SplatMeshOptions {
     bigSceneMode?: boolean;
 
     /**
-     * 模型下载的最大并发请求数，默认 16，可在1~32之间调整，范围外的设定会按默认值 16 处理
-     */
-    maxFetchCount?: number | undefined;
-
-    /**
      * 模型地址（最近一次添加渲染的模型地址，仅小场景适用），小场景添加模型渲染时会自动设定为模型地址，默认 undefined，
      */
     url?: string | undefined;

@@ -10,20 +10,16 @@ import {
     IsPointcloudMode,
     CreateSplatMesh,
     SplatMeshDispose,
-    SplatDataManagerDispose,
+    SplatTexdataManagerDispose,
     WorkerDispose,
     GetScene,
     GetOptions,
     GetCanvas,
     GetRenderer,
     IsBigSceneMode,
-    MaxModelFetchCount,
-    SplatDataManagerAddModel,
-    SplatDataManagerRemoveModel,
-    SplatDataManagerRemoveAll,
+    SplatTexdataManagerAddModel,
     WorkerSort,
-    IsFetching,
-    SplatDataManagerDataChanged,
+    SplatTexdataManagerDataChanged,
     NotifyViewerNeedUpdate,
     ViewerNeedUpdate,
     TraverseDisposeAndClear,
@@ -44,8 +40,8 @@ import { setupGaussianText } from '../../modeldata/text/SetupGaussianText';
 import { setupApi } from '../../api/SetupApi';
 import { initSplatMeshOptions } from '../../utils/ViewerUtils';
 import { setupCommonUtils } from '../../utils/CommonUtils';
-import { setupWorker } from '../../sorter/SetupSorter';
 import { MetaData } from '../../modeldata/ModelData';
+import { setupSorter } from '../../sorter/SetupSorter';
 
 export class SplatMesh extends Mesh {
     public readonly isSplatMesh: boolean = true;
@@ -81,17 +77,16 @@ export class SplatMesh extends Mesh {
         on(GetScene, () => opts.scene);
         on(IsBigSceneMode, () => opts.bigSceneMode);
         on(IsPointcloudMode, () => opts.pointcloudMode);
-        on(MaxModelFetchCount, () => opts.maxFetchCount);
         on(GetSplatMesh, () => this);
 
         on(NotifyViewerNeedUpdate, () => opts.viewerEvents?.fire(ViewerNeedUpdate));
 
         setupCommonUtils(events);
-        setupWorker(events);
+        setupApi(events);
+        setupSorter(events);
         setupSplatMesh(events);
         setupSplatTextureManager(events);
         setupGaussianText(events);
-        setupApi(events);
 
         this.copy(events.fire(CreateSplatMesh));
         this.frustumCulled = false;
@@ -105,7 +100,7 @@ export class SplatMesh extends Mesh {
             fire(SplatUpdatePerformanceNow, performance.now());
         };
         this.onAfterRender = () => {
-            fire(SplatDataManagerDataChanged, 10000) && fire(NotifyViewerNeedUpdate); // 纹理数据更新后10秒内总是要刷新
+            fire(SplatTexdataManagerDataChanged, 10000) && fire(NotifyViewerNeedUpdate); // 纹理数据更新后10秒内总是要刷新
         };
     }
 
@@ -120,12 +115,10 @@ export class SplatMesh extends Mesh {
         const thisOpts = this.opts;
 
         if (opts) {
-            opts.bigSceneMode !== undefined && (thisOpts.bigSceneMode = opts.bigSceneMode);
             opts.pointcloudMode !== undefined && fire(SplatUpdatePointMode, opts.pointcloudMode);
             opts.lightFactor !== undefined && fire(SplatUpdateLightFactor, opts.lightFactor);
             opts.maxRenderCountOfMobile !== undefined && (thisOpts.maxRenderCountOfMobile = opts.maxRenderCountOfMobile);
             opts.maxRenderCountOfPc !== undefined && (thisOpts.maxRenderCountOfPc = opts.maxRenderCountOfPc);
-            opts.maxFetchCount !== undefined && (opts.maxFetchCount = opts.maxFetchCount >= 1 && opts.maxFetchCount <= 32 ? opts.maxFetchCount : 16);
 
             fire(NotifyViewerNeedUpdate);
         }
@@ -140,7 +133,7 @@ export class SplatMesh extends Mesh {
     public async addModel(opts: ModelOptions, meta: MetaData): Promise<void> {
         if (this.disposed) return;
         this.meta = meta;
-        this.events.fire(SplatDataManagerAddModel, opts, meta);
+        this.events.fire(SplatTexdataManagerAddModel, opts, meta);
     }
 
     public fire(key: number, ...args: any): any {
@@ -160,7 +153,7 @@ export class SplatMesh extends Mesh {
         fire(GetScene).remove(this);
 
         fire(CommonUtilsDispose);
-        fire(SplatDataManagerDispose);
+        fire(SplatTexdataManagerDispose);
         fire(WorkerDispose);
         fire(SplatMeshDispose);
 

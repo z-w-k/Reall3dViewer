@@ -127,7 +127,7 @@ function setSplatData(model: SplatModel, data: Uint8Array) {
 
     const f32s: Float32Array = new Float32Array(data.buffer);
     const ui32s: Uint32Array = new Uint32Array(data.buffer);
-    for (let i = 0, x = 0, y = 0, z = 0, m = model.downloadSplatCount; i < dataCnt; i++) {
+    for (let i = 0, x = 0, y = 0, z = 0; i < dataCnt; i++) {
         x = f32s[i * 8];
         y = f32s[i * 8 + 1];
         z = f32s[i * 8 + 2];

@@ -217,11 +217,15 @@ function setBlockSplatData(model: SplatModel, data: Uint8Array) {
         console.warn('unsupport splat or sp20 in large sence mode');
     }
 
-    const dataCnt = data.byteLength / 32;
+    let dataCnt = data.byteLength / 32;
     const stepCnt = 4096;
     if (!isCut) {
-        !model.splatData && (model.splatData = new Uint8Array(Math.min(model.opts.downloadLimitSplatCount, model.modelSplatCount) * SplatDataSize32));
+        const maxSplatDataCnt = Math.min(model.opts.downloadLimitSplatCount, model.modelSplatCount);
+        !model.splatData && (model.splatData = new Uint8Array(maxSplatDataCnt * SplatDataSize32));
         !model.watermarkData && (model.watermarkData = new Uint8Array(0));
+        if (model.dataSplatCount + dataCnt > maxSplatDataCnt) {
+            dataCnt = maxSplatDataCnt - model.dataSplatCount; // 丢弃超出限制的部分
+        }
 
         // 计算当前半径
         const f32s: Float32Array = new Float32Array(data.buffer);

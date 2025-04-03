@@ -5,7 +5,7 @@ import { Events } from '../events/Events';
 import { GetWorker, WorkerSort, WorkerDispose, GetViewProjectionMatrixArray, GetMaxRenderCount, IsBigSceneMode } from '../events/EventConstants';
 import { WkInit, WkIsBigSceneMode, WkMaxRenderCount, WkViewProjection } from '../utils/consts/WkConstants';
 
-export function setupWorker(events: Events) {
+export function setupSorter(events: Events) {
     const on = (key: number, fn?: Function, multiFn?: boolean): Function | Function[] => events.on(key, fn, multiFn);
     const fire = (key: number, ...args: any): any => events.fire(key, ...args);
     const worker = new Worker(new URL('./Sorter.ts', import.meta.url), { type: 'module' });

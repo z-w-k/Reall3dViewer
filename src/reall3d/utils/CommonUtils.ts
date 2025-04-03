@@ -265,7 +265,6 @@ export function initSplatMeshOptions(options: SplatMeshOptions): SplatMeshOption
     opts.lightFactor ??= 1.0;
     opts.maxRenderCountOfMobile ??= opts.bigSceneMode ? 256 * 10000 : (256 + 32) * 10000;
     opts.maxRenderCountOfPc ??= opts.bigSceneMode ? (256 + 64) * 10000 : (256 + 128) * 10000;
-    opts.maxFetchCount = opts.maxFetchCount ? (opts.maxFetchCount >= 1 && opts.maxFetchCount <= 32 ? opts.maxFetchCount : 16) : 16;
     opts.debugMode ??= location.protocol === 'http:' || /^test\./.test(location.host); // 生产环境不开启
 
     return opts;

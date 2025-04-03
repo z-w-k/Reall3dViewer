@@ -34,8 +34,6 @@ export const GetControls = i++;
 export const GetCameraInfo = i++;
 /** 更新设定相机参数 */
 export const SetCameraInfo = i++;
-/** 相机是否就绪（小场景适用） */
-export const IsSmallSceneCameraReady = i++;
 /** 相机设定为未就绪（小场景开始前设定） */
 export const SetSmallSceneCameraNotReady = i++;
 /** 设定相机视点 */
@@ -144,7 +142,7 @@ export const CountFpsReal = i++;
 export const GetFpsReal = i++;
 
 /** 销毁 */
-export const Utils_Dispose = i++;
+export const ViewerUtilsDispose = i++;
 /** 销毁 */
 export const CommonUtilsDispose = i++;
 
@@ -164,23 +162,18 @@ export const IsCameraChangedNeedUpdate = i++;
 /** 是否相机视角发生变化需要重新加载数据 */
 export const IsCameraChangedNeedLoadData = i++;
 /** 是否大场景模式 */
-export const IsBigSceneMode = i++; /** 是否点云模式 */
+export const IsBigSceneMode = i++;
+/** 是否点云模式 */
 export const IsPointcloudMode = i++;
 /** 是否调试模式 */
 export const IsDebugMode = i++;
-/** 模型下载最大并发数 */
-export const MaxModelFetchCount = i++;
 
 /** 添加模型 */
-export const SplatDataManagerAddModel = i++;
-/** 删除模型 */
-export const SplatDataManagerRemoveModel = i++;
-/** 删除所有模型 */
-export const SplatDataManagerRemoveAll = i++;
+export const SplatTexdataManagerAddModel = i++;
 /** 数据是否有变化（大场景用） */
-export const SplatDataManagerDataChanged = i++;
+export const SplatTexdataManagerDataChanged = i++;
 /** 销毁 */
-export const SplatDataManagerDispose = i++;
+export const SplatTexdataManagerDispose = i++;
 /** 销毁 */
 export const SplatMeshDispose = i++;
 

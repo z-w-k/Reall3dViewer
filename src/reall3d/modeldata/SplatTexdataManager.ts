@@ -3,11 +3,11 @@
 // ================================
 import {
     OnFetchStart,
-    SplatDataManagerDispose,
-    SplatDataManagerAddModel,
+    SplatTexdataManagerDispose,
+    SplatTexdataManagerAddModel,
     GetMaxRenderCount,
     SplatMeshCycleZoom,
-    SplatDataManagerDataChanged,
+    SplatTexdataManagerDataChanged,
     OnFetching,
     OnFetchStop,
     Information,
@@ -55,16 +55,16 @@ export function setupSplatTextureManager(events: Events) {
 
     async function mergeAndUploadData(isBigSceneMode: boolean) {
         if (disposed) return;
-        if (splatModel && splatModel.status === ModelStatus.Invalid) {
+        if (splatModel && (splatModel.status === ModelStatus.Invalid || splatModel.status === ModelStatus.FetchFailed)) {
             return fire(OnFetchStop, 0) || fire(Information, { renderSplatCount: 0, visibleSplatCount: 0, modelSplatCount: 0 }); // 无效
         }
         if (!splatModel || !splatModel.downloadSplatCount) return; // 没数据
 
-        const downloadDone = splatModel.status === ModelStatus.FetchDone || splatModel.status === ModelStatus.FetchAborted;
-        // const downloadDone = splatModel.status !== ModelStatus.FetchReady && splatModel.status !== ModelStatus.Fetching;
+        const downloadDone = splatModel.status !== ModelStatus.FetchReady && splatModel.status !== ModelStatus.Fetching;
         if (downloadDone) {
             // 已下载完，通知一次进度条
-            !splatModel.notifyFetchStopDone && (splatModel.notifyFetchStopDone = true) && fire(OnFetchStop, splatModel.downloadSplatCount);
+            const downloadCount = Math.min(splatModel.opts.downloadLimitSplatCount, splatModel.downloadSplatCount);
+            !splatModel.notifyFetchStopDone && (splatModel.notifyFetchStopDone = true) && fire(OnFetchStop, downloadCount);
         } else {
             // 没下载完，更新下载进度条
             fire(OnFetching, (100 * splatModel.downloadSize) / splatModel.fileSize);
@@ -195,9 +195,9 @@ export function setupSplatTextureManager(events: Events) {
         fire(SplatMeshCycleZoom);
     }
 
-    on(SplatDataManagerAddModel, async (opts: ModelOptions, meta: MetaData) => await add(opts, meta));
-    on(SplatDataManagerDataChanged, (msDuring: number = 10000) => Date.now() - lastPostDataTime < msDuring);
-    on(SplatDataManagerDispose, () => dispose());
+    on(SplatTexdataManagerAddModel, async (opts: ModelOptions, meta: MetaData) => await add(opts, meta));
+    on(SplatTexdataManagerDataChanged, (msDuring: number = 10000) => Date.now() - lastPostDataTime < msDuring);
+    on(SplatTexdataManagerDispose, () => dispose());
 
     fire(
         RunLoopByFrame,

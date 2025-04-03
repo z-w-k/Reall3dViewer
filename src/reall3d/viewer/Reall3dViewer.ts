@@ -1,4 +1,4 @@
-import { IsBigSceneMode, OnSetFlyPositions, OnSetFlyTargets, SplatDataManagerDispose } from './../events/EventConstants';
+import { IsBigSceneMode, OnSetFlyPositions, OnSetFlyTargets, SplatTexdataManagerDispose } from './../events/EventConstants';
 // ================================
 // Copyright (c) 2025 reall3d.com
 // ================================
@@ -32,7 +32,7 @@ import {
     StopAutoRotate,
     TraverseDisposeAndClear,
     UpdateAllMarkByMeterScale,
-    Utils_Dispose,
+    ViewerUtilsDispose,
     ViewerCheckNeedUpdate,
     ViewerSetPointcloudMode,
     OnSetWaterMark,
@@ -511,7 +511,7 @@ export class Reall3dViewer {
         const fire = (key: number, ...args: any): any => this.events.fire(key, ...args);
 
         fire(CommonUtilsDispose);
-        fire(Utils_Dispose);
+        fire(ViewerUtilsDispose);
         fire(CSS3DRendererDispose);
         fire(EventListenerDispose);
         fire(GetControls).dispose();

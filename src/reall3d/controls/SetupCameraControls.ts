@@ -1,7 +1,7 @@
 // ================================
 // Copyright (c) 2025 reall3d.com
 // ================================
-import { GetCameraFov, IsSmallSceneCameraReady, OnViewerDisposeResetVars, SetSmallSceneCameraNotReady } from './../events/EventConstants';
+import { GetCameraFov, OnViewerDisposeResetVars, SetSmallSceneCameraNotReady } from './../events/EventConstants';
 import {
     GetCameraInfo,
     GetCameraLookAt,
@@ -102,7 +102,6 @@ export function setupCameraControls(events: Events) {
     });
 
     let cameraReady: boolean = false;
-    on(IsSmallSceneCameraReady, (): boolean => fire(GetOptions).bigSceneMode || cameraReady);
     on(SetSmallSceneCameraNotReady, (): boolean => (cameraReady = false));
 
     let pcCameraInfo: CameraInfo;
