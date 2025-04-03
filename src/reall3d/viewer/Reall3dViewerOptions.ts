@@ -40,14 +40,9 @@ export interface Reall3dViewerOptions {
     debugMode?: boolean | undefined;
 
     /**
-     * 是否大场景模式（小场景指单模型渲染，大场景指多模型动态渲染），初始化后不可修改
+     * 是否大场景模式，初始化后不可修改
      */
     bigSceneMode?: boolean;
-
-    /**
-     * 模型地址，默认 undefined，
-     */
-    url?: string | undefined;
 
     /**
      * 是否点云模式渲染，默认为true

@@ -211,12 +211,6 @@ export async function loadSpx(model: SplatModel) {
 
 function setBlockSplatData(model: SplatModel, data: Uint8Array) {
     let isCut: boolean = !!model.meta.autoCut;
-    if (isCut && (model.opts.format === 'splat' || model.opts.format === 'sp20')) {
-        isCut = false;
-        model.meta.autoCut = 0; // 硬改纠正自动裁剪
-        console.warn('unsupport splat or sp20 in large sence mode');
-    }
-
     let dataCnt = data.byteLength / 32;
     const stepCnt = 4096;
     if (!isCut) {

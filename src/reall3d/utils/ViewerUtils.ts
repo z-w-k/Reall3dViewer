@@ -208,7 +208,6 @@ export function copyGsViewerOptions(gsViewerOptions: Reall3dViewerOptions): Spla
     opts.camera = gsViewerOptions.camera;
     opts.controls = gsViewerOptions.controls;
     opts.bigSceneMode = gsViewerOptions.bigSceneMode;
-    opts.url = gsViewerOptions.url;
     opts.pointcloudMode = gsViewerOptions.pointcloudMode;
     opts.maxRenderCountOfMobile = gsViewerOptions.maxRenderCountOfMobile;
     opts.maxRenderCountOfPc = gsViewerOptions.maxRenderCountOfPc;

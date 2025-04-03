@@ -16,7 +16,6 @@ import {
     RunLoopByFrame,
     SetCameraInfo,
     ControlPlaneUpdate,
-    GetOptions,
 } from '../events/EventConstants';
 import { PerspectiveCamera, Vector3 } from 'three';
 import { Events } from '../events/Events';

@@ -22,7 +22,6 @@ import {
     OnViewerDisposeResetVars,
     OnViewerUpdate,
     RunLoopByTime,
-    MetaSaveSmallSceneCameraInfo,
     SetGaussianText,
     SetSmallSceneCameraNotReady,
     SplatSetPointcloudMode,
@@ -52,7 +51,6 @@ import {
     ViewerNeedUpdate,
     MetaMarkRemoveData,
     PrintInfo,
-    GetCameraInfo,
     GetSplatMesh,
     FlySavePositions,
 } from '../events/EventConstants';
@@ -213,17 +211,13 @@ export class Reall3dViewer {
             let file = e.dataTransfer.files[0];
 
             const url: any = URL.createObjectURL(file);
-            let format: 'spx' | 'bin' | 'splat' | 'sp20';
+            let format: 'splat' | 'spx';
             if (file.name.endsWith('.spx')) {
                 format = 'spx';
-            } else if (file.name.endsWith('.bin')) {
-                format = 'bin';
             } else if (file.name.endsWith('.splat')) {
                 format = 'splat';
-            } else if (file.name.endsWith('.sp20')) {
-                format = 'sp20';
             } else {
-                return console.error('unknow format!', file.name);
+                return console.error('unsupported format:', file.name);
             }
 
             that.reset({ debugMode: true });
@@ -370,7 +364,7 @@ export class Reall3dViewer {
     }
 
     /**
-     * 添加要渲染的高斯模型
+     * 添加要渲染的高斯模型（小场景模式）
      * @param urlOpts 高斯模型链接或选项
      */
     public async addModel(urlOpts: string | ModelOptions): Promise<void> {
@@ -390,12 +384,8 @@ export class Reall3dViewer {
         if (!modelOpts.format) {
             if (modelOpts.url.endsWith('.spx')) {
                 modelOpts.format = 'spx';
-            } else if (modelOpts.url.endsWith('.bin')) {
-                modelOpts.format = 'bin';
             } else if (modelOpts.url.endsWith('.splat')) {
                 modelOpts.format = 'splat';
-            } else if (modelOpts.url.endsWith('.sp20')) {
-                modelOpts.format = 'sp20';
             } else {
                 console.error('unknow format!', modelOpts.url);
                 return;
@@ -404,6 +394,7 @@ export class Reall3dViewer {
 
         // 获取元数据
         const opts: Reall3dViewerOptions = fire(GetOptions);
+        opts.bigSceneMode = false;
         let meta: MetaData = {};
         if (modelOpts.url.startsWith('http')) {
             const metaUrl = modelOpts.url.substring(0, modelOpts.url.lastIndexOf('.')) + '.meta.json'; // xxx/abc.bin => xxx/abc.meta.json
@@ -420,11 +411,9 @@ export class Reall3dViewer {
         }
 
         // 按元数据调整更新相机、标注等信息
-        if (!opts.bigSceneMode || (meta.autoCut || 0) < 2) {
-            delete meta.autoCut; // 小场景或没有配置成切割多块，都不支持切割
-            fire(SetSmallSceneCameraNotReady);
-            fire(LoadSmallSceneMetaData, meta);
-        }
+        delete meta.autoCut; // 小场景没有切割
+        fire(SetSmallSceneCameraNotReady);
+        fire(LoadSmallSceneMetaData, meta);
 
         // 加载模型
         this.splatMesh.addModel(modelOpts, meta);
