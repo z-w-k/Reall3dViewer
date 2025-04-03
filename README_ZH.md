@@ -43,10 +43,9 @@ npm run build
 # open a web browser to render your 3dgs model
 # http://hostname:port/index.html?url=your-model-link-address
 
-# The .sp20 format is similar to .splat, but it reduces the file size by 37.5%
-# .sp20 file can be obtained through conversion using the gsbox
+# .spx file can be obtained through conversion using the gsbox
 # https://github.com/gotoeasy/gsbox
-gsbox ply2splat20 -i /path/to/input.ply -o /path/to/output.sp20
+gsbox p2x -i /path/to/input.ply -o /path/to/output.spx
 ```
 
 ## TODO
