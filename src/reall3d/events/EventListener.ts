@@ -153,7 +153,7 @@ export function setupEventListener(events: Events) {
             fire(ControlPlaneSwitchVisible, true);
             keySet.clear();
         } else if (keySet.has('KeyP')) {
-            fire(Flying);
+            fire(Flying, true);
             keySet.clear();
         } else if (keySet.has('Equal')) {
             fire(AddFlyPosition);

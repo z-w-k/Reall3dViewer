@@ -100,13 +100,13 @@ export function setupFlying(events: Events) {
     let flyStartTime = 0;
     let curvePos: CatmullRomCurve3 | null;
     let curveTgt: CatmullRomCurve3 | null;
-    on(Flying, () => {
+    on(Flying, (force: boolean) => {
         t = 0;
         flyStartTime = Date.now();
         curvePos = null;
         curveTgt = null;
         if (!flyPositions.length) return;
-        if (!fire(GetControls).autoRotate) return; // 避免在非自动旋转模式下执行
+        if (!force && !fire(GetControls).autoRotate) return; // 避免在非自动旋转模式下执行
 
         const controls: Controls = fire(GetControls);
 

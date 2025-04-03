@@ -243,7 +243,7 @@ export class Reall3dViewer {
     public fire(n: number, p1?: any, p2?: any): void {
         n === 1 && this.splatMesh.fire(SplatUpdateShowWaterMark, p1); // 显示/隐藏水印
         n === 2 && this.events.fire(AddFlyPosition);
-        n === 3 && this.events.fire(Flying);
+        n === 3 && this.events.fire(Flying, true);
         n === 4 && this.events.fire(ClearFlyPosition);
         n === 5 && this.events.fire(FlySavePositions);
         n === 6 && this.events.fire(MetaMarkSaveData);
