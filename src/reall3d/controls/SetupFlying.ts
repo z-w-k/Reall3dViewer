@@ -108,12 +108,12 @@ export function setupFlying(events: Events) {
         if (!flyPositions.length) return;
         if (!fire(GetControls).autoRotate) return; // 避免在非自动旋转模式下执行
 
-        // const controls: Controls = fire(GetControls);
+        const controls: Controls = fire(GetControls);
 
-        // const points: Vector3[] = [controls.object.position.clone()];
-        // const tgts: Vector3[] = [controls.target.clone()];
-        const points: Vector3[] = [];
-        const tgts: Vector3[] = [];
+        const points: Vector3[] = [controls.object.position.clone()];
+        const tgts: Vector3[] = [controls.target.clone()];
+        // const points: Vector3[] = [];
+        // const tgts: Vector3[] = [];
         const all: Vector3[] = fire(GetFlyPositions) || [];
         for (let i = 0, max = Math.min(all.length, 100); i < max; i++) {
             all[i] && points.push(all[i]);
