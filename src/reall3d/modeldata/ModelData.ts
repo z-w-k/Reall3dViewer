@@ -172,6 +172,10 @@ export interface MetaData {
     maxRenderCountOfMobile?: number;
     /** PC端最大渲染数量 */
     maxRenderCountOfPc?: number;
+    /** 移动端最大下载数量 */
+    mobileDownloadLimitSplatCount?: number;
+    /** PC端最大下载数量 */
+    pcDownloadLimitSplatCount?: number;
 
     /** 米比例尺 */
     meterScale?: number;

@@ -56,7 +56,9 @@ export async function loadSplat(model: SplatModel) {
             }
 
             // 超过限制时终止下载
-            const downloadLimitSplatCount = isMobile ? MobileDownloadLimitSplatCount : PcDownloadLimitSplatCount;
+            const pcDownloadLimitCount = model.meta.maxRenderCountOfPc || PcDownloadLimitSplatCount;
+            const mobileDownloadLimitCount = model.meta.maxRenderCountOfMobile || MobileDownloadLimitSplatCount;
+            const downloadLimitSplatCount = isMobile ? mobileDownloadLimitCount : pcDownloadLimitCount;
             const isSingleLimit: boolean = !model.meta?.autoCut && model.downloadSplatCount >= model.opts.downloadLimitSplatCount;
             const isCutLimit = model.meta?.autoCut && model.downloadSplatCount >= downloadLimitSplatCount;
             (isSingleLimit || isCutLimit) && model.abortController.abort();
