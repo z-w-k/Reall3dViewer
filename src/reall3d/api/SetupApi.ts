@@ -3,6 +3,7 @@
 // ================================
 import { Events } from '../events/Events';
 import { HttpPostMetaData, HttpQueryGaussianText } from '../events/EventConstants';
+import { ViewerVersion } from '../utils/consts/GlobalConstants';
 export function setupApi(events: Events) {
     const on = (key: number, fn?: Function, multiFn?: boolean): Function | Function[] => events.on(key, fn, multiFn);
 
@@ -15,6 +16,7 @@ export function setupApi(events: Events) {
         const url = 'https://reall3d.com/gsfont/api/getGaussianText';
         const formData = new FormData();
         formData.append('text', text.substring(0, 100)); // 限制查取最大100字
+        formData.append('ver', ViewerVersion);
 
         return new Promise(resolve => {
             fetch(url, { method: 'POST', body: formData })
