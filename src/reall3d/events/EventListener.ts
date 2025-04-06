@@ -234,10 +234,7 @@ export function setupEventListener(events: Events) {
                             fire(ViewerNeedUpdate);
                             controlPlaneVisibleChecking = false;
                             // 旋转轴调整后 2 秒内无操作，自动保存相机位置
-                            fire(MetaSaveSmallSceneCameraInfo).then((ok: boolean) => {
-                                // @ts-ignore
-                                ok && parent?.onShowMessage?.('sOperation');
-                            });
+                            fire(MetaSaveSmallSceneCameraInfo);
                         }
                     },
                     () => fire(IsControlPlaneVisible),

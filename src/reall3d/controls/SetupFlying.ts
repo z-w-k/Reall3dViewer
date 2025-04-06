@@ -25,6 +25,7 @@ import {
 import { Controls } from './Controls';
 import { CatmullRomCurve3, Vector3 } from 'three';
 import { MetaData } from '../modeldata/ModelData';
+import { SplatMesh } from '../meshs/splatmesh/SplatMesh';
 export function setupFlying(events: Events) {
     const fire = (key: number, ...args: any): any => events.fire(key, ...args);
     const on = (key: number, fn?: Function, multiFn?: boolean): Function | Function[] => events.on(key, fn, multiFn);
@@ -87,7 +88,7 @@ export function setupFlying(events: Events) {
         }
         const metaJson = JSON.stringify(meta, null, 2);
 
-        return await fire(HttpPostMetaData, metaJson, fire(GetOptions).url);
+        return await fire(HttpPostMetaData, metaJson, (fire(GetSplatMesh) as SplatMesh).meta.url);
     });
 
     on(FlyOnce, () => {

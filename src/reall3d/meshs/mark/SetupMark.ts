@@ -121,7 +121,7 @@ export function setupMark(events: Events) {
         meta.cameraInfo = fire(GetCameraInfo);
         const metaJson = JSON.stringify(meta, null, 2);
 
-        return await fire(HttpPostMetaData, metaJson, fire(GetOptions).url);
+        return await fire(HttpPostMetaData, metaJson, (fire(GetSplatMesh) as SplatMesh).meta.url);
     });
 
     on(MetaMarkSaveData, async (): Promise<boolean> => {
@@ -141,7 +141,7 @@ export function setupMark(events: Events) {
         }
         const metaJson = JSON.stringify(meta, null, 2);
 
-        return await fire(HttpPostMetaData, metaJson, fire(GetOptions).url);
+        return await fire(HttpPostMetaData, metaJson, (fire(GetSplatMesh) as SplatMesh).meta.url);
     });
 
     on(MetaMarkRemoveData, async (): Promise<boolean> => {
@@ -149,7 +149,7 @@ export function setupMark(events: Events) {
         delete meta.marks;
         const metaJson = JSON.stringify(meta, null, 2);
 
-        const rs = await fire(HttpPostMetaData, metaJson, fire(GetOptions).url);
+        const rs = await fire(HttpPostMetaData, metaJson, (fire(GetSplatMesh) as SplatMesh).meta.url);
 
         const marks: WeakRef<any>[] = [];
         markMap.forEach(item => marks.push(item));
@@ -171,7 +171,7 @@ export function setupMark(events: Events) {
         meta.watermark = fire(GetCachedWaterMark) || '';
 
         const metaJson = JSON.stringify(meta, null, 2);
-        return await fire(HttpPostMetaData, metaJson, fire(GetOptions).url);
+        return await fire(HttpPostMetaData, metaJson, (fire(GetSplatMesh) as SplatMesh).meta.url);
     });
 
     on(LoadSmallSceneMetaData, (metaData: MetaData) => {
