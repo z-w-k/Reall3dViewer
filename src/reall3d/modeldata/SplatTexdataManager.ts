@@ -176,7 +176,7 @@ export function setupSplatTextureManager(events: Events) {
         const MaxRenderCount: number = fire(GetMaxRenderCount);
         const isBigSceneMode: boolean = fire(IsBigSceneMode);
 
-        opts.fetchReload = isNeedReload(meta.updateDate || 0); // 3天内更新的重新下载
+        opts.fetchReload = isNeedReload(meta.updateDate || 0); // 7天内更新的重新下载
 
         // 调整下载限制
         if (isBigSceneMode && meta.autoCut) {
