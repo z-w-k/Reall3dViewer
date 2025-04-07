@@ -396,18 +396,16 @@ export class Reall3dViewer {
         const opts: Reall3dViewerOptions = fire(GetOptions);
         opts.bigSceneMode = false;
         let meta: MetaData = {};
-        if (modelOpts.url.startsWith('http')) {
-            const metaUrl = modelOpts.url.substring(0, modelOpts.url.lastIndexOf('.')) + '.meta.json'; // xxx/abc.bin => xxx/abc.meta.json
-            try {
-                const res = await fetch(metaUrl, { mode: 'cors', credentials: 'omit', cache: 'reload' });
-                if (res.status === 200) {
-                    meta = await res.json();
-                } else {
-                    console.warn('meta file fetch failed, status:', res.status);
-                }
-            } catch (e) {
-                console.warn('meta file fetch failed', e.message);
+        try {
+            const metaUrl = modelOpts.url.substring(0, modelOpts.url.lastIndexOf('.')) + '.meta.json'; // xxx/abc.spx => xxx/abc.meta.json
+            const res = await fetch(metaUrl, { mode: 'cors', credentials: 'omit', cache: 'reload' });
+            if (res.status === 200) {
+                meta = await res.json();
+            } else {
+                console.warn('meta file fetch failed, status:', res.status);
             }
+        } catch (e) {
+            console.warn('meta file fetch failed', e.message);
         }
 
         meta.url = modelOpts.url; // 小场景元数据的url仅变量用途
