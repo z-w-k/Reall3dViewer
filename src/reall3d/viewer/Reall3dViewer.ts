@@ -417,6 +417,7 @@ export class Reall3dViewer {
 
         // 加载模型
         this.splatMesh.addModel(modelOpts, meta);
+        await fire(OnSetWaterMark, meta.watermark);
         fire(GetControls).updateRotateAxis();
     }
 

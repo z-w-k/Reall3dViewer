@@ -32,7 +32,6 @@ import {
     UpdateAllMarkByMeterScale,
     ReComputePlansArea,
     Information,
-    OnSetWaterMark,
     GetCachedWaterMark,
     MetaSaveWatermark,
     OnSetFlyPositions,
@@ -219,7 +218,6 @@ export function setupMark(events: Events) {
             }
         });
 
-        fire(OnSetWaterMark, metaData.watermark || '');
         fire(OnSetFlyPositions, metaData.flyPositions || []);
         fire(OnSetFlyTargets, metaData.flyTargets || []);
     });
