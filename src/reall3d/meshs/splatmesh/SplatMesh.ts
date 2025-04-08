@@ -88,7 +88,6 @@ export class SplatMesh extends Mesh {
         setupSplatMesh(events);
         setupGaussianText(events);
 
-        this.frustumCulled = false;
         this.name = `${opts.name || this.id}`;
 
         this.events = events;
@@ -96,6 +95,7 @@ export class SplatMesh extends Mesh {
 
         (async () => {
             this.copy(await events.fire(CreateSplatMesh));
+            this.frustumCulled = false;
             this.onBeforeRender = () => {
                 fire(WorkerSort);
                 fire(SplatUpdatePerformanceNow, performance.now());
