@@ -199,13 +199,12 @@ export function initControls(opts: Reall3dViewerOptions): Controls {
 }
 
 export function copyGsViewerOptions(gsViewerOptions: Reall3dViewerOptions): SplatMeshOptions {
-    const { renderer, scene, camera } = gsViewerOptions;
-    const opts: SplatMeshOptions = { renderer, scene, camera };
+    const { renderer, scene } = gsViewerOptions;
+    const opts: SplatMeshOptions = { renderer, scene };
     opts.viewerEvents = gsViewerOptions.viewerEvents;
     opts.debugMode = gsViewerOptions.debugMode;
     opts.renderer = gsViewerOptions.renderer;
     opts.scene = gsViewerOptions.scene;
-    opts.camera = gsViewerOptions.camera;
     opts.controls = gsViewerOptions.controls;
     opts.bigSceneMode = gsViewerOptions.bigSceneMode;
     opts.pointcloudMode = gsViewerOptions.pointcloudMode;

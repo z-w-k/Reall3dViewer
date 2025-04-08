@@ -24,10 +24,10 @@ export interface SplatMeshOptions {
      */
     scene: Scene;
 
-    /**
-     * 指定相机对象传入使用
-     */
-    camera?: PerspectiveCamera;
+    // /**
+    //  * 指定相机对象传入使用
+    //  */
+    // camera?: PerspectiveCamera;
 
     /**
      * 控制器

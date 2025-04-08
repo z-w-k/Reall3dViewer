@@ -107,15 +107,11 @@ export function setupSplatMesh(events: Events) {
     const on = (key: number, fn?: Function, multiFn?: boolean): Function | Function[] => events.on(key, fn, multiFn);
     const fire = (key: number, ...args: any): any => events.fire(key, ...args);
 
-    const MaxSplatCount = fire(GetMaxRenderCount) + 10240; // 加上预留的动态文字水印数
-    const texwidth = 1024 * 2;
-    const texheight = Math.ceil((2 * MaxSplatCount) / texwidth);
-
     let maxRadius: number = 0;
     let currentMaxRadius: number = 0;
     const arySwitchProcess: any[] = [];
 
-    on(CreateSplatGeometry, () => {
+    on(CreateSplatGeometry, async () => {
         const baseGeometry = new InstancedBufferGeometry();
         baseGeometry.setIndex([0, 1, 2, 0, 2, 3]);
         const positionsArray = new Float32Array(4 * 3);
@@ -129,6 +125,7 @@ export function setupSplatMesh(events: Events) {
 
         let geometry = new InstancedBufferGeometry().copy(baseGeometry);
 
+        const MaxSplatCount = await fire(GetMaxRenderCount);
         const indexArray = new Uint32Array(MaxSplatCount);
         const indexAttribute = new InstancedBufferAttribute(indexArray, 1, false);
         indexAttribute.setUsage(DynamicDrawUsage);
@@ -156,7 +153,11 @@ export function setupSplatMesh(events: Events) {
         return geometry;
     });
 
-    on(CreateSplatMaterial, () => {
+    on(CreateSplatMaterial, async () => {
+        const MaxSplatCount = await fire(GetMaxRenderCount);
+        const texwidth = 1024 * 2;
+        const texheight = Math.ceil((2 * MaxSplatCount) / texwidth);
+
         const material: ShaderMaterial = new ShaderMaterial({
             uniforms: fire(CreateSplatUniforms),
             vertexShader: getSplatVertexShader(),
@@ -304,8 +305,8 @@ export function setupSplatMesh(events: Events) {
         return material;
     });
 
-    on(CreateSplatMesh, () => {
-        const mesh = new Mesh(fire(CreateSplatGeometry), fire(CreateSplatMaterial));
+    on(CreateSplatMesh, async () => {
+        const mesh = new Mesh(await fire(CreateSplatGeometry), await fire(CreateSplatMaterial));
         fire(SplatUpdateFocal);
         fire(SplatUpdateViewport);
         fire(SplatUpdateBigSceneMode, fire(IsBigSceneMode));

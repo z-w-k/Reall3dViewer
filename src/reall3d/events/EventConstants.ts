@@ -78,7 +78,7 @@ export const LoaderModelStart = i++;
 
 /** 渲染信息 */
 export const Information = i++;
-/** 当前时点限制渲染的的高斯点数 */
+/** 当前时点限制渲染的的高斯点数(包含了附加的动态文字水印数) */
 export const GetMaxRenderCount = i++;
 
 /** 渲染帧率 */

@@ -28,6 +28,7 @@ import { isMobile } from '../utils/consts/GlobalConstants';
 const worker: Worker = self as any;
 let texture0: SplatTexdata = { index: 0, version: 0 };
 let texture1: SplatTexdata = { index: 1, version: 0 };
+let isSorterReady: boolean = false;
 
 let sortRunning: boolean;
 const Epsilon: number = isMobile ? 0.01 : 0.002;
@@ -39,6 +40,7 @@ let lastSortVersion: number = 0;
 let isBigSceneMode: boolean;
 
 function runSort(sortViewProj: number[]) {
+    if (!isSorterReady) return; // 尚未就绪
     let texture: SplatTexdata = texture0.version > texture1.version ? texture0 : texture1;
     if (!texture.version) return; // 初期还没有数据
 
@@ -199,5 +201,6 @@ worker.onmessage = (e: any) => {
     } else if (data[WkInit]) {
         isBigSceneMode = data[WkIsBigSceneMode];
         distances = new Int32Array(data[WkMaxRenderCount]);
+        isSorterReady = true;
     }
 };

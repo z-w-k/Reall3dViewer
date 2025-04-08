@@ -8,7 +8,6 @@ import {
     RunLoopByFrame,
     RunLoopByTime,
     GetOptions,
-    GetMaxRenderCount,
     OnFetchStop,
     OnFetchStart,
     Information,
@@ -38,11 +37,6 @@ export function setupCommonUtils(events: Events) {
     on(IsDebugMode, () => fire(GetOptions).debugMode);
 
     on(CommonUtilsDispose, () => (disposed = true));
-
-    on(GetMaxRenderCount, (): number => {
-        const opts: SplatMeshOptions = fire(GetOptions);
-        return isMobile ? opts.maxRenderCountOfMobile : opts.maxRenderCountOfPc;
-    });
 
     // 按帧率执行
     let iFrameCount: number = 0;

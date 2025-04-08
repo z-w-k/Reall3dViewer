@@ -18,6 +18,7 @@ import {
     UploadSplatTexture,
     SplatUpdateTopY,
     GetSplatActivePoints,
+    GetOptions,
 } from '../events/EventConstants';
 import { Events } from '../events/Events';
 import { MetaData, ModelStatus, SplatModel } from './ModelData';
@@ -26,6 +27,7 @@ import { loadSplat } from './loaders/SplatLoader';
 import { isMobile, MobileDownloadLimitSplatCount, PcDownloadLimitSplatCount } from '../utils/consts/GlobalConstants';
 import { isNeedReload } from '../utils/CommonUtils';
 import { loadSpx } from './loaders/SpxLoader';
+import { SplatMeshOptions } from '../meshs/splatmesh/SplatMeshOptions';
 
 export function setupSplatTextureManager(events: Events) {
     const on = (key: number, fn?: Function, multiFn?: boolean): Function | Function[] => events.on(key, fn, multiFn);
@@ -41,6 +43,20 @@ export function setupSplatTextureManager(events: Events) {
     let mergeRunning: boolean = false;
 
     const isBigSceneMode: boolean = fire(IsBigSceneMode);
+
+    let fnResolveModelSplatCount: (value: unknown) => void;
+    const promiseModelSplatCount: Promise<number> = new Promise(resolve => (fnResolveModelSplatCount = resolve));
+    on(GetMaxRenderCount, async (): Promise<number> => {
+        const opts: SplatMeshOptions = fire(GetOptions);
+        let rs = isMobile ? opts.maxRenderCountOfMobile : opts.maxRenderCountOfPc;
+        let textWatermarkPlusCnt = 10240; // 加上预留的动态文字水印数
+        if (opts.bigSceneMode) {
+            rs += textWatermarkPlusCnt;
+        } else if ((await promiseModelSplatCount) < rs) {
+            rs = (await promiseModelSplatCount) + textWatermarkPlusCnt; // 小场景如果模型数据点数小于最大渲染数，用模型数据点数计算即可，节省内存
+        }
+        return rs;
+    });
 
     on(SetGaussianText, async (text: string, isY: boolean = true, isNgativeY: boolean = true) => {
         try {
@@ -107,7 +123,7 @@ export function setupSplatTextureManager(events: Events) {
         texture.textureReady = false;
 
         // 合并（模型数据 + 动态文字水印）
-        const maxRenderCount = fire(GetMaxRenderCount) + 10240; // 加上预留的水印数
+        const maxRenderCount = await fire(GetMaxRenderCount);
         const texwidth = 1024 * 2;
         const texheight = Math.ceil((2 * maxRenderCount) / texwidth);
 
@@ -173,7 +189,8 @@ export function setupSplatTextureManager(events: Events) {
 
     async function add(opts: ModelOptions, meta: MetaData) {
         if (disposed) return;
-        const MaxRenderCount: number = fire(GetMaxRenderCount);
+        const splatMeshOptions: SplatMeshOptions = fire(GetOptions);
+        const maxRenderCount: number = isMobile ? splatMeshOptions.maxRenderCountOfMobile : splatMeshOptions.maxRenderCountOfPc;
         const isBigSceneMode: boolean = fire(IsBigSceneMode);
 
         opts.fetchReload = isNeedReload(meta.updateDate || 0); // 7天内更新的重新下载
@@ -181,18 +198,31 @@ export function setupSplatTextureManager(events: Events) {
         // 调整下载限制
         if (isBigSceneMode && meta.autoCut) {
             const bigSceneDownloadLimit = isMobile ? MobileDownloadLimitSplatCount : PcDownloadLimitSplatCount;
-            opts.downloadLimitSplatCount = Math.min(meta.autoCut * meta.autoCut * MaxRenderCount + MaxRenderCount, bigSceneDownloadLimit);
+            opts.downloadLimitSplatCount = Math.min(meta.autoCut * meta.autoCut * maxRenderCount + maxRenderCount, bigSceneDownloadLimit);
         } else {
-            opts.downloadLimitSplatCount = MaxRenderCount;
+            opts.downloadLimitSplatCount = maxRenderCount;
         }
 
-        if (!loadSplatModel((splatModel = new SplatModel(opts, meta)))) {
+        splatModel = new SplatModel(opts, meta);
+        const fnCheckModelSplatCount = () => {
+            if (splatModel.status == ModelStatus.Invalid || splatModel.status == ModelStatus.FetchFailed) {
+                return fnResolveModelSplatCount(0);
+            }
+            if (splatModel.modelSplatCount >= 0) {
+                setTimeout(() => fire(SplatMeshCycleZoom), 5);
+                fnResolveModelSplatCount(splatModel.modelSplatCount);
+            } else {
+                setTimeout(fnCheckModelSplatCount, 10);
+            }
+        };
+        fnCheckModelSplatCount();
+
+        if (!loadSplatModel(splatModel)) {
             console.error('Unsupported format:', opts.format);
             fire(OnFetchStop, 0);
             return;
         }
         fire(OnFetchStart);
-        fire(SplatMeshCycleZoom);
     }
 
     on(SplatTexdataManagerAddModel, async (opts: ModelOptions, meta: MetaData) => await add(opts, meta));

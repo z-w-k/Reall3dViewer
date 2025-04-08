@@ -64,7 +64,7 @@ export class SplatMesh extends Mesh {
         // 默认参数校验设定
         const opts: SplatMeshOptions = initSplatMeshOptions(options);
 
-        const camera = opts.camera as PerspectiveCamera;
+        const camera = opts.controls.object as PerspectiveCamera;
         on(GetOptions, () => opts);
         on(GetCanvas, () => opts.renderer.domElement);
         on(GetCamera, () => camera);
@@ -83,25 +83,27 @@ export class SplatMesh extends Mesh {
 
         setupCommonUtils(events);
         setupApi(events);
+        setupSplatTextureManager(events);
         setupSorter(events);
         setupSplatMesh(events);
-        setupSplatTextureManager(events);
         setupGaussianText(events);
 
-        this.copy(events.fire(CreateSplatMesh));
         this.frustumCulled = false;
         this.name = `${opts.name || this.id}`;
 
         this.events = events;
         this.opts = opts;
 
-        this.onBeforeRender = () => {
-            fire(WorkerSort);
-            fire(SplatUpdatePerformanceNow, performance.now());
-        };
-        this.onAfterRender = () => {
-            fire(SplatTexdataManagerDataChanged, 10000) && fire(NotifyViewerNeedUpdate); // 纹理数据更新后10秒内总是要刷新
-        };
+        (async () => {
+            this.copy(await events.fire(CreateSplatMesh));
+            this.onBeforeRender = () => {
+                fire(WorkerSort);
+                fire(SplatUpdatePerformanceNow, performance.now());
+            };
+            this.onAfterRender = () => {
+                fire(SplatTexdataManagerDataChanged, 10000) && fire(NotifyViewerNeedUpdate); // 纹理数据更新后10秒内总是要刷新
+            };
+        })();
     }
 
     /**

@@ -57,7 +57,7 @@ export class SplatModel {
     /** 一个高斯点数据长度 */
     public rowLength: number = 0;
     /** 模型的高斯数量 */
-    public modelSplatCount: number = 0;
+    public modelSplatCount: number = -1;
     /** 已下载的高斯数量 */
     public downloadSplatCount: number = 0;
     /** 待渲染的高斯数量（大场景时动态计算需要渲染的数量） */
