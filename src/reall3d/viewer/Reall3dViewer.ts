@@ -109,7 +109,7 @@ export class Reall3dViewer {
         const scene: Scene = initScene(opts);
         initCamera(opts);
         const controls: Controls = initControls(opts);
-        controls.target.fromArray(opts.lookAt);
+        controls.updateByOptions(opts);
 
         const events = new Events();
         opts.viewerEvents = events;

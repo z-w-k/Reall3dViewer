@@ -134,6 +134,26 @@ export interface Reall3dViewerOptions {
     enablePan?: boolean | undefined;
 
     /**
+     * 最小视距
+     */
+    minDistance?: number | undefined;
+
+    /**
+     * 最大视距
+     */
+    maxDistance?: number | undefined;
+
+    /**
+     * 最小倾斜角度
+     */
+    minPolarAngle?: number | undefined;
+
+    /**
+     * 最大倾斜角度
+     */
+    maxPolarAngle?: number | undefined;
+
+    /**
      * 是否允许键盘操作，默认true
      */
     enableKeyboard?: boolean | undefined;

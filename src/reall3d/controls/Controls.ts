@@ -16,25 +16,24 @@ export class Controls extends OrbitControls {
         super(camera, canvas);
 
         const that = this;
-        that.enableDamping = opts.enableDamping;
         that.dampingFactor = 0.1;
         that.rotateSpeed = 0.4;
-        that.autoRotate = opts.autoRotate;
-        that.enableZoom = opts.enableZoom;
-        that.enableRotate = opts.enableRotate;
-        that.enablePan = opts.enablePan;
-
-        // navigator.userAgent.includes('Mobi') && (that.maxPolarAngle = Math.PI / 2); // 手机上翻限制到水平角度
+        that.updateByOptions(opts);
     }
 
     public updateByOptions(opts: Reall3dViewerOptions) {
         if (!opts) return;
         const that = this;
+
         opts.enableDamping !== undefined && (that.enableDamping = opts.enableDamping);
         opts.autoRotate !== undefined && (that.autoRotate = opts.autoRotate);
         opts.enableZoom !== undefined && (that.enableZoom = opts.enableZoom);
         opts.enableRotate !== undefined && (that.enableRotate = opts.enableRotate);
         opts.enablePan !== undefined && (that.enablePan = opts.enablePan);
+        opts.minDistance !== undefined && (that.minDistance = opts.minDistance);
+        opts.maxDistance !== undefined && (that.maxDistance = opts.maxDistance);
+        opts.minPolarAngle !== undefined && (that.minPolarAngle = opts.minPolarAngle);
+        opts.maxPolarAngle !== undefined && (that.maxPolarAngle = opts.maxPolarAngle);
 
         opts.fov !== undefined && ((that.object as PerspectiveCamera).fov = opts.fov);
         opts.near !== undefined && ((that.object as PerspectiveCamera).near = opts.near);
@@ -42,7 +41,7 @@ export class Controls extends OrbitControls {
         opts.position && that.object.position.fromArray(opts.position);
         opts.lookAt && that.target.fromArray(opts.lookAt);
         opts.lookUp && that.object.up.fromArray(opts.lookUp);
-        (opts.fov || opts.near || opts.far || opts.position || opts.lookAt || opts.lookUp) && that.update();
+        that.update();
     }
 
     /**
