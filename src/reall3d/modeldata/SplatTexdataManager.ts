@@ -19,6 +19,7 @@ import {
     SplatUpdateTopY,
     GetSplatActivePoints,
     GetOptions,
+    StopAutoRotate,
 } from '../events/EventConstants';
 import { Events } from '../events/Events';
 import { MetaData, ModelStatus, SplatModel } from './ModelData';
@@ -72,6 +73,7 @@ export function setupSplatTextureManager(events: Events) {
     async function mergeAndUploadData(isBigSceneMode: boolean) {
         if (disposed) return;
         if (splatModel && (splatModel.status === ModelStatus.Invalid || splatModel.status === ModelStatus.FetchFailed)) {
+            (fire(GetOptions) as SplatMeshOptions).viewerEvents?.fire(StopAutoRotate);
             return fire(OnFetchStop, 0) || fire(Information, { renderSplatCount: 0, visibleSplatCount: 0, modelSplatCount: 0 }); // 无效
         }
         if (!splatModel || !splatModel.downloadSplatCount) return; // 没数据
