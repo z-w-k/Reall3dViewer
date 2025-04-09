@@ -5,11 +5,12 @@ import { Camera, PerspectiveCamera, Vector3 } from 'three';
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js';
 import { initCanvas } from '../utils/ViewerUtils';
 import { Reall3dViewerOptions } from '../viewer/Reall3dViewerOptions';
+import { isMobile } from '../utils/consts/GlobalConstants';
 
 /**
  * 旋转控制器
  */
-export class Controls extends OrbitControls {
+export class CameraControls extends OrbitControls {
     constructor(opts: Reall3dViewerOptions) {
         const canvas: HTMLCanvasElement = initCanvas(opts);
         const camera: Camera = opts.camera;
@@ -21,8 +22,7 @@ export class Controls extends OrbitControls {
         that.updateByOptions(opts);
     }
 
-    public updateByOptions(opts: Reall3dViewerOptions) {
-        if (!opts) return;
+    public updateByOptions(opts: Reall3dViewerOptions = {}) {
         const that = this;
 
         opts.enableDamping !== undefined && (that.enableDamping = opts.enableDamping);
@@ -41,6 +41,10 @@ export class Controls extends OrbitControls {
         opts.position && that.object.position.fromArray(opts.position);
         opts.lookAt && that.target.fromArray(opts.lookAt);
         opts.lookUp && that.object.up.fromArray(opts.lookUp);
+
+        // @ts-ignore
+        isMobile && that._dollyOut?.(0.75); // 手机适当缩小
+        that.updateRotateAxis();
         that.update();
     }
 
@@ -49,8 +53,8 @@ export class Controls extends OrbitControls {
      */
     public updateRotateAxis() {
         // @ts-ignore
-        this._quat.setFromUnitVectors(this.object.up, new Vector3(0, 1, 0));
+        this._quat?.setFromUnitVectors?.(this.object.up, new Vector3(0, 1, 0));
         // @ts-ignore
-        this._quatInverse = this._quat.clone().invert();
+        this._quatInverse = this._quat?.clone?.()?.invert?.();
     }
 }

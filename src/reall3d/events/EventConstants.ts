@@ -32,10 +32,6 @@ export const GetCamera = i++;
 export const GetControls = i++;
 /** 取得当前相机参数信息 */
 export const GetCameraInfo = i++;
-/** 更新设定相机参数 */
-export const SetCameraInfo = i++;
-/** 相机设定为未就绪（小场景开始前设定） */
-export const SetSmallSceneCameraNotReady = i++;
 /** 设定相机视点 */
 export const CameraSetLookAt = i++;
 /** 取相机视点 */
@@ -317,9 +313,6 @@ export const LoadSmallSceneMetaData = i++;
 
 /** 遍历销毁并清空Object3D的子对象 */
 export const TraverseDisposeAndClear = i++;
-
-/** 渲染器销毁时清理内部变量 */
-export const OnViewerDisposeResetVars = i++;
 
 /** 取消当前正在进行的标注 */
 export const CancelCurrentMark = i++;

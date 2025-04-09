@@ -26,7 +26,6 @@ import {
     GetMarkFromWeakRef,
     GetMarkDataByName,
     UpdateMarkByName,
-    SetCameraInfo,
     MetaSaveSmallSceneCameraInfo,
     GetCameraInfo,
     UpdateAllMarkByMeterScale,
@@ -37,6 +36,7 @@ import {
     OnSetFlyPositions,
     OnSetFlyTargets,
     GetSplatMesh,
+    GetControls,
 } from './../../events/EventConstants';
 import { MarkMultiLines } from './MarkMultiLines';
 import { CSS3DRenderer } from 'three/examples/jsm/Addons.js';
@@ -53,6 +53,7 @@ import { MarkDataMultiLines } from './data/MarkDataMultiLines';
 import { MarkDataDistanceLine } from './data/MarkDataDistanceLine';
 import { MetaData } from '../../modeldata/ModelData';
 import { SplatMesh } from '../splatmesh/SplatMesh';
+import { CameraControls } from '../../controls/CameraControls';
 
 export function setupMark(events: Events) {
     const on = (key: number, fn?: Function, multiFn?: boolean): Function | Function[] => events.on(key, fn, multiFn);
@@ -174,14 +175,12 @@ export function setupMark(events: Events) {
     });
 
     on(LoadSmallSceneMetaData, (metaData: MetaData) => {
-        const opts: Reall3dViewerOptions = fire(GetOptions);
-        if (opts.bigSceneMode) return fire(SetCameraInfo, null); // TODO
-
         if (metaData.meterScale) {
             fire(GetOptions).meterScale = metaData.meterScale;
             fire(Information, { scale: `1 : ${fire(GetOptions).meterScale} m` });
         }
-        fire(SetCameraInfo, metaData);
+        (fire(GetControls) as CameraControls).updateByOptions({ ...metaData, ...(metaData.cameraInfo || {}) });
+
         const marks = metaData.marks || [];
 
         // 初始化标注，隐藏待激活显示

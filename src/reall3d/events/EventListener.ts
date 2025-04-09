@@ -49,7 +49,7 @@ import {
 } from './EventConstants';
 import { Reall3dViewerOptions } from '../viewer/Reall3dViewerOptions';
 import { SplatMesh } from '../meshs/splatmesh/SplatMesh';
-import { Controls } from '../controls/Controls';
+import { CameraControls } from '../controls/CameraControls';
 import { CSS3DRenderer } from 'three/addons/renderers/CSS3DRenderer.js';
 import { MarkDistanceLine } from '../meshs/mark/MarkDistanceLine';
 import { MarkMultiLines } from '../meshs/mark/MarkMultiLines';
@@ -92,7 +92,7 @@ export function setupEventListener(events: Events) {
 
     on(RotateAt, (rotateLeft: boolean = true) => {
         if (disposed) return;
-        const controls: Controls = fire(GetControls);
+        const controls: CameraControls = fire(GetControls);
         const angle = rotateLeft ? Math.PI / 128 : -(Math.PI / 128);
         const matrix4: Matrix4 = new Matrix4().makeRotationAxis(new Vector3(0, 0, -1).transformDirection(controls.object.matrixWorld), angle);
         controls.object.up.transformDirection(matrix4);

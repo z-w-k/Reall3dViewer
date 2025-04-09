@@ -23,7 +23,7 @@ import {
     GetCameraLookUp,
 } from '../events/EventConstants';
 import { SplatMeshOptions } from '../meshs/splatmesh/SplatMeshOptions';
-import { Controls } from '../controls/Controls';
+import { CameraControls } from '../controls/CameraControls';
 import { Reall3dViewerOptions } from '../viewer/Reall3dViewerOptions';
 
 export function setupViewerUtils(events: Events) {
@@ -192,8 +192,8 @@ export function initCamera(opts: Reall3dViewerOptions): PerspectiveCamera {
     return opts.camera;
 }
 
-export function initControls(opts: Reall3dViewerOptions): Controls {
-    const controls: Controls = new Controls(opts);
+export function initControls(opts: Reall3dViewerOptions): CameraControls {
+    const controls: CameraControls = new CameraControls(opts);
     opts.controls = controls;
     return controls;
 }

@@ -19,11 +19,9 @@ import {
     MetaMarkSaveData,
     MarkUpdateVisible,
     OnViewerAfterUpdate,
-    OnViewerDisposeResetVars,
     OnViewerUpdate,
     RunLoopByTime,
     SetGaussianText,
-    SetSmallSceneCameraNotReady,
     SplatSetPointcloudMode,
     SplatSwitchDisplayMode,
     SplatUpdateLightFactor,
@@ -68,7 +66,7 @@ import {
     initScene,
     setupViewerUtils,
 } from '../utils/ViewerUtils';
-import { Controls } from '../controls/Controls';
+import { CameraControls } from '../controls/CameraControls';
 import { Reall3dViewerOptions } from './Reall3dViewerOptions';
 import { setupEventListener } from '../events/EventListener';
 import { setupRaycaster } from '../raycaster/SetupRaycaster';
@@ -108,7 +106,7 @@ export class Reall3dViewer {
         const renderer: WebGLRenderer = initRenderer(opts);
         const scene: Scene = initScene(opts);
         initCamera(opts);
-        const controls: Controls = initControls(opts);
+        const controls: CameraControls = initControls(opts);
         controls.updateByOptions(opts);
 
         const events = new Events();
@@ -288,7 +286,7 @@ export class Reall3dViewer {
             }
         }
 
-        const controls: Controls = fire(GetControls);
+        const controls: CameraControls = fire(GetControls);
         controls.updateByOptions(opts);
 
         fire(Information, { scale: `1 : ${fire(GetOptions).meterScale} m` });
@@ -353,7 +351,6 @@ export class Reall3dViewer {
             fire(OnSetFlyPositions, meta.flyPositions || []);
             fire(OnSetFlyTargets, meta.flyTargets || []);
         } else {
-            fire(SetSmallSceneCameraNotReady);
             fire(LoadSmallSceneMetaData, meta);
         }
 
@@ -396,29 +393,29 @@ export class Reall3dViewer {
         const opts: Reall3dViewerOptions = fire(GetOptions);
         opts.bigSceneMode = false;
         let meta: MetaData = {};
-        try {
-            const metaUrl = modelOpts.url.substring(0, modelOpts.url.lastIndexOf('.')) + '.meta.json'; // xxx/abc.spx => xxx/abc.meta.json
-            const res = await fetch(metaUrl, { mode: 'cors', credentials: 'omit', cache: 'reload' });
-            if (res.status === 200) {
-                meta = await res.json();
-            } else {
-                console.warn('meta file fetch failed, status:', res.status);
+        if (!modelOpts.url.startsWith('blob:')) {
+            try {
+                const metaUrl = modelOpts.url.substring(0, modelOpts.url.lastIndexOf('.')) + '.meta.json'; // xxx/abc.spx => xxx/abc.meta.json
+                const res = await fetch(metaUrl, { mode: 'cors', credentials: 'omit', cache: 'reload' });
+                if (res.status === 200) {
+                    meta = await res.json();
+                } else {
+                    console.warn('meta file fetch failed, status:', res.status);
+                }
+            } catch (e) {
+                console.warn('meta file fetch failed', e.message, modelOpts.url);
             }
-        } catch (e) {
-            console.warn('meta file fetch failed', e.message);
         }
 
         meta.url = modelOpts.url; // 小场景元数据的url仅变量用途
 
         // 按元数据调整更新相机、标注等信息
         delete meta.autoCut; // 小场景没有切割
-        fire(SetSmallSceneCameraNotReady);
         fire(LoadSmallSceneMetaData, meta);
 
         // 加载模型
         this.splatMesh.addModel(modelOpts, meta);
         await fire(OnSetWaterMark, meta.watermark);
-        fire(GetControls).updateRotateAxis();
     }
 
     /**
@@ -505,7 +502,6 @@ export class Reall3dViewer {
         fire(CSS3DRendererDispose);
         fire(EventListenerDispose);
         fire(GetControls).dispose();
-        fire(OnViewerDisposeResetVars);
 
         fire(TraverseDisposeAndClear, fire(GetScene));
 

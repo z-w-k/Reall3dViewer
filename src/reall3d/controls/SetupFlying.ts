@@ -22,7 +22,7 @@ import {
     FlyEnable,
     FlyOnce,
 } from '../events/EventConstants';
-import { Controls } from './Controls';
+import { CameraControls } from './CameraControls';
 import { CatmullRomCurve3, Vector3 } from 'three';
 import { MetaData } from '../modeldata/ModelData';
 import { SplatMesh } from '../meshs/splatmesh/SplatMesh';
@@ -63,7 +63,7 @@ export function setupFlying(events: Events) {
         }
     });
     on(AddFlyPosition, () => {
-        const controls: Controls = fire(GetControls);
+        const controls: CameraControls = fire(GetControls);
         flyPositions.push(controls.object.position.clone());
         flyTargets.push(controls.target.clone());
     });
@@ -109,7 +109,7 @@ export function setupFlying(events: Events) {
         if (!flyPositions.length) return;
         if (!force && !fire(GetControls).autoRotate) return; // 避免在非自动旋转模式下执行
 
-        const controls: Controls = fire(GetControls);
+        const controls: CameraControls = fire(GetControls);
 
         const points: Vector3[] = [controls.object.position.clone()];
         const tgts: Vector3[] = [controls.target.clone()];
@@ -135,7 +135,7 @@ export function setupFlying(events: Events) {
             if (Date.now() - flyStartTime > flyTotalTime) fire(FlyDisable);
             if (!flyEnable || !curvePos || !curveTgt) return;
 
-            const controls: Controls = fire(GetControls);
+            const controls: CameraControls = fire(GetControls);
 
             t = (Date.now() - flyStartTime) / flyTotalTime;
             const pt = curvePos.getPoint(t);

@@ -1,12 +1,12 @@
 // ================================
 // Copyright (c) 2025 reall3d.com
 // ================================
-import { GetCameraFov, OnViewerDisposeResetVars, SetSmallSceneCameraNotReady } from './../events/EventConstants';
 import {
     GetCameraInfo,
     GetCameraLookAt,
     GetCameraLookUp,
     GetCameraPosition,
+    GetCameraFov,
     GetControls,
     ControlsUpdate,
     ControlsUpdateRotateAxis,
@@ -14,15 +14,12 @@ import {
     CameraSetLookAt,
     FocusMarkerMeshUpdate,
     RunLoopByFrame,
-    SetCameraInfo,
     ControlPlaneUpdate,
 } from '../events/EventConstants';
 import { PerspectiveCamera, Vector3 } from 'three';
 import { Events } from '../events/Events';
 import { GetCamera } from '../events/EventConstants';
-import { Controls } from './Controls';
-import { isMobile } from '../utils/consts/GlobalConstants';
-import { MetaData } from '../modeldata/ModelData';
+import { CameraControls } from './CameraControls';
 
 /**
  * 相机参数信息
@@ -100,37 +97,8 @@ export function setupCameraControls(events: Events) {
         return { position, lookUp, lookAt };
     });
 
-    let cameraReady: boolean = false;
-    on(SetSmallSceneCameraNotReady, (): boolean => (cameraReady = false));
-
-    let pcCameraInfo: CameraInfo;
-    on(SetCameraInfo, (metaData?: MetaData) => {
-        pcCameraInfo = metaData?.cameraInfo;
-        if (pcCameraInfo) {
-            // 忽略 fov,near,far,aspect 参数
-            const controls: Controls = fire(GetControls);
-            controls.object.position.fromArray(pcCameraInfo.position);
-            controls.object.up.fromArray(pcCameraInfo.lookUp);
-            controls.target.fromArray(pcCameraInfo.lookAt);
-
-            // @ts-ignore
-            isMobile && controls._dollyOut(0.75); // 手机适当缩小
-
-            controls.updateRotateAxis();
-        }
-        cameraReady = true;
-    });
-    on(
-        OnViewerDisposeResetVars,
-        () => {
-            cameraReady = false;
-            pcCameraInfo = undefined;
-        },
-        true,
-    );
-
-    on(ControlsUpdate, () => fire(GetControls).update());
-    on(ControlsUpdateRotateAxis, () => fire(GetControls).updateRotateAxis());
+    on(ControlsUpdate, () => (fire(GetControls) as CameraControls).update());
+    on(ControlsUpdateRotateAxis, () => (fire(GetControls) as CameraControls).updateRotateAxis());
 
     // ---------------------
     const epsilon = 0.01;
