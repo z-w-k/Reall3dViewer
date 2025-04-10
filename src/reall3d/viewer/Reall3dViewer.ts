@@ -362,32 +362,25 @@ export class Reall3dViewer {
 
     /**
      * 添加要渲染的高斯模型（小场景模式）
-     * @param urlOpts 高斯模型链接或选项
+     * @param urlOpts 高斯模型链接或元数据文件链接或选项
      */
     public async addModel(urlOpts: string | ModelOptions): Promise<void> {
         if (this.disposed) return;
         const fire = (key: number, ...args: any): any => this.events.fire(key, ...args);
 
         // 参数整理
-        let modelOpts: ModelOptions;
+        let metaUrl = '';
+        let modelOpts: ModelOptions = { url: '' };
         if (Object.prototype.toString.call(urlOpts) === '[object String]') {
-            modelOpts = { url: urlOpts as string };
+            if ((urlOpts as string).endsWith('.meta.json')) {
+                metaUrl = urlOpts as string;
+            } else {
+                modelOpts.url = urlOpts as string;
+            }
         } else {
             modelOpts = urlOpts as ModelOptions;
         }
-        if (!modelOpts.url) return console.error('model url is empty');
-
-        // 检查设定格式
-        if (!modelOpts.format) {
-            if (modelOpts.url.endsWith('.spx')) {
-                modelOpts.format = 'spx';
-            } else if (modelOpts.url.endsWith('.splat')) {
-                modelOpts.format = 'splat';
-            } else {
-                console.error('unknow format!', modelOpts.url);
-                return;
-            }
-        }
+        if (!modelOpts.url && !metaUrl) return console.error('model url is empty');
 
         // 获取元数据
         const opts: Reall3dViewerOptions = fire(GetOptions);
@@ -395,7 +388,7 @@ export class Reall3dViewer {
         let meta: MetaData = {};
         if (!modelOpts.url.startsWith('blob:')) {
             try {
-                const metaUrl = modelOpts.url.substring(0, modelOpts.url.lastIndexOf('.')) + '.meta.json'; // xxx/abc.spx => xxx/abc.meta.json
+                metaUrl = metaUrl || modelOpts.url.substring(0, modelOpts.url.lastIndexOf('.')) + '.meta.json'; // xxx/abc.spx => xxx/abc.meta.json
                 const res = await fetch(metaUrl, { mode: 'cors', credentials: 'omit', cache: 'reload' });
                 if (res.status === 200) {
                     meta = await res.json();
@@ -407,10 +400,22 @@ export class Reall3dViewer {
             }
         }
 
-        meta.url = modelOpts.url; // 小场景元数据的url仅变量用途
+        // 检查整理
+        meta.url = meta.url || modelOpts.url;
+        delete meta.autoCut; // 小场景没有切割
+        if (!modelOpts.format) {
+            modelOpts.url = modelOpts.url || meta.url;
+            if (modelOpts.url.endsWith('.spx')) {
+                modelOpts.format = 'spx';
+            } else if (modelOpts.url.endsWith('.splat')) {
+                modelOpts.format = 'splat';
+            } else {
+                console.error('unknow format!', modelOpts.url);
+                return;
+            }
+        }
 
         // 按元数据调整更新相机、标注等信息
-        delete meta.autoCut; // 小场景没有切割
         fire(LoadSmallSceneMetaData, meta);
 
         // 加载模型

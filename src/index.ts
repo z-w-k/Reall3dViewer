@@ -57,7 +57,7 @@ function fnClick(className: string) {
         document.querySelector('#gsviewer .op-show').innerHTML = txt;
     } else if (className == 'demo1') {
         viewer.reset({ debugMode: true });
-        setTimeout(() => viewer.addModel(`https://reall3d.com/demo-models/yz.spx`), 50); // Let it GC
+        setTimeout(() => viewer.addModel(`https://reall3d.com/demo-models/yz.meta.json`), 50); // Let it GC
     } else if (className == 'demo2') {
         viewer.reset({ debugMode: true });
         setTimeout(() => viewer.addModel(`https://reall3d.com/demo-models/jtstjg.spx`), 50); // Let it GC
