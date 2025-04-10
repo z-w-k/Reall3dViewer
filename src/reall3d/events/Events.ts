@@ -49,8 +49,8 @@ export class Events {
     public fire(key: number, ...args: any): any {
         const fn = this.map.get(key);
         if (!fn) {
-            this.map.size && console.warn('Undefined event:', key, '(', ...args, ')');
-            // console.warn('Undefined event:', key, '(', ...args, ')');
+            // this.map.size && console.warn('Undefined event:', key, '(', ...args, ')');
+            this.map.size && console.log('Undefined event:', key, '(', ...args, ')');
             return;
         }
         if (typeof fn == 'function') {
