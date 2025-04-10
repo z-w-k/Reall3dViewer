@@ -207,7 +207,7 @@ export function setupSplatTextureManager(events: Events) {
 
         splatModel = new SplatModel(opts, meta);
         const fnCheckModelSplatCount = () => {
-            if (splatModel.status == ModelStatus.Invalid || splatModel.status == ModelStatus.FetchFailed) {
+            if (!splatModel || splatModel.status == ModelStatus.Invalid || splatModel.status == ModelStatus.FetchFailed) {
                 return fnResolveModelSplatCount(0);
             }
             if (splatModel.modelSplatCount >= 0) {
