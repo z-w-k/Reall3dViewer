@@ -50,11 +50,9 @@ export function setupSplatTextureManager(events: Events) {
     on(GetMaxRenderCount, async (): Promise<number> => {
         const opts: SplatMeshOptions = fire(GetOptions);
         let rs = isMobile ? opts.maxRenderCountOfMobile : opts.maxRenderCountOfPc;
-        let textWatermarkPlusCnt = 10240; // 加上预留的动态文字水印数
-        if (opts.bigSceneMode) {
-            rs += textWatermarkPlusCnt;
-        } else if ((await promiseModelSplatCount) < rs) {
-            rs = (await promiseModelSplatCount) + textWatermarkPlusCnt; // 小场景如果模型数据点数小于最大渲染数，用模型数据点数计算即可，节省内存
+        if (!opts.bigSceneMode) {
+            let modelCnt = await promiseModelSplatCount;
+            rs = Math.min(modelCnt, rs) + 10240; // 小场景如果模型数据点数小于最大渲染数，用模型数据点数计算以节省内存，10240为预留的动态文字水印数
         }
         return rs;
     });
