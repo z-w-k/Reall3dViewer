@@ -187,8 +187,6 @@ export async function loadSpx(model: SplatModel) {
                 }
             }
 
-            await new Promise(resolve => setTimeout(resolve));
-
             // 超过限制时终止下载
             const pcDownloadLimitCount = model.meta.pcDownloadLimitSplatCount || PcDownloadLimitSplatCount;
             const mobileDownloadLimitCount = model.meta.mobileDownloadLimitSplatCount || MobileDownloadLimitSplatCount;
