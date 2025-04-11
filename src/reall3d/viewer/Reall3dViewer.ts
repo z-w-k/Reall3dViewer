@@ -197,18 +197,21 @@ export class Reall3dViewer {
         !opts.disableDropLocalFile && this.enableDropLocalFile(); // 默认支持拖拽本地文件进行渲染
     }
 
+    /**
+     * 允许拖拽本地文件进行渲染【注：仅偶尔方便为目的，并不适合高频使用】
+     */
     private enableDropLocalFile(): void {
         const that = this;
         document.addEventListener('dragover', function (e) {
             e.preventDefault();
             e.stopPropagation();
         });
-        document.addEventListener('drop', function (e) {
+        document.addEventListener('drop', async function (e) {
             e.preventDefault();
             e.stopPropagation();
             let file = e.dataTransfer.files[0];
+            if (!file) return;
 
-            const url: any = URL.createObjectURL(file);
             let format: 'splat' | 'spx';
             if (file.name.endsWith('.spx')) {
                 format = 'spx';
@@ -218,8 +221,10 @@ export class Reall3dViewer {
                 return console.error('unsupported format:', file.name);
             }
 
+            const url = URL.createObjectURL(file);
+
             that.reset({ debugMode: true });
-            that.addModel({ url, format });
+            setTimeout(async () => await that.addModel({ url, format }));
         });
     }
 
@@ -355,7 +360,7 @@ export class Reall3dViewer {
         }
 
         // 加载模型
-        this.splatMesh.addModel({ url: meta.url }, meta);
+        await this.splatMesh.addModel({ url: meta.url }, meta);
         await fire(OnSetWaterMark, meta.watermark);
         fire(GetControls).updateRotateAxis();
     }
@@ -419,7 +424,7 @@ export class Reall3dViewer {
         fire(LoadSmallSceneMetaData, meta);
 
         // 加载模型
-        this.splatMesh.addModel(modelOpts, meta);
+        await this.splatMesh.addModel(modelOpts, meta);
         await fire(OnSetWaterMark, meta.watermark);
     }
 
@@ -506,7 +511,7 @@ export class Reall3dViewer {
         fire(ViewerUtilsDispose);
         fire(CSS3DRendererDispose);
         fire(EventListenerDispose);
-        fire(GetControls).dispose();
+        (fire(GetControls) as CameraControls).dispose();
 
         fire(TraverseDisposeAndClear, fire(GetScene));
 

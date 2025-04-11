@@ -135,7 +135,7 @@ export class SplatMesh extends Mesh {
     public async addModel(opts: ModelOptions, meta: MetaData): Promise<void> {
         if (this.disposed) return;
         this.meta = meta;
-        this.events.fire(SplatTexdataManagerAddModel, opts, meta);
+        await this.events.fire(SplatTexdataManagerAddModel, opts, meta);
     }
 
     public fire(key: number, ...args: any): any {
