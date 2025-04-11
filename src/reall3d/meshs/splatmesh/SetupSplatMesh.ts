@@ -126,6 +126,7 @@ export function setupSplatMesh(events: Events) {
         let geometry = new InstancedBufferGeometry().copy(baseGeometry);
 
         const MaxSplatCount = await fire(GetMaxRenderCount);
+        if (disposed) return;
         const indexArray = new Uint32Array(MaxSplatCount);
         const indexAttribute = new InstancedBufferAttribute(indexArray, 1, false);
         indexAttribute.setUsage(DynamicDrawUsage);
@@ -155,6 +156,7 @@ export function setupSplatMesh(events: Events) {
 
     on(CreateSplatMaterial, async () => {
         const MaxSplatCount = await fire(GetMaxRenderCount);
+        if (disposed) return;
         const texwidth = 1024 * 2;
         const texheight = Math.ceil((2 * MaxSplatCount) / texwidth);
 
