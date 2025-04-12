@@ -63,6 +63,8 @@ export function setupRaycaster(events: Events) {
         // console.time('raycaster');
         for (let i = 0; i < objectSplats.length; i++) {
             const rs: any = objectSplats[i].fire(GetSplatActivePoints);
+            if (!rs) continue;
+
             if (rs.length !== undefined) {
                 // 坐标数组计算
                 const activePoints: Float32Array = rs;
