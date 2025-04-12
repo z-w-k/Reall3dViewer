@@ -1,4 +1,4 @@
-import { IsBigSceneMode, OnSetFlyPositions, OnSetFlyTargets, SplatTexdataManagerDispose } from './../events/EventConstants';
+import { IsBigSceneMode, OnSetFlyPositions, OnSetFlyTargets } from './../events/EventConstants';
 // ================================
 // Copyright (c) 2025 reall3d.com
 // ================================
@@ -95,6 +95,7 @@ export class Reall3dViewer {
     constructor(opts: Reall3dViewerOptions = {}) {
         console.info('Reall3dViewer', ViewerVersion);
         this.init(initGsViewerOptions(opts));
+        !opts.disableDropLocalFile && this.enableDropLocalFile();
     }
 
     private init(opts: Reall3dViewerOptions) {
@@ -193,12 +194,10 @@ export class Reall3dViewer {
         fire(Information, { scale: `1 : ${fire(GetOptions).meterScale} m` });
 
         this.initGsApi();
-
-        !opts.disableDropLocalFile && this.enableDropLocalFile(); // 默认支持拖拽本地文件进行渲染
     }
 
     /**
-     * 允许拖拽本地文件进行渲染【注：仅偶尔方便为目的，并不适合高频使用】
+     * 允许拖拽本地文件进行渲染
      */
     private enableDropLocalFile(): void {
         const that = this;
@@ -224,7 +223,10 @@ export class Reall3dViewer {
             const url = URL.createObjectURL(file);
 
             that.reset({ debugMode: true });
-            setTimeout(async () => await that.addModel({ url, format }));
+            setTimeout(async () => {
+                await that.addModel({ url, format });
+                URL.revokeObjectURL(url);
+            });
         });
     }
 

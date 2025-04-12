@@ -66,7 +66,28 @@ export function setupSplatTextureManager(events: Events) {
         }
     });
 
-    on(GetSplatActivePoints, () => (!isBigSceneMode || texture0.version < texture1.version ? texture0.xyz : texture1.xyz));
+    on(GetSplatActivePoints, () => {
+        // 大场景按动态计算
+        if (isBigSceneMode) return texture0.version <= texture1.version ? texture0.xyz : texture1.xyz;
+
+        // 小场景下载完成后按分块
+        if (splatModel?.status === ModelStatus.FetchDone || splatModel?.status === ModelStatus.FetchAborted) {
+            if (splatModel.activePoints && splatModel.activePoints.length === undefined) return splatModel.activePoints;
+            const obj = {};
+            const xyzs: Float32Array = texture0.xyz;
+            for (let i = 0, count = xyzs.length / 3, x = 0, y = 0, z = 0, key = ''; i < count; i++) {
+                x = xyzs[i * 3];
+                y = xyzs[i * 3 + 1];
+                z = xyzs[i * 3 + 2];
+                key = `${Math.floor(x / 2) * 2 + 1},${Math.floor(y / 2) * 2 + 1},${Math.floor(z / 2) * 2 + 1}`;
+                (obj[key] = obj[key] || []).push(x, y, z);
+            }
+            return (splatModel.activePoints = obj);
+        }
+
+        // 小场景没下载完，不分块
+        return texture0.xyz;
+    });
 
     async function mergeAndUploadData(isBigSceneMode: boolean) {
         if (disposed) return;
@@ -161,6 +182,7 @@ export function setupSplatTextureManager(events: Events) {
 
         if (downloadDone && !splatModel.smallSceneUploadDone) {
             splatModel.smallSceneUploadDone = true;
+            fire(GetSplatActivePoints); // 小场景下载完时主动触发一次坐标分块
         }
         fire(Information, { renderSplatCount: splatModel.renderSplatCount });
     }

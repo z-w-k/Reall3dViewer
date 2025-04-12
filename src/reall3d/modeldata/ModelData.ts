@@ -86,6 +86,8 @@ export class SplatModel {
     public textWatermarkVersion: number = 0;
     public lastTextWatermarkVersion: number = 0;
 
+    public activePoints: any;
+
     constructor(opts: ModelOptions, meta: MetaData = {}) {
         this.opts = { ...opts };
 

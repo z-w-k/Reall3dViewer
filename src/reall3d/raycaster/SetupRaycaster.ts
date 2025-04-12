@@ -60,16 +60,37 @@ export function setupRaycaster(events: Events) {
         //     }
         // }
 
+        // console.time('raycaster');
         for (let i = 0; i < objectSplats.length; i++) {
-            const activePoints: Float32Array = objectSplats[i].fire(GetSplatActivePoints);
-            const cnt = activePoints.length / 3;
-            for (let j = 0; j < cnt; j++) {
-                const point: Vector3 = new Vector3(activePoints[3 * j + 0], activePoints[3 * j + 1], activePoints[3 * j + 2]);
-                if (raycaster.ray.distanceToPoint(point) <= MinDistance) {
-                    spheres.push(new Sphere(point, raycaster.ray.origin.distanceTo(point)));
+            const rs: any = objectSplats[i].fire(GetSplatActivePoints);
+            if (rs.length !== undefined) {
+                // 坐标数组计算
+                const activePoints: Float32Array = rs;
+                const cnt = activePoints.length / 3;
+                for (let j = 0; j < cnt; j++) {
+                    const point: Vector3 = new Vector3(activePoints[3 * j + 0], activePoints[3 * j + 1], activePoints[3 * j + 2]);
+                    if (raycaster.ray.distanceToPoint(point) <= MinDistance) {
+                        spheres.push(new Sphere(point, raycaster.ray.origin.distanceTo(point)));
+                    }
+                }
+            } else {
+                // 分块计算
+                for (let key of Object.keys(rs)) {
+                    const xyzs: string[] = key.split(',');
+                    const center: Vector3 = new Vector3(Number(xyzs[0]), Number(xyzs[1]), Number(xyzs[2]));
+                    if (raycaster.ray.distanceToPoint(center) <= 1.01) {
+                        const points: number[] = rs[key];
+                        for (let j = 0, cnt = points.length / 3; j < cnt; j++) {
+                            const point: Vector3 = new Vector3(points[3 * j + 0], points[3 * j + 1], points[3 * j + 2]);
+                            if (raycaster.ray.distanceToPoint(point) <= MinDistance) {
+                                spheres.push(new Sphere(point, raycaster.ray.origin.distanceTo(point)));
+                            }
+                        }
+                    }
                 }
             }
         }
+        // console.timeEnd('raycaster');
 
         spheres.sort((a: Sphere, b: Sphere) => a.radius - b.radius);
 
