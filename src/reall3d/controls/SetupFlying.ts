@@ -10,7 +10,6 @@ import {
     GetFlyPositionArray,
     GetFlyPositions,
     GetFlyTargetArray,
-    GetOptions,
     GetSplatMesh,
     HttpPostMetaData,
     OnSetFlyPositions,
