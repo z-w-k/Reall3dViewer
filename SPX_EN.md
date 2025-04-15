@@ -31,7 +31,7 @@ Fixed-length header for format identification, containing bounding box data for 
 | 44–47       | uint32    | `*`Creater ID            | A unique value (other than `0` reserved for official use) to identify the creater  |
 | 48–51       | uint32    | `*`Exclusive ID          | A non-zero value (where `0` indicates public formats) defines a proprietary/private data block format      |
 | 52~55       | uint32    | SH degree          | Allowed values: `0,1,2,3`. Others → `0` |
-| 56–63       | -         | Reserved              | Reserved for future use (3 × uint32)                                        |
+| 56–63       | -         | Reserved              | Reserved for future use                                        |
 | 64–123      | ASCII     | Comment               | Maximum 60 ASCII characters                    |
 | 124–127     | uint32    | `*`Checksum              | Validates file integrity (creater-specific)                               |
 
