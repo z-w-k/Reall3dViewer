@@ -57,7 +57,7 @@ Data blocks consist of a fixed header followed by customizable content.
 
 ## Open Block Content Formats
 
-he data block format encompasses both open and exclusive formats. The reserved range from 0 to 255 is designated for defining the open format, while other values are employed for exclusive formats.
+he data block format encompasses both open and exclusive formats. The reserved range from `0 to 255` is designated for defining the open format, while other values are employed for exclusive formats.
 
 <br>
 
