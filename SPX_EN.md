@@ -30,7 +30,8 @@ Fixed-length header for format identification, containing bounding box data for 
 | 40–43       | uint32    | Creation Date         | Date in `YYYYMMDD` format                                                   |
 | 44–47       | uint32    | `*`Creater ID            | A unique value (other than `0` reserved for official use) to identify the creater  |
 | 48–51       | uint32    | `*`Exclusive ID          | A non-zero value (where `0` indicates public formats) defines a proprietary/private data block format      |
-| 52–63       | -         | Reserved              | Reserved for future use (3 × uint32)                                        |
+| 52~55       | uint32    | SH degree          | Allowed values: `0,1,2,3`. Others → `0` |
+| 56–63       | -         | Reserved              | Reserved for future use (3 × uint32)                                        |
 | 64–123      | ASCII     | Comment               | Maximum 60 ASCII characters                    |
 | 124–127     | uint32    | `*`Checksum              | Validates file integrity (creater-specific)                               |
 
@@ -61,7 +62,7 @@ he data block format encompasses both open and exclusive formats. The reserved r
 <br>
 
 
-✅  Format `20` (Open Standard)
+✅  Open Format `20`, basic data
 
 | Byte Offset | Type      | Field Name            | Description                                                                 |
 |-------------|-----------|-----------------------|-----------------------------------------------------------------------------|
@@ -75,3 +76,47 @@ he data block format encompasses both open and exclusive formats. The reserved r
 - **Rotation**: Quaternion components (8-bit each).
 
 ---
+
+
+✅  Open Format `1`, data of SH degree 1
+
+
+| Byte Offset | Type      | Field Name            | Description                                                                 |
+|----------|------|------|------|
+| 0–3      | uint32 | `*`Gaussian Count     | Number of Gaussians                                                         |
+| 4–7      | uint32 | `*`Format ID          | `1` data of Spherical harmonics (SH) degree 1                       |
+| 8~n      | bytes  | `*`Data               | rest0...rest8,rest0...rest8,... |
+
+- `rest0...rest8` Spherical harmonics (8-bit each)
+
+---
+
+
+
+✅  Open Format `2`, data of SH degree 2
+
+
+| Byte Offset | Type      | Field Name            | Description                                                                 |
+|----------|------|------|------|
+| 0–3      | uint32 | `*`Gaussian Count     | Number of Gaussians                                                         |
+| 4–7      | uint32 | `*`Format ID          | `2` data of Spherical harmonics (SH) degree 2                       |
+| 8~n      | bytes  | `*`Data               | rest9...rest23,rest9...rest23,... |
+
+- `rest9...rest23` Spherical harmonics (8-bit each)
+
+---
+
+
+✅  Open Format `3`, data of SH degree 3
+
+
+| Byte Offset | Type      | Field Name            | Description                                                                 |
+|----------|------|------|------|
+| 0–3      | uint32 | `*`Gaussian Count     | Number of Gaussians                                                         |
+| 4–7      | uint32 | `*`Format ID          | `3` data of Spherical harmonics (SH) degree 3                       |
+| 8~n      | bytes  | `*`Data               | rest24...rest44,rest24...rest44,... |
+
+- `rest24...rest44` Spherical harmonics (8-bit each)
+
+---
+
