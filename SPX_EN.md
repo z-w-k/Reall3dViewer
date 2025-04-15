@@ -100,9 +100,9 @@ he data block format encompasses both open and exclusive formats. The reserved r
 |----------|------|------|------|
 | 0–3      | uint32 | `*`Gaussian Count     | Number of Gaussians                                                         |
 | 4–7      | uint32 | `*`Format ID          | `2` data of Spherical harmonics (SH) degree 2                       |
-| 8~n      | bytes  | `*`Data               | rest9...rest23,rest9...rest23,... |
+| 8~n      | bytes  | `*`Data               | rest0...rest23,rest0...rest23,... |
 
-- `rest9...rest23` Spherical harmonics (8-bit each)
+- `rest0...rest23` Spherical harmonics (8-bit each)
 
 ---
 
