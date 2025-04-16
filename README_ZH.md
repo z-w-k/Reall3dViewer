@@ -51,6 +51,10 @@ gsbox p2x -i /path/to/input.ply -o /path/to/output.spx
 ## TODO
 - 持续优化增强渲染性能
 - 设计更加优化的模型格式`.spx`及工具
+- 球谐系数
+- 大场景
+
+
 ## 履历
 https://github.com/reall3d-com/Reall3dViewer/releases
 

@@ -51,6 +51,8 @@ gsbox p2x -i /path/to/input.ply -o /path/to/output.spx
 ## TODO
 - Continuously optimize and enhance rendering performance
 - Design more optimized model format `.spx` and tool
+- Spherical harmonics
+- Large scene
 
 ## Release History
 https://github.com/reall3d-com/Reall3dViewer/releases
