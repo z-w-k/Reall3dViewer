@@ -1,7 +1,14 @@
 // ================================
 // Copyright (c) 2025 reall3d.com
 // ================================
-import { SplatDataSize32, WasmBlockSize } from '../../utils/consts/GlobalConstants';
+import {
+    SplatDataSize32,
+    SpxBlockFormats,
+    SpxBlockFormatSH1,
+    SpxBlockFormatSH2,
+    SpxBlockFormatSH3,
+    WasmBlockSize,
+} from '../../utils/consts/GlobalConstants';
 import { SpxHeader } from '../ModelData';
 
 const WasmBase64 =
@@ -59,11 +66,25 @@ export async function parseSpxHeader(header: Uint8Array): Promise<SpxHeader> {
 export async function parseSpxBlockData(data: Uint8Array): Promise<Uint8Array | null> {
     const ui32s = new Uint32Array(data.buffer);
 
-    if (ui32s[1] === 1) return new Uint8Array(0); // TODO SH1
-    if (ui32s[1] === 2) return new Uint8Array(0); // TODO SH2
-    if (ui32s[1] === 3) return new Uint8Array(0); // TODO SH3
+    const splatCount = ui32s[0];
+    const bfid = ui32s[1];
+    if (!SpxBlockFormats.includes(bfid)) {
+        console.warn('unknown block format');
+        return null;
+    }
 
-    const resultByteLength = ui32s[0] * SplatDataSize32;
+    if (SpxBlockFormatSH1 == bfid) {
+        console.warn('TODO SH1');
+        return new Uint8Array(0);
+    } else if (SpxBlockFormatSH2 == bfid) {
+        console.warn('TODO SH2');
+        return new Uint8Array(0);
+    } else if (SpxBlockFormatSH3 == bfid) {
+        console.warn('TODO SH3');
+        return new Uint8Array(0);
+    }
+
+    const resultByteLength = splatCount * SplatDataSize32;
     const wasmModule = WebAssembly.compile(Uint8Array.from(atob(WasmBase64), c => c.charCodeAt(0)).buffer);
     const blockCnt = Math.floor((resultByteLength + data.byteLength) / WasmBlockSize) + 2;
     const memory = new WebAssembly.Memory({ initial: blockCnt, maximum: blockCnt });
