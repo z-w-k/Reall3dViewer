@@ -58,6 +58,11 @@ export async function parseSpxHeader(header: Uint8Array): Promise<SpxHeader> {
 
 export async function parseSpxBlockData(data: Uint8Array): Promise<Uint8Array | null> {
     const ui32s = new Uint32Array(data.buffer);
+
+    if (ui32s[1] === 1) return new Uint8Array(0); // TODO SH1
+    if (ui32s[1] === 2) return new Uint8Array(0); // TODO SH2
+    if (ui32s[1] === 3) return new Uint8Array(0); // TODO SH3
+
     const resultByteLength = ui32s[0] * SplatDataSize32;
     const wasmModule = WebAssembly.compile(Uint8Array.from(atob(WasmBase64), c => c.charCodeAt(0)).buffer);
     const blockCnt = Math.floor((resultByteLength + data.byteLength) / WasmBlockSize) + 2;

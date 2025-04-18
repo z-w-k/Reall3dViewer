@@ -166,7 +166,7 @@ export async function loadSpx(model: SplatModel) {
                 }
 
                 model.downloadSplatCount += datas.byteLength / 32;
-                setBlockSplatData(model, datas);
+                datas.byteLength && setBlockSplatData(model, datas);
 
                 if (value.byteLength < 4) {
                     // 剩余不足以读取下一个块长度，缓存起来待继续下载
