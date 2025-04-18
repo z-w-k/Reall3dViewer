@@ -78,7 +78,7 @@ he data block format encompasses both open and exclusive formats. The reserved r
 ---
 
 
-✅  Open Format `1`, data of SH degree 1
+✅  Open Format `1`, data of SH degree 1 (SH1 only)
 
 
 | Byte Offset | Type      | Field Name            | Description                                                                 |
@@ -93,7 +93,7 @@ he data block format encompasses both open and exclusive formats. The reserved r
 
 
 
-✅  Open Format `2`, data of SH degree 2
+✅  Open Format `2`, data of SH degree 2 (SH1 + SH2)
 
 
 | Byte Offset | Type      | Field Name            | Description                                                                 |
@@ -107,7 +107,7 @@ he data block format encompasses both open and exclusive formats. The reserved r
 ---
 
 
-✅  Open Format `3`, data of SH degree 3
+✅  Open Format `3`, data of SH degree 3 (SH3 only)
 
 
 | Byte Offset | Type      | Field Name            | Description                                                                 |
