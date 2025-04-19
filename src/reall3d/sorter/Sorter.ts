@@ -85,7 +85,7 @@ function runSort(sortViewProj: number[]) {
     const dataCount = renderSplatCount - watermarkCount;
     depthIndex = new Uint32Array(renderSplatCount);
     const { maxDepth, minDepth } = getDepth(texture, viewProj);
-    if (maxDepth - minDepth <= 0.0001) {
+    if (maxDepth - minDepth <= 0.00001) {
         for (let i = 0; i < renderSplatCount; i++) depthIndex[i] = i;
     } else {
         // 数据
