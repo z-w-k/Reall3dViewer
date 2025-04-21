@@ -64,7 +64,7 @@ export async function parseSpxHeader(header: Uint8Array): Promise<SpxHeader> {
 }
 
 export async function parseSpxBlockData(data: Uint8Array): Promise<Uint8Array | null> {
-    const ui32s = new Uint32Array(data.buffer);
+    const ui32s = new Uint32Array(data.slice(0, 8).buffer);
 
     const splatCount = ui32s[0];
     const bfid = ui32s[1];
