@@ -157,16 +157,20 @@ export async function loadSpx(model: SplatModel) {
 
                 // 解析块数据
                 isGzip && (ui8sBlock = await unGzip(ui8sBlock));
-                const datas: Uint8Array = await parseSpxBlockData(ui8sBlock);
-                if (!datas) {
+                const spxBlock = await parseSpxBlockData(ui8sBlock);
+                if (!spxBlock.success) {
                     console.error('spx block data parser failed');
                     model.abortController.abort();
                     model.status = ModelStatus.Invalid;
                     break;
                 }
 
-                model.downloadSplatCount += datas.byteLength / 32;
-                datas.byteLength && setBlockSplatData(model, datas);
+                if (spxBlock.isSplat) {
+                    model.downloadSplatCount += spxBlock.datas.byteLength / 32;
+                    setBlockSplatData(model, spxBlock.datas);
+                } else if (spxBlock.isSh) {
+                    spxBlock.isSh3 ? model.Sh3Data.push(spxBlock.datas) : model.Sh12Data.push(spxBlock.datas);
+                }
 
                 if (value.byteLength < 4) {
                     // 剩余不足以读取下一个块长度，缓存起来待继续下载

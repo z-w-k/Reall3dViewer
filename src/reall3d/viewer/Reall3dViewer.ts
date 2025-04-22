@@ -1,4 +1,11 @@
-import { IsBigSceneMode, OnSetFlyPositions, OnSetFlyTargets } from './../events/EventConstants';
+import {
+    GetCurrentDisplayShDegree,
+    GetModelShDegree,
+    IsBigSceneMode,
+    OnSetFlyPositions,
+    OnSetFlyTargets,
+    SplatUpdateShDegree,
+} from './../events/EventConstants';
 // ================================
 // Copyright (c) 2025 reall3d.com
 // ================================
@@ -253,6 +260,13 @@ export class Reall3dViewer {
         n === 5 && this.events.fire(FlySavePositions);
         n === 6 && this.events.fire(MetaMarkSaveData);
         n === 7 && this.events.fire(MetaMarkRemoveData);
+        if (n === 8) {
+            (async () => {
+                let shDegree: number = await this.splatMesh.fire(GetModelShDegree);
+                if (p1) shDegree = this.splatMesh.fire(GetCurrentDisplayShDegree) + p1;
+                this.splatMesh.fire(SplatUpdateShDegree, shDegree);
+            })();
+        }
     }
 
     /**

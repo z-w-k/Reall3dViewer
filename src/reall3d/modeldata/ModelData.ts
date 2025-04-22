@@ -22,9 +22,9 @@ export class SpxHeader {
     public CreateDate: number;
     public CreaterId: number;
     public ExclusiveId: number;
+    public ShDegree: number;
     public Reserve1: number;
     public Reserve2: number;
-    public Reserve3: number;
     public Comment: string;
 
     public HashCheck: boolean;
@@ -53,6 +53,11 @@ export class SplatModel {
     public dataSplatCount: number = 0;
     /** 模型水印数量 */
     public watermarkCount: number = 0;
+
+    /** 球谐系数（1级，或1级和2级） */
+    public Sh12Data: Uint8Array[] = [];
+    /** 球谐系数（仅3级） */
+    public Sh3Data: Uint8Array[] = [];
 
     /** 一个高斯点数据长度 */
     public rowLength: number = 0;

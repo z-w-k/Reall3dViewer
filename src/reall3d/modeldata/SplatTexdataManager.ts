@@ -1,3 +1,4 @@
+import { SpxHeader } from './ModelData';
 // ================================
 // Copyright (c) 2025 reall3d.com
 // ================================
@@ -20,6 +21,11 @@ import {
     GetSplatActivePoints,
     GetOptions,
     StopAutoRotate,
+    GetShTexheight,
+    SplatUpdateSh12Texture,
+    SplatUpdateSh3Texture,
+    GetModelShDegree,
+    SplatUpdateShDegree,
 } from '../events/EventConstants';
 import { Events } from '../events/Events';
 import { MetaData, ModelStatus, SplatModel } from './ModelData';
@@ -55,6 +61,36 @@ export function setupSplatTextureManager(events: Events) {
             rs = Math.min(modelCnt, rs) + 10240; // 小场景如果模型数据点数小于最大渲染数，用模型数据点数计算以节省内存，10240为预留的动态文字水印数
         }
         return rs;
+    });
+    on(GetShTexheight, async (shDegree: number): Promise<number> => {
+        const opts: SplatMeshOptions = fire(GetOptions);
+        if (opts.bigSceneMode) return 1; // 大场景不支持
+
+        let cnt = isMobile ? opts.maxRenderCountOfMobile : opts.maxRenderCountOfPc;
+        let modelCnt = await promiseModelSplatCount;
+        cnt = Math.min(modelCnt, cnt);
+
+        if (!splatModel.header) return 1; // splat
+        if (shDegree >= 3) {
+            if (splatModel.header.ShDegree < 3) return 1; // 无SH3数据
+        } else if (shDegree >= 1) {
+            if (splatModel.header.ShDegree < 1) return 1; // 无SH12数据
+        } else {
+            return 1;
+        }
+
+        const texwidth = 1024 * 2;
+        const texheight = Math.ceil(cnt / texwidth);
+        return texheight;
+    });
+
+    on(GetModelShDegree, async (): Promise<number> => {
+        const opts: SplatMeshOptions = fire(GetOptions);
+        if (opts.bigSceneMode) return 0; // 大场景不支持
+
+        await promiseModelSplatCount;
+        if (!splatModel.header) return 0; // splat
+        return splatModel.header.ShDegree;
     });
 
     on(SetGaussianText, async (text: string, isY: boolean = true, isNgativeY: boolean = true) => {
@@ -182,6 +218,11 @@ export function setupSplatTextureManager(events: Events) {
 
         if (downloadDone && !splatModel.smallSceneUploadDone) {
             splatModel.smallSceneUploadDone = true;
+            fire(SplatUpdateSh12Texture, splatModel.Sh12Data);
+            fire(SplatUpdateSh3Texture, splatModel.Sh3Data);
+            splatModel.Sh12Data = null;
+            splatModel.Sh3Data = null;
+            fire(SplatUpdateShDegree, 3);
             fire(GetSplatActivePoints); // 小场景下载完时主动触发一次坐标分块
         }
         fire(Information, { renderSplatCount: splatModel.renderSplatCount });

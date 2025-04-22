@@ -206,9 +206,11 @@ export function setupCommonUtils(events: Events) {
             // updateSceneData,
             scale,
             cuts,
+            shDegree,
         }: Partial<Record<string, any>> = {}) => {
             if (!fire(IsDebugMode)) return;
 
+            shDegree !== undefined && setInfo('shDegree', `${shDegree}`);
             renderSplatCount !== undefined && setInfo('renderSplatCount', `${renderSplatCount}`);
             visibleSplatCount !== undefined && setInfo('visibleSplatCount', `${visibleSplatCount}`);
             modelSplatCount !== undefined && setInfo('modelSplatCount', `${modelSplatCount}`);

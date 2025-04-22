@@ -114,5 +114,11 @@ function fnClick(className: string) {
         viewer.fire(4);
     } else if (className == 'fly-save') {
         viewer.fire(5);
+    } else if (className == 'add-sh') {
+        viewer.fire(8, 1);
+    } else if (className == 'default-sh') {
+        viewer.fire(8);
+    } else if (className == 'sub-sh') {
+        viewer.fire(8, -1);
     }
 }

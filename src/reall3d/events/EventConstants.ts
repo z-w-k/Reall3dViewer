@@ -121,6 +121,8 @@ export const SplatUpdatePerformanceNow = i++;
 export const SplatUpdateShowWaterMark = i++;
 /** Splat更新调试效果 */
 export const SplatUpdateDebugEffect = i++;
+/** Splat更新球谐系数级别 */
+export const SplatUpdateShDegree = i++;
 /** Splat几何体销毁 */
 export const SplatGeometryDispose = i++;
 
@@ -350,3 +352,14 @@ export const PrintInfo = i++;
 export const UploadSplatTexture = i++;
 /** 上传纹理完成 */
 export const UploadSplatTextureDone = i++;
+/** 球谐系数纹理高度 */
+export const GetShTexheight = i++;
+/** Splat更新球谐系数纹理(1,2级) */
+export const SplatUpdateSh12Texture = i++;
+
+/** Splat更新球谐系数纹理(3级) */
+export const SplatUpdateSh3Texture = i++;
+/** 模型数据的球谐系数级别 */
+export const GetModelShDegree = i++;
+/** 当前以多少球谐系数级别在显示 */
+export const GetCurrentDisplayShDegree = i++;

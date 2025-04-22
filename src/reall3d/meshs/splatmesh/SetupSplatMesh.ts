@@ -1,7 +1,18 @@
 // ================================
 // Copyright (c) 2025 reall3d.com
 // ================================
-import { GetCamera, UploadSplatTexture, UploadSplatTextureDone } from './../../events/EventConstants';
+import {
+    GetCamera,
+    GetCurrentDisplayShDegree,
+    GetModelShDegree,
+    GetRenderer,
+    GetShTexheight,
+    SplatUpdateSh12Texture,
+    SplatUpdateSh3Texture,
+    SplatUpdateShDegree,
+    UploadSplatTexture,
+    UploadSplatTextureDone,
+} from './../../events/EventConstants';
 import {
     BufferAttribute,
     DataTexture,
@@ -12,7 +23,9 @@ import {
     Mesh,
     NormalBlending,
     PerspectiveCamera,
+    Renderer,
     RGBAIntegerFormat,
+    RGBIntegerFormat,
     ShaderMaterial,
     UnsignedIntType,
     Vector2,
@@ -73,8 +86,11 @@ import {
     VarMarkPoint,
     VarPerformanceNow,
     VarPointMode,
+    VarShDegree,
     VarShowWaterMark,
     VarSplatIndex,
+    VarSplatShTexture12,
+    VarSplatShTexture3,
     VarSplatTexture0,
     VarSplatTexture1,
     VarTopY,
@@ -110,6 +126,9 @@ export function setupSplatMesh(events: Events) {
     let maxRadius: number = 0;
     let currentMaxRadius: number = 0;
     const arySwitchProcess: any[] = [];
+
+    let currentDisplayShDegree: number = 0;
+    on(GetCurrentDisplayShDegree, () => currentDisplayShDegree);
 
     on(CreateSplatGeometry, async () => {
         const baseGeometry = new InstancedBufferGeometry();
@@ -183,6 +202,20 @@ export function setupSplatMesh(events: Events) {
         dataTexture1.internalFormat = 'RGBA32UI';
         dataTexture1.needsUpdate = true;
         material.uniforms[VarSplatTexture1].value = dataTexture1;
+
+        const shTexheight12 = await fire(GetShTexheight, 1);
+        const dataArraySh12 = new Uint32Array(texwidth * shTexheight12 * 4);
+        let dataTextureSh12 = new DataTexture(dataArraySh12, texwidth, shTexheight12, RGBAIntegerFormat, UnsignedIntType);
+        dataTextureSh12.internalFormat = 'RGBA32UI';
+        dataTextureSh12.needsUpdate = true;
+        material.uniforms[VarSplatShTexture12].value = dataTextureSh12;
+        const shTexheight3 = await fire(GetShTexheight, 3);
+        const dataArraySh3 = new Uint32Array(texwidth * shTexheight3 * 4);
+        let dataTextureSh3 = new DataTexture(dataArraySh3, texwidth, shTexheight3, RGBAIntegerFormat, UnsignedIntType);
+        dataTextureSh3.internalFormat = 'RGBA32UI';
+        dataTextureSh3.needsUpdate = true;
+        material.uniforms[VarSplatShTexture3].value = dataTextureSh3;
+
         material.needsUpdate = true;
 
         let isLastEmpty: boolean = false;
@@ -211,6 +244,38 @@ export function setupSplatMesh(events: Events) {
                 dataTexture0 = dataTexture;
             }
 
+            material.needsUpdate = true;
+            fire(NotifyViewerNeedUpdate);
+        });
+
+        on(SplatUpdateSh12Texture, async (datas: Uint8Array[]) => {
+            if (!datas || !datas.length) return;
+            const dataArray = new Uint32Array(texwidth * (await fire(GetShTexheight, 1)) * 4);
+            const ui8s = new Uint8Array(dataArray.buffer);
+            for (let i = 0, offset = 0; i < datas.length; i++) {
+                ui8s.set(datas[i], offset);
+                offset += datas[i].byteLength;
+            }
+            const dataTexture = new DataTexture(dataArray, texwidth, shTexheight12, RGBAIntegerFormat, UnsignedIntType);
+            dataTexture.internalFormat = 'RGBA32UI';
+            dataTexture.needsUpdate = true;
+            material.uniforms[VarSplatShTexture12].value = dataTexture;
+            material.needsUpdate = true;
+            fire(NotifyViewerNeedUpdate);
+        });
+
+        on(SplatUpdateSh3Texture, async (datas: Uint8Array[]) => {
+            if (!datas || !datas.length) return;
+            const dataArray = new Uint32Array(texwidth * (await fire(GetShTexheight, 3)) * 4);
+            const ui8s = new Uint8Array(dataArray.buffer);
+            for (let i = 0, offset = 0; i < datas.length; i++) {
+                ui8s.set(datas[i], offset);
+                offset += datas[i].byteLength;
+            }
+            const dataTexture = new DataTexture(dataArray, texwidth, shTexheight12, RGBAIntegerFormat, UnsignedIntType);
+            dataTexture.internalFormat = 'RGBA32UI';
+            dataTexture.needsUpdate = true;
+            material.uniforms[VarSplatShTexture3].value = dataTexture;
             material.needsUpdate = true;
             fire(NotifyViewerNeedUpdate);
         });
@@ -298,10 +363,22 @@ export function setupSplatMesh(events: Events) {
             material.uniforms[VarDebugEffect].value = value;
             material.uniformsNeedUpdate = true;
         });
+        on(SplatUpdateShDegree, async (value: number) => {
+            const modelShDegree: number = await fire(GetModelShDegree);
+            if (value < 0) value = 0;
+            if (value > modelShDegree) value = modelShDegree;
+            currentDisplayShDegree = value;
+            material.uniforms[VarShDegree].value = value;
+            material.uniformsNeedUpdate = true;
+            fire(Information, { shDegree: `${value} / max ${modelShDegree}` });
+            fire(NotifyViewerNeedUpdate);
+        });
         on(SplatMaterialDispose, () => {
             material.dispose();
             dataTexture0 && dataTexture0.dispose();
             dataTexture1 && dataTexture1.dispose();
+            dataTextureSh12 && dataTextureSh12.dispose();
+            dataTextureSh3 && dataTextureSh3.dispose();
         });
 
         return material;
@@ -407,12 +484,15 @@ export function setupSplatMesh(events: Events) {
         return {
             [VarSplatTexture0]: { type: 't', value: null },
             [VarSplatTexture1]: { type: 't', value: null },
+            [VarSplatShTexture12]: { type: 't', value: null },
+            [VarSplatShTexture3]: { type: 't', value: null },
             [VarFocal]: { type: 'v2', value: new Vector2() },
             [VarViewport]: { type: 'v2', value: new Vector2() },
             [VarUsingIndex]: { type: 'int', value: 0 },
             [VarPointMode]: { type: 'int', value: 0 },
             [VarDebugEffect]: { type: 'int', value: 1 },
             [VarBigSceneMode]: { type: 'int', value: 0 },
+            [VarShDegree]: { type: 'int', value: 0 },
             [VarLightFactor]: { type: 'float', value: 1 },
             [VarTopY]: { type: 'float', value: 0 },
             [VarCurrentVisibleRadius]: { type: 'float', value: 0 },
