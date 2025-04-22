@@ -182,4 +182,9 @@ export interface Reall3dViewerOptions {
      * 是否禁止直接拖拽本地文件进行查看，默认false
      */
     disableDropLocalFile?: boolean | undefined;
+
+    /**
+     * 球谐系数的渲染级别，默认为模型数据的最大可渲染级别
+     */
+    shDegree?: number | undefined;
 }

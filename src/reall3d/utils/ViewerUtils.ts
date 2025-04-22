@@ -211,6 +211,7 @@ export function copyGsViewerOptions(gsViewerOptions: Reall3dViewerOptions): Spla
     opts.maxRenderCountOfMobile = gsViewerOptions.maxRenderCountOfMobile;
     opts.maxRenderCountOfPc = gsViewerOptions.maxRenderCountOfPc;
     opts.lightFactor = gsViewerOptions.lightFactor;
+    opts.shDegree = gsViewerOptions.shDegree;
 
     return opts;
 }

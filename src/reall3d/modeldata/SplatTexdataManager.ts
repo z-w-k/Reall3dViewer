@@ -222,7 +222,8 @@ export function setupSplatTextureManager(events: Events) {
             fire(SplatUpdateSh3Texture, splatModel.Sh3Data);
             splatModel.Sh12Data = null;
             splatModel.Sh3Data = null;
-            fire(SplatUpdateShDegree, 3);
+            const opts: SplatMeshOptions = fire(GetOptions);
+            fire(SplatUpdateShDegree, opts.shDegree === undefined ? 3 : opts.shDegree);
             fire(GetSplatActivePoints); // 小场景下载完时主动触发一次坐标分块
         }
         fire(Information, { renderSplatCount: splatModel.renderSplatCount });
