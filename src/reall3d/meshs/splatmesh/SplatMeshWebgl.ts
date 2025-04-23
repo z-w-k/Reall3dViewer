@@ -26,7 +26,7 @@ export function getSplatVertexShader() {
             int shCnt = 0;
             float[45] fSHs;
             uvec4 rgb12 = texelFetch(splatShTexture12, ivec2((splatIndex & 0x7ffu), (splatIndex >> 11)), 0);
-            if (any(notEqual(uvec4(0u), rgb12))) {
+            if ( rgb12.a > 0u ) {
                 shCnt = 3;
                 fSHs[0] = float((rgb12.r >> 27) & MaskSH) * FactorSH - 1.0;
                 fSHs[1] = float((rgb12.r >> 22) & MaskSH) * FactorSH - 1.0;
@@ -34,7 +34,7 @@ export function getSplatVertexShader() {
                 fSHs[3] = float((rgb12.r >> 12) & MaskSH) * FactorSH - 1.0;
                 fSHs[4] = float((rgb12.r >> 7) & MaskSH) * FactorSH - 1.0;
                 fSHs[5] = float((rgb12.r >> 2) & MaskSH) * FactorSH - 1.0;
-                fSHs[6] = float(( (rgb12.r << 2) | (rgb12.g >> 29) ) & MaskSH) * FactorSH - 1.0;
+                fSHs[6] = float(( (rgb12.r << 3) | (rgb12.g >> 29) ) & MaskSH) * FactorSH - 1.0;
                 fSHs[7] = float((rgb12.g >> 24) & MaskSH) * FactorSH - 1.0;
                 fSHs[8] = float((rgb12.g >> 19) & MaskSH) * FactorSH - 1.0;
 
@@ -58,7 +58,7 @@ export function getSplatVertexShader() {
 
                     if (shDegree > 2) {
                         uvec4 rgb3 = texelFetch(splatShTexture3, ivec2(splatIndex & 0x7ffu, splatIndex >> 11), 0);
-                        if (any(notEqual(uvec4(0u), rgb3))) {
+                        if ( rgb3.a > 0u ) {
                             shCnt = 15;
                             fSHs[24] = float((rgb3.r >> 27) & MaskSH) * FactorSH - 1.0;
                             fSHs[25] = float((rgb3.r >> 22) & MaskSH) * FactorSH - 1.0;
@@ -66,7 +66,7 @@ export function getSplatVertexShader() {
                             fSHs[27] = float((rgb3.r >> 12) & MaskSH) * FactorSH - 1.0;
                             fSHs[28] = float((rgb3.r >> 7) & MaskSH) * FactorSH - 1.0;
                             fSHs[29] = float((rgb3.r >> 2) & MaskSH) * FactorSH - 1.0;
-                            fSHs[30] = float(( (rgb3.r << 2) | (rgb3.g >> 29) ) & MaskSH) * FactorSH - 1.0;
+                            fSHs[30] = float(( (rgb3.r << 3) | (rgb3.g >> 29) ) & MaskSH) * FactorSH - 1.0;
                             fSHs[31] = float((rgb3.g >> 24) & MaskSH) * FactorSH - 1.0;
                             fSHs[32] = float((rgb3.g >> 19) & MaskSH) * FactorSH - 1.0;
                             fSHs[33]  = float((rgb3.g >> 14) & MaskSH) * FactorSH - 1.0;
