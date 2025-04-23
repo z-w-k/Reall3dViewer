@@ -18,7 +18,7 @@ if (url) {
     debugMode && initDevMode(true);
 } else {
     viewer = new Reall3dViewer({ debugMode: true });
-    viewer.addModel(`https://reall3d.com/demo-models/yz.spx`);
+    viewer.addModel(`https://reall3d.com/demo-models/hornedlizard.spx`);
 
     initDevMode();
 }
