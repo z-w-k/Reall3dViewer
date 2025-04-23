@@ -229,7 +229,9 @@ export class Reall3dViewer {
 
             const url = URL.createObjectURL(file);
 
-            that.reset({ debugMode: true });
+            const opts: Reall3dViewerOptions = that.events.fire(GetOptions);
+            opts.debugMode = true;
+            that.reset(opts);
             setTimeout(async () => {
                 await that.addModel({ url, format });
                 URL.revokeObjectURL(url);
