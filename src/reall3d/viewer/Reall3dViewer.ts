@@ -2,6 +2,7 @@ import {
     GetCurrentDisplayShDegree,
     GetModelShDegree,
     IsBigSceneMode,
+    IsControlPlaneVisible,
     OnSetFlyPositions,
     OnSetFlyTargets,
     SplatUpdateShDegree,
@@ -146,7 +147,7 @@ export class Reall3dViewer {
                     !this.disposed && (this.needUpdate = true);
                     oUpdater.count++ >= 150 && (oUpdater.stop = true);
                 },
-                () => !this.disposed && !oUpdater.stop,
+                () => !this.disposed && (fire(IsControlPlaneVisible) || !oUpdater.stop),
                 10,
             );
         });

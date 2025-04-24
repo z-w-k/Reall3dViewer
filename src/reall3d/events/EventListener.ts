@@ -28,7 +28,6 @@ import {
     GetScene,
     SplatSetPointcloudMode,
     SplatSwitchDisplayMode,
-    RunLoopByTime,
     IsControlPlaneVisible,
     SplatUpdateLightFactor,
     SelectMarkPoint,
@@ -46,6 +45,7 @@ import {
     ClearFlyPosition,
     PrintInfo,
     GetSplatMesh,
+    OnViewerUpdate,
 } from './EventConstants';
 import { Reall3dViewerOptions } from '../viewer/Reall3dViewerOptions';
 import { SplatMesh } from '../meshs/splatmesh/SplatMesh';
@@ -79,7 +79,6 @@ export function setupEventListener(events: Events) {
 
     let disposed: boolean;
     let mouseState: MouseState = new MouseState();
-    let controlPlaneVisibleChecking: boolean = false;
     let lastActionTome: number;
 
     on(StartAutoRotate, () => {
@@ -224,26 +223,21 @@ export function setupEventListener(events: Events) {
         e.code === 'KeyR' && keySet.add(e.code);
         if (e.code === 'ArrowLeft' || e.code === 'ArrowRight') {
             fire(ControlsUpdateRotateAxis);
-            if (!controlPlaneVisibleChecking) {
-                controlPlaneVisibleChecking = true;
-                fire(
-                    RunLoopByTime,
-                    () => {
-                        if (Date.now() - lastActionTome > 2000) {
-                            fire(ControlPlaneSwitchVisible, false);
-                            fire(ViewerNeedUpdate);
-                            controlPlaneVisibleChecking = false;
-                            // 旋转轴调整后 2 秒内无操作，自动保存相机位置
-                            fire(MetaSaveSmallSceneCameraInfo);
-                        }
-                    },
-                    () => fire(IsControlPlaneVisible),
-                    100,
-                );
-            }
         }
         lastActionTome = Date.now();
     };
+
+    on(
+        OnViewerUpdate,
+        () => {
+            if (fire(IsControlPlaneVisible) && Date.now() - lastActionTome > 2000) {
+                fire(ControlPlaneSwitchVisible, false);
+                // 旋转轴调整后 2 秒内无操作，自动保存相机位置
+                fire(MetaSaveSmallSceneCameraInfo);
+            }
+        },
+        true,
+    );
 
     const blurEventListener = () => {
         keySet.clear();
