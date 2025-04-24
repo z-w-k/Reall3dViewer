@@ -45,13 +45,12 @@ npm run build
 
 # .spx file can be obtained through conversion using the gsbox
 # https://github.com/gotoeasy/gsbox
-gsbox p2x -i /path/to/input.ply -o /path/to/output.spx
+gsbox p2x -i /path/to/input.ply -o /path/to/output.spx -sh 0
 ```
 
 ## TODO
 - Continuously optimize and enhance rendering performance
 - Design more optimized model format `.spx` and tool
-- Spherical harmonics
 - Large scene
 
 ## Release History
