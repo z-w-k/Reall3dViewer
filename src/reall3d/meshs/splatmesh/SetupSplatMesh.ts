@@ -2,18 +2,6 @@
 // Copyright (c) 2025 reall3d.com
 // ================================
 import {
-    GetCamera,
-    GetCurrentDisplayShDegree,
-    GetModelShDegree,
-    GetRenderer,
-    GetShTexheight,
-    SplatUpdateSh12Texture,
-    SplatUpdateSh3Texture,
-    SplatUpdateShDegree,
-    UploadSplatTexture,
-    UploadSplatTextureDone,
-} from './../../events/EventConstants';
-import {
     BufferAttribute,
     DataTexture,
     DoubleSide,
@@ -23,9 +11,7 @@ import {
     Mesh,
     NormalBlending,
     PerspectiveCamera,
-    Renderer,
     RGBAIntegerFormat,
-    RGBIntegerFormat,
     ShaderMaterial,
     UnsignedIntType,
     Vector2,
@@ -33,6 +19,14 @@ import {
 } from 'three';
 import { Events } from '../../events/Events';
 import {
+    GetCamera,
+    GetCurrentDisplayShDegree,
+    GetModelShDegree,
+    GetShTexheight,
+    SplatUpdateSh12Texture,
+    SplatUpdateSh3Texture,
+    SplatUpdateShDegree,
+    UploadSplatTexture,
     NotifyViewerNeedUpdate,
     SplatUpdateViewport,
     GetSplatMaterial,
@@ -249,7 +243,7 @@ export function setupSplatMesh(events: Events) {
         });
 
         on(SplatUpdateSh12Texture, async (datas: Uint8Array[]) => {
-            if (!datas || !datas.length) return;
+            if (fire(IsBigSceneMode) || !datas || !datas.length) return;
             const dataArray = new Uint32Array(texwidth * (await fire(GetShTexheight, 1)) * 4);
             const ui8s = new Uint8Array(dataArray.buffer);
             for (let i = 0, offset = 0; i < datas.length; i++) {
@@ -265,7 +259,7 @@ export function setupSplatMesh(events: Events) {
         });
 
         on(SplatUpdateSh3Texture, async (datas: Uint8Array[]) => {
-            if (!datas || !datas.length) return;
+            if (fire(IsBigSceneMode) || !datas || !datas.length) return;
             const dataArray = new Uint32Array(texwidth * (await fire(GetShTexheight, 3)) * 4);
             const ui8s = new Uint8Array(dataArray.buffer);
             for (let i = 0, offset = 0; i < datas.length; i++) {
@@ -364,6 +358,7 @@ export function setupSplatMesh(events: Events) {
             material.uniformsNeedUpdate = true;
         });
         on(SplatUpdateShDegree, async (value: number) => {
+            if (fire(IsBigSceneMode)) return;
             const modelShDegree: number = await fire(GetModelShDegree);
             if (value < 0) value = 0;
             if (value > modelShDegree) value = modelShDegree;
