@@ -17,7 +17,7 @@ if (url) {
     viewer.addModel(url);
     debugMode && initDevMode(true);
 } else {
-    viewer = new Reall3dViewer({ debugMode: true });
+    viewer = new Reall3dViewer({ debugMode: true, maxRenderCountOfPc: 384 * 10000, shDegree: 3 });
     viewer.addModel(`https://reall3d.com/demo-models/hornedlizard.spx`);
 
     initDevMode();
