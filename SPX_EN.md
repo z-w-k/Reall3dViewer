@@ -68,12 +68,12 @@ he data block format encompasses both open and exclusive formats. The reserved r
 |-------------|-----------|-----------------------|-----------------------------------------------------------------------------|
 | 0–3         | uint32    | `*`Gaussian Count     | Number of Gaussians                                                         |
 | 4–7         | uint32    | `*`Format ID          | `20`                                                                 |
-| 8–n         | bytes     | `*`Data               | x...y...z...sx...sy...sz...r...g...b...a...rx...ry...rz...rw... |
+| 8–n         | bytes     | `*`Data               | x...y...z...sx...sy...sz...r...g...b...a...rw...rx...ry...rz... |
 
-- **Coordinates**: 24-bit precision (`x`, `y`, `z`).
-- **Scale**: 8-bit per axis (`sx`, `sy`, `sz`).
-- **Color**: RGBA channels (8-bit each).
-- **Rotation**: Quaternion components (8-bit each).
+- `x,y,z` Coordinates, 24-bit precision (`x`, `y`, `z`).
+- `sx,sy,sz` Scale, 8-bit per axis (`sx`, `sy`, `sz`).
+- `r,g,b,a` Color, RGBA channels (8-bit each).
+- `rw,rx,ry,rz` Rotation, Quaternion components (8-bit each).
 
 ---
 
@@ -85,9 +85,9 @@ he data block format encompasses both open and exclusive formats. The reserved r
 |----------|------|------|------|
 | 0–3      | uint32 | `*`Gaussian Count     | Number of Gaussians                                                         |
 | 4–7      | uint32 | `*`Format ID          | `1` data of Spherical harmonics (SH) degree 1                       |
-| 8~n      | bytes  | `*`Data               | rest0...rest8,rest0...rest8,... |
+| 8~n      | bytes  | `*`Data               | sh0...sh8,sh0...sh8,... |
 
-- `rest0...rest8` Spherical harmonics (8-bit each)
+- `sh0...sh8` Spherical harmonics (8-bit each)
 
 ---
 
@@ -99,10 +99,10 @@ he data block format encompasses both open and exclusive formats. The reserved r
 | Byte Offset | Type      | Field Name            | Description                                                                 |
 |----------|------|------|------|
 | 0–3      | uint32 | `*`Gaussian Count     | Number of Gaussians                                                         |
-| 4–7      | uint32 | `*`Format ID          | `2` data of Spherical harmonics (SH) degree 2                       |
-| 8~n      | bytes  | `*`Data               | rest0...rest23,rest0...rest23,... |
+| 4–7      | uint32 | `*`Format ID          | `2` data of Spherical harmonics (SH) degree 1 and 2                       |
+| 8~n      | bytes  | `*`Data               | sh0...sh23,sh0...sh23,... |
 
-- `rest0...rest23` Spherical harmonics (8-bit each)
+- `sh0...sh23` Spherical harmonics (8-bit each)
 
 ---
 
@@ -114,9 +114,9 @@ he data block format encompasses both open and exclusive formats. The reserved r
 |----------|------|------|------|
 | 0–3      | uint32 | `*`Gaussian Count     | Number of Gaussians                                                         |
 | 4–7      | uint32 | `*`Format ID          | `3` data of Spherical harmonics (SH) degree 3                       |
-| 8~n      | bytes  | `*`Data               | rest24...rest44,rest24...rest44,... |
+| 8~n      | bytes  | `*`Data               | sh24...sh44,sh24...sh44,... |
 
-- `rest24...rest44` Spherical harmonics (8-bit each)
+- `sh24...sh44` Spherical harmonics (8-bit each)
 
 ---
 
