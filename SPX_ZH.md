@@ -18,14 +18,14 @@
 | 0~2 | ASCII | `*`固定 | 固定值 `spx` |
 | 3 | uint8 | `*`版本号 | 当前只有 `1` |
 | 4~7 | uint32 | `*`高斯点数 |  |
-| 8~11 | float32 | `*`minX | 包围盒的minX |
-| 12~15 | float32 | `*`maxX | 包围盒的maxX |
-| 16~19 | float32 | `*`minY | 包围盒的minY |
-| 20~23 | float32 | `*`maxY | 包围盒的maxY |
-| 24~27 | float32 | `*`minZ | 包围盒的minZ |
-| 28~31 | float32 | `*`maxZ | 包围盒的maxZ |
-| 32~35 | float32 | 中心高度 |  |
-| 36~39 | float32 | 半径 |  |
+| 8~11 | float32 | `*`MinX | 包围盒的minX |
+| 12~15 | float32 | `*`MaxX | 包围盒的maxX |
+| 16~19 | float32 | `*`MinY | 包围盒的minY |
+| 20~23 | float32 | `*`MaxY | 包围盒的maxY |
+| 24~27 | float32 | `*`MinZ | 包围盒的minZ |
+| 28~31 | float32 | `*`MaxZ | 包围盒的maxZ |
+| 32~35 | float32 | MinTopY | 最小中心高度 |
+| 36~39 | float32 | MaxTopY | 最大中心高度 |
 | 40~43 | uint32 | 创建日期 | YYYYMMDD |
 | 44~47 | uint32 | `*`生成器识别号 | 自定义`0(官方)`以外用的唯一值来标识生成器自己 |
 | 48~51 | uint32 | `*`专属识别号 | 自定义`0(公开)`以外表示非公开的自定义数据块格式 |

@@ -19,14 +19,14 @@ Fixed-length header for format identification, containing bounding box data for 
 | 0–2         | ASCII     | `*`Magic           | Fixed value `spx`                                                         |
 | 3           | uint8     | `*`Version               | Current version: `1`                                                        |
 | 4–7         | uint32    | `*`Gaussian Count        | Total number of Gaussian points                                             |
-| 8–11        | float32   | `*`minX                  | Bounding box minimum X coordinate                                           |
-| 12–15       | float32   | `*`maxX                  | Bounding box maximum X coordinate                                           |
-| 16–19       | float32   | `*`minY                  | Bounding box minimum Y coordinate                                           |
-| 20–23       | float32   | `*`maxY                  | Bounding box maximum Y coordinate                                           |
-| 24–27       | float32   | `*`minZ                  | Bounding box minimum Z coordinate                                           |
-| 28–31       | float32   | `*`maxZ                  | Bounding box maximum Z coordinate                                           |
-| 32–35       | float32   | Center Height         | Model center height (Y-axis)                                                |
-| 36–39       | float32   | Radius                | Bounding sphere radius                                                      |
+| 8–11        | float32   | `*`MinX                  | Bounding box minimum X coordinate                                           |
+| 12–15       | float32   | `*`MaxX                  | Bounding box maximum X coordinate                                           |
+| 16–19       | float32   | `*`MinY                  | Bounding box minimum Y coordinate                                           |
+| 20–23       | float32   | `*`MaxY                  | Bounding box maximum Y coordinate                                           |
+| 24–27       | float32   | `*`MinZ                  | Bounding box minimum Z coordinate                                           |
+| 28–31       | float32   | `*`MaxZ                  | Bounding box maximum Z coordinate                                           |
+| 32–35       | float32   | Min Center Height        | Min model center height (Y-axis)                                                |
+| 36–39       | float32   | Max Center Height        | Max model center height (Y-axis)                                                |
 | 40–43       | uint32    | Creation Date         | Date in `YYYYMMDD` format                                                   |
 | 44–47       | uint32    | `*`Creater ID         | A unique value (other than `0` reserved for official use) to identify the creater  |
 | 48–51       | uint32    | `*`Exclusive ID       | A non-zero value (where `0` indicates public formats) defines a proprietary/private data block format      |
