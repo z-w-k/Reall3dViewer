@@ -167,7 +167,7 @@ export function setupSplatTextureManager(events: Events) {
         if (splatModel.smallSceneUploadDone && splatModel.lastTextWatermarkVersion == splatModel.textWatermarkVersion) return; // 已传完(模型数据 + 动态文字水印)
 
         if (!texture.version) {
-            fire(SplatUpdateTopY, splatModel.header?.TopY || 0); // 初次传入高点
+            fire(SplatUpdateTopY, splatModel.header?.MinTopY || 0); // 初次传入高点
 
             let ver: string = splatModel.opts.format;
             if (splatModel.opts.format == 'spx') {
@@ -213,7 +213,8 @@ export function setupSplatTextureManager(events: Events) {
         texture.minZ = splatModel.minZ;
         texture.maxZ = splatModel.maxZ;
 
-        fire(UploadSplatTexture, texture, splatModel.currentRadius, splatModel.header?.MaxRadius || splatModel.currentRadius);
+        // TODO MaxRadius?
+        fire(UploadSplatTexture, texture, splatModel.currentRadius, splatModel.currentRadius);
         lastPostDataTime = sysTime;
 
         if (downloadDone && !splatModel.smallSceneUploadDone) {

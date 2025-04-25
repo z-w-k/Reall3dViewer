@@ -151,6 +151,6 @@ function setSplatData(model: SplatModel, data: Uint8Array) {
             model.splatData.set(data.slice(i * 32, i * 32 + 32), model.dataSplatCount++ * 32);
         }
     }
-    const topY = model.header?.TopY || 0;
+    const topY = model.header?.MinTopY || 0;
     model.currentRadius = Math.sqrt(model.maxX * model.maxX + topY * topY + model.maxZ * model.maxZ);
 }

@@ -251,7 +251,7 @@ function setBlockSplatData(model: SplatModel, data: Uint8Array) {
             }
         }
 
-        const topY = model.header.TopY || 0;
+        const topY = model.header.MinTopY || 0;
         model.currentRadius = Math.sqrt(model.maxX * model.maxX + topY * topY + model.maxZ * model.maxZ); // 当前模型数据范围离高点的最大半径
         return;
     }

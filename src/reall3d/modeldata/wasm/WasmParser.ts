@@ -27,8 +27,8 @@ export async function parseSpxHeader(header: Uint8Array): Promise<SpxHeader> {
     head.MaxY = f32s[5];
     head.MinZ = f32s[6];
     head.MaxZ = f32s[7];
-    head.TopY = f32s[8];
-    head.MaxRadius = f32s[9];
+    head.MinTopY = f32s[8];
+    head.MaxTopY = f32s[9];
     head.CreateDate = ui32s[10];
     head.CreaterId = ui32s[11];
     head.ExclusiveId = ui32s[12];

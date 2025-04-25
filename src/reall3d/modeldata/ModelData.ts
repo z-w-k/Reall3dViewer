@@ -17,8 +17,8 @@ export class SpxHeader {
     public MaxY: number;
     public MinZ: number;
     public MaxZ: number;
-    public TopY: number;
-    public MaxRadius: number;
+    public MinTopY: number;
+    public MaxTopY: number;
     public CreateDate: number;
     public CreaterId: number;
     public ExclusiveId: number;
