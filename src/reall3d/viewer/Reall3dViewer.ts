@@ -231,6 +231,7 @@ export class Reall3dViewer {
             const url = URL.createObjectURL(file);
 
             const opts: Reall3dViewerOptions = that.events.fire(GetOptions);
+            opts.pointcloudMode = true;
             opts.debugMode = true;
             that.reset(opts);
             setTimeout(async () => {
