@@ -23,6 +23,9 @@ export class SpxHeader {
     public CreaterId: number;
     public ExclusiveId: number;
     public ShDegree: number;
+    public Flag1: number;
+    public Flag2: number;
+    public Flag3: number;
     public Reserve1: number;
     public Reserve2: number;
     public Comment: string;

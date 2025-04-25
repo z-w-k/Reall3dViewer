@@ -32,7 +32,10 @@ export async function parseSpxHeader(header: Uint8Array): Promise<SpxHeader> {
     head.CreateDate = ui32s[10];
     head.CreaterId = ui32s[11];
     head.ExclusiveId = ui32s[12];
-    head.ShDegree = ui32s[13];
+    head.ShDegree = header[52];
+    head.Flag1 = header[53];
+    head.Flag2 = header[54];
+    head.Flag3 = header[55];
     head.Reserve1 = ui32s[14];
     head.Reserve2 = ui32s[15];
 
