@@ -154,12 +154,21 @@ export function setupSplatTextureManager(events: Events) {
     async function mergeAndUploadTextureData(downloadDone: boolean) {
         if (disposed) return;
         const texture = texture0;
+        const maxRenderCount = await fire(GetMaxRenderCount);
 
         const txtWatermarkData = textWatermarkData;
         let dataSplatCount = splatModel.dataSplatCount;
         let watermarkCount = downloadDone ? splatModel.watermarkCount : 0;
         let textWatermarkCount = downloadDone ? (txtWatermarkData?.byteLength || 0) / 32 : 0; // 动态输入的文字水印数
         splatModel.renderSplatCount = dataSplatCount + watermarkCount + textWatermarkCount; // 渲染数
+
+        if (splatModel.renderSplatCount >= maxRenderCount) {
+            // 中断下载等特殊情况
+            splatModel.renderSplatCount = maxRenderCount;
+            watermarkCount = 0;
+            textWatermarkCount = 0;
+            dataSplatCount > maxRenderCount && (dataSplatCount = maxRenderCount);
+        }
 
         fire(Information, { visibleSplatCount: splatModel.renderSplatCount, modelSplatCount: splatModel.modelSplatCount + textWatermarkCount }); // 可见数=模型数据总点数
 
@@ -180,7 +189,6 @@ export function setupSplatTextureManager(events: Events) {
         texture.textureReady = false;
 
         // 合并（模型数据 + 动态文字水印）
-        const maxRenderCount = await fire(GetMaxRenderCount);
         const texwidth = 1024 * 2;
         const texheight = Math.ceil((2 * maxRenderCount) / texwidth);
 
