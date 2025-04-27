@@ -2,6 +2,7 @@
 // Copyright (c) 2025 reall3d.com
 // ================================
 import {
+    SplatDataSize16,
     SplatDataSize32,
     SpxBlockFormats,
     SpxBlockFormatSH1,
@@ -91,42 +92,21 @@ export async function parseSpxBlockData(data: Uint8Array): Promise<SpxBlockResul
     const isSh1: boolean = SpxBlockFormatSH1 == blockFormat;
     const isSh2: boolean = SpxBlockFormatSH2 == blockFormat;
     const isSh3: boolean = SpxBlockFormatSH3 == blockFormat;
+    const isSh: boolean = isSh1 || isSh2 || isSh3;
+    const isSplat: boolean = !isSh;
 
-    const resultByteLength = splatCount * SplatDataSize32;
+    const resultByteLength = splatCount * (isSh ? SplatDataSize16 : SplatDataSize32);
     const wasmModule = WebAssembly.compile(Uint8Array.from(atob(WasmBase64), c => c.charCodeAt(0)).buffer);
-    let blockCnt: number;
-    if (isSh1) {
-        blockCnt = Math.floor((splatCount * 16) / WasmBlockSize) + 2;
-    } else if (isSh2) {
-        blockCnt = Math.floor((splatCount * 24 + 8) / WasmBlockSize) + 2;
-    } else if (isSh3) {
-        blockCnt = Math.floor((splatCount * 21 + 8) / WasmBlockSize) + 2;
-    } else {
-        blockCnt = Math.floor((resultByteLength + data.byteLength) / WasmBlockSize) + 2;
-    }
-
+    const blockCnt: number = Math.floor((resultByteLength + data.byteLength) / WasmBlockSize) + 2;
     const memory = new WebAssembly.Memory({ initial: blockCnt, maximum: blockCnt });
     const instance = await WebAssembly.instantiate(await wasmModule, { env: { memory, expf } });
     const dataParser: any = instance.exports.D;
 
     const wasmMemory = new Uint8Array(memory.buffer);
-    let code: number;
-    if (isSh1) {
-        const inputIndex: number = splatCount * 7 + ((splatCount * 9) % 4) + 8;
-        wasmMemory.set(data, inputIndex);
-        code = dataParser(0, inputIndex);
-        if (!code) return { splatCount, blockFormat, success: true, datas: wasmMemory.slice(0, splatCount * 16), isSh: true, isSh1, isSh2, isSh3 };
-    } else if (isSh2 || isSh3) {
-        wasmMemory.set(data, 0);
-        code = dataParser(0, 0);
-        if (!code) return { splatCount, blockFormat, success: true, datas: wasmMemory.slice(0, splatCount * 16), isSh: true, isSh1, isSh2, isSh3 };
-    } else {
-        wasmMemory.set(data, resultByteLength);
-        code = dataParser(0, resultByteLength);
-        if (!code) return { splatCount, blockFormat, success: true, datas: wasmMemory.slice(0, resultByteLength), isSplat: true };
-    }
-
-    return { splatCount, blockFormat, success: false };
+    wasmMemory.set(data, resultByteLength);
+    const code = dataParser(0, resultByteLength);
+    if (code) return { splatCount, blockFormat, success: false };
+    return { splatCount, blockFormat, success: true, datas: wasmMemory.slice(0, resultByteLength), isSplat, isSh, isSh1, isSh2, isSh3 };
 }
 
 export async function parseSplatToTexdata(data: Uint8Array, splatCount: number): Promise<Uint8Array> {
