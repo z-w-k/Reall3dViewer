@@ -61,3 +61,5 @@ export const WkMaxZ = `$${n++}`;
 export const WkInit = `$${n++}`;
 /** 水印数量 */
 export const WkWatermarkCount = `$${n++}`;
+/** 相机方向 */
+export const WkCameraDirection = `$${n++}`;

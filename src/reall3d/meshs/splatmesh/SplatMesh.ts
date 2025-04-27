@@ -1,7 +1,7 @@
 // ================================
 // Copyright (c) 2025 reall3d.com
 // ================================
-import { Mesh, PerspectiveCamera } from 'three';
+import { Mesh, PerspectiveCamera, Vector3 } from 'three';
 import { Events } from '../../events/Events';
 import {
     SplatUpdatePerformanceNow,
@@ -31,6 +31,7 @@ import {
     CommonUtilsDispose,
     GetSplatMesh,
     GetCameraLookAt,
+    GetCameraDirection,
 } from '../../events/EventConstants';
 import { setupSplatTextureManager } from '../../modeldata/SplatTexdataManager';
 import { SplatMeshOptions } from './SplatMeshOptions';
@@ -73,6 +74,7 @@ export class SplatMesh extends Mesh {
         on(GetCameraLookAt, (copy: boolean = false) => (copy ? opts.controls.target.clone() : opts.controls.target));
         on(GetViewProjectionMatrixArray, () => camera.projectionMatrix.clone().multiply(camera.matrixWorldInverse).multiply(this.matrix).toArray());
         on(GetViewProjectionMatrix, () => camera.projectionMatrix.clone().multiply(camera.matrixWorldInverse));
+        on(GetCameraDirection, () => camera.getWorldDirection(new Vector3()).toArray());
         on(GetRenderer, () => opts.renderer);
         on(GetScene, () => opts.scene);
         on(IsBigSceneMode, () => opts.bigSceneMode);

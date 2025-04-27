@@ -363,3 +363,5 @@ export const SplatUpdateSh3Texture = i++;
 export const GetModelShDegree = i++;
 /** 当前以多少球谐系数级别在显示 */
 export const GetCurrentDisplayShDegree = i++;
+/** 取相机方向 */
+export const GetCameraDirection = i++;
