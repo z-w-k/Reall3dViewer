@@ -232,6 +232,7 @@ export class Reall3dViewer {
 
             const opts: Reall3dViewerOptions = that.events.fire(GetOptions);
             opts.pointcloudMode = true;
+            opts.autoRotate = true;
             opts.debugMode = true;
             that.reset(opts);
             setTimeout(async () => {
