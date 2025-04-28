@@ -159,7 +159,7 @@ export async function loadSpx(model: SplatModel) {
                 isGzip && (ui8sBlock = await unGzip(ui8sBlock));
                 const spxBlock = await parseSpxBlockData(ui8sBlock);
                 if (!spxBlock.success) {
-                    console.error('spx block data parser failed');
+                    console.error('spx block data parser failed. block format:', spxBlock.blockFormat);
                     model.abortController.abort();
                     model.status = ModelStatus.Invalid;
                     break;

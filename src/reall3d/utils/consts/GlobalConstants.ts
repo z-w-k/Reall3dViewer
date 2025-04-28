@@ -1,7 +1,7 @@
 // ================================
 // Copyright (c) 2025 reall3d.com
 // ================================
-export const ViewerVersion = 'v1.3.0-dev-sh'; // Reall3dViewer 版本
+export const ViewerVersion = 'v1.3.0-dev-exclusive'; // Reall3dViewer 版本
 
 export const isMobile = navigator.userAgent.includes('Mobi');
 export const HalfChars = 'QWERTYUIOPLKJHGFDSAZXCVBNM1234567890qwertyuioplkjhgfdsazxcvbnm`~!@#$%^&*()-_=+\\|]}[{\'";::,<.>//? \t';
@@ -32,15 +32,3 @@ export const SpxBlockFormatSH3 = 3;
 
 /** 【Reall3D扩展的专属格式】the exclusive format extended by reall3d */
 export const SpxExclusiveFormatReall3d = 3141592653;
-/** 【Reall3D扩展的专属格式】the exclusive format extended by reall3d */
-export const SpxBlockFormatReall3d = 2718281828;
-
-/** 【可识别的数据块格式】Block Content Formats */
-export const SpxBlockFormats = [
-    SpxBlockFormatData20,
-    SpxBlockFormatSH1,
-    SpxBlockFormatSH2,
-    SpxBlockFormatSH3,
-    SpxExclusiveFormatReall3d,
-    SpxBlockFormatReall3d,
-];
