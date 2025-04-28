@@ -31,7 +31,7 @@ let texture1: SplatTexdata = { index: 1, version: 0 };
 let isSorterReady: boolean = false;
 
 let sortRunning: boolean;
-const Epsilon: number = isMobile ? 0.01 : 0.002;
+const Epsilon: number = isMobile ? 0.2 : 0.2;
 let viewProj: number[];
 let lastViewProj: number[] = [];
 let distances: Int32Array;
