@@ -32,9 +32,9 @@ Fixed-length header for format identification, containing bounding box data for 
 | 48–51       | uint32    | `*`Exclusive ID       | A non-zero value (where `0` indicates public formats) defines a proprietary/private data block format      |
 | 52          | uint8     | SH degree             | Allowed values: `0,1,2,3`. Others → `0` |
 | 53          | uint8     | Flag1                 | Distinguishes different model forms; default is `0` |
-| 54          | uint8     | Flag2                 | Reserved for future use |
-| 55          | uint8     | Flag3                 | Reserved for future use |
-| 56–63       | -         | Reserved              | Reserved for future use                                        |
+| 54          | uint8     | Flag2                 | Indicating whether it is inverted. default is `0` |
+| 55          | uint8     | Flag3                 | Reserved |
+| 56–63       | -         | Reserved              | Reserved                                        |
 | 64–123      | ASCII     | Comment               | Maximum 60 ASCII characters                    |
 | 124–127     | uint32    | `*`Checksum              | Validates file integrity (creater-specific)                               |
 
