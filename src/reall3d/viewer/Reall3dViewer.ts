@@ -231,6 +231,7 @@ export class Reall3dViewer {
             const url = URL.createObjectURL(file);
 
             const opts: Reall3dViewerOptions = that.events.fire(GetOptions);
+            opts.bigSceneMode=false
             opts.pointcloudMode = true;
             opts.autoRotate = true;
             opts.debugMode = true;
