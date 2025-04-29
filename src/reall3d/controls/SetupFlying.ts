@@ -85,9 +85,8 @@ export function setupFlying(events: Events) {
             delete meta.flyPositions;
             delete meta.flyTargets;
         }
-        const metaJson = JSON.stringify(meta, null, 2);
 
-        return await fire(HttpPostMetaData, metaJson, (fire(GetSplatMesh) as SplatMesh).meta.url);
+        return await fire(HttpPostMetaData, meta);
     });
 
     on(FlyOnce, () => {

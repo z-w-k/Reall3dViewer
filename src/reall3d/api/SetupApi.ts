@@ -4,12 +4,17 @@
 import { Events } from '../events/Events';
 import { HttpPostMetaData, HttpQueryGaussianText } from '../events/EventConstants';
 import { ViewerVersion } from '../utils/consts/GlobalConstants';
+import { MetaData } from '../modeldata/ModelData';
 export function setupApi(events: Events) {
     const on = (key: number, fn?: Function, multiFn?: boolean): Function | Function[] => events.on(key, fn, multiFn);
 
-    on(HttpPostMetaData, (meta: string, url: string) => {
+    on(HttpPostMetaData, (meta: MetaData) => {
         // TODO post meta data to server here
-        console.info(meta);
+        const url = meta.url;
+        const metaClone: MetaData = { ...meta };
+        delete metaClone.url;
+        const metaJson = JSON.stringify(meta, null, 2);
+        console.info(metaJson);
     });
 
     on(HttpQueryGaussianText, (text: string = '') => {

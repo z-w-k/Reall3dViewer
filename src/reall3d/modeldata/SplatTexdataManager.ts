@@ -176,7 +176,9 @@ export function setupSplatTextureManager(events: Events) {
         if (splatModel.smallSceneUploadDone && splatModel.lastTextWatermarkVersion == splatModel.textWatermarkVersion) return; // 已传完(模型数据 + 动态文字水印)
 
         if (!texture.version) {
-            fire(SplatUpdateTopY, splatModel.header?.MinTopY || 0); // 初次传入高点
+            if (splatModel.header) {
+                fire(SplatUpdateTopY, (splatModel.header.Flag2 ? splatModel.header.MaxTopY : splatModel.header.MinTopY) || 0); // 初次传入高点
+            }
 
             let ver: string = splatModel.opts.format;
             if (splatModel.opts.format == 'spx') {
