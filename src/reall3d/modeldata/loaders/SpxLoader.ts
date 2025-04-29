@@ -94,13 +94,6 @@ export async function loadSpx(model: SplatModel) {
                 headChunk = null;
 
                 // 文件头检查校验
-                if (header.CreaterId === SpxCreaterReall3d && !header.HashCheck) {
-                    // 【例】文件头中提示为官方出品，但实际哈希校验失败，视为不可信任，停止处理
-                    model.abortController.abort();
-                    model.status = ModelStatus.Invalid;
-                    console.error('hash check failed!', header.Comment);
-                    continue;
-                }
                 if (!ExclusiveFormats.includes(header.ExclusiveId)) {
                     // 属于无法识别的格式时停止处理，或者进一步结合CreaterId判断是否能识别，避免后续出现数据解析错误
                     model.abortController.abort();
