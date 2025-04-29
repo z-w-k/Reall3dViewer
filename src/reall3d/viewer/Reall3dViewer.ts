@@ -195,7 +195,7 @@ export class Reall3dViewer {
         let watermark: string = '';
         on(OnSetWaterMark, (text: string = '') => {
             watermark = text;
-            this.splatMesh.fire(SetGaussianText, watermark, true, false); // 水印文字水平朝向
+            this.splatMesh.fire(SetGaussianText, watermark, true); // 水印文字水平朝向
         });
         on(GetCachedWaterMark, () => watermark);
 

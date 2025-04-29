@@ -93,8 +93,10 @@ export function setupSplatTextureManager(events: Events) {
         return splatModel.header.ShDegree;
     });
 
-    on(SetGaussianText, async (text: string, isY: boolean = true, isNgativeY: boolean = true) => {
+    on(SetGaussianText, async (text: string, isY: boolean = true) => {
         try {
+            await promiseModelSplatCount;
+            const isNgativeY = !!splatModel.header?.Flag2;
             textWatermarkData = await fire(GetGaussianText, text, isY, isNgativeY);
             splatModel && (splatModel.textWatermarkVersion = Date.now());
         } catch (e) {
