@@ -22,6 +22,7 @@
 - [x] 支持`.splat`以及优化的`.spx`格式
 - [x] 支持标注测量
 - [x] 支持文字水印
+- [x] 支持1~3级球谐系数
 
 
 ## 在线演示
@@ -50,7 +51,6 @@ gsbox p2x -i /path/to/input.ply -o /path/to/output.spx -sh 0
 
 ## TODO
 - 持续优化增强渲染性能
-- 设计更加优化的模型格式`.spx`及工具
 - 大场景
 
 

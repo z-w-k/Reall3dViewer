@@ -22,6 +22,7 @@
 - [x] Support `.splat` and optimized `.spx` formats
 - [x] Support mark and measurement
 - [x] Support text watermark
+- [x] Support 1st to 3nd degree spherical harmonics
 
 
 ## Live demo
@@ -50,7 +51,6 @@ gsbox p2x -i /path/to/input.ply -o /path/to/output.spx -sh 0
 
 ## TODO
 - Continuously optimize and enhance rendering performance
-- Design more optimized model format `.spx` and tool
 - Large scene
 
 ## Release History
