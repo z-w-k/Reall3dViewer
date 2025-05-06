@@ -30,7 +30,8 @@ https://reall3d.com/reall3dviewer/index.html
 
 
 ## `.spx`
-https://github.com/reall3d-com/Reall3dViewer/blob/main/SPX_ZH.md
+- 格式说明： https://github.com/reall3d-com/Reall3dViewer/blob/main/SPX_ZH.md
+- 转换工具： https://github.com/gotoeasy/gsbox
 
 
 ## 用法
