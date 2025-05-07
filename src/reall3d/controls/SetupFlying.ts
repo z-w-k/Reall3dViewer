@@ -24,7 +24,6 @@ import {
 import { CameraControls } from './CameraControls';
 import { CatmullRomCurve3, Vector3 } from 'three';
 import { MetaData } from '../modeldata/ModelData';
-import { SplatMesh } from '../meshs/splatmesh/SplatMesh';
 export function setupFlying(events: Events) {
     const fire = (key: number, ...args: any): any => events.fire(key, ...args);
     const on = (key: number, fn?: Function, multiFn?: boolean): Function | Function[] => events.on(key, fn, multiFn);

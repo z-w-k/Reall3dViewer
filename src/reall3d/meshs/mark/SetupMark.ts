@@ -52,7 +52,6 @@ import { MarkDataMultiPlans } from './data/MarkDataMultiPlans';
 import { MarkDataMultiLines } from './data/MarkDataMultiLines';
 import { MarkDataDistanceLine } from './data/MarkDataDistanceLine';
 import { MetaData } from '../../modeldata/ModelData';
-import { SplatMesh } from '../splatmesh/SplatMesh';
 import { CameraControls } from '../../controls/CameraControls';
 
 export function setupMark(events: Events) {

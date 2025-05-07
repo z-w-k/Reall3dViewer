@@ -8,7 +8,6 @@ import {
     PcDownloadLimitSplatCount,
     isMobile,
     SpxHeaderSize,
-    SpxCreaterReall3d,
     SpxOpenFormat0,
     SpxExclusiveFormatReall3d,
 } from '../../utils/consts/GlobalConstants';

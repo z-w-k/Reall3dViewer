@@ -1,7 +1,7 @@
 // ================================
 // Copyright (c) 2025 reall3d.com
 // ================================
-import { Matrix4, PerspectiveCamera, Renderer, Scene } from 'three';
+import { Matrix4, Renderer, Scene } from 'three';
 import { Events } from '../../events/Events';
 import { OrbitControls } from 'three/examples/jsm/Addons.js';
 
@@ -23,11 +23,6 @@ export interface SplatMeshOptions {
      * 指定场景对象传入使用
      */
     scene: Scene;
-
-    // /**
-    //  * 指定相机对象传入使用
-    //  */
-    // camera?: PerspectiveCamera;
 
     /**
      * 控制器

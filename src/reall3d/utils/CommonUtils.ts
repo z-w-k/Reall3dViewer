@@ -27,7 +27,7 @@ import {
 } from '../events/EventConstants';
 import { Object3D, PerspectiveCamera, ShaderChunk, Vector3 } from 'three';
 import { SplatMeshOptions } from '../meshs/splatmesh/SplatMeshOptions';
-import { isMobile, ViewerVersion } from './consts/GlobalConstants';
+import { ViewerVersion } from './consts/GlobalConstants';
 
 export function setupCommonUtils(events: Events) {
     let disposed: boolean = false;

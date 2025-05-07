@@ -1,3 +1,8 @@
+// ================================
+// Copyright (c) 2025 reall3d.com
+// ================================
+import '../style/style.less';
+import { Scene, AmbientLight, WebGLRenderer } from 'three';
 import {
     GetCurrentDisplayShDegree,
     GetModelShDegree,
@@ -6,13 +11,6 @@ import {
     OnSetFlyPositions,
     OnSetFlyTargets,
     SplatUpdateShDegree,
-} from './../events/EventConstants';
-// ================================
-// Copyright (c) 2025 reall3d.com
-// ================================
-import '../style/style.less';
-import { Scene, AmbientLight, WebGLRenderer } from 'three';
-import {
     ClearMarkPoint,
     CommonUtilsDispose,
     CreateFocusMarkerMesh,
