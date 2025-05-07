@@ -74,7 +74,7 @@ export class SplatModel {
     /** 中断控制器 */
     public abortController: AbortController;
 
-    /** bin格式模型的头信息 */
+    /** spx格式模型的头信息 */
     public header: SpxHeader = null;
 
     public meta: MetaData;
@@ -107,6 +107,8 @@ export class SplatModel {
                 this.opts.format = 'spx';
             } else if (opts.url?.endsWith('.splat')) {
                 this.opts.format = 'splat';
+            } else if (opts.url?.endsWith('.ply')) {
+                this.opts.format = 'ply';
             } else {
                 console.error('unknow format!');
             }
