@@ -19,7 +19,7 @@
 <br>
 
 ## Features
-- [x] Support `.splat` and optimized `.spx` formats
+- [x] Support formats: `.ply`, `.splat`, `.spx`
 - [x] Support mark and measurement
 - [x] Support text watermark
 - [x] Support 1st to 3nd degree spherical harmonics
