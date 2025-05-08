@@ -19,7 +19,7 @@
 <br>
 
 ## 特点
-- [x] 支持`.splat`以及优化的`.spx`格式
+- [x] 支持格式: `.ply`、`.splat`、`.spx`、`.spz`
 - [x] 支持标注测量
 - [x] 支持文字水印
 - [x] 支持1~3级球谐系数
@@ -30,6 +30,7 @@ https://reall3d.com/reall3dviewer/index.html
 
 
 ## `.spx`
+
 - 格式说明： https://github.com/reall3d-com/Reall3dViewer/blob/main/SPX_ZH.md
 - 转换工具： https://github.com/gotoeasy/gsbox
 
