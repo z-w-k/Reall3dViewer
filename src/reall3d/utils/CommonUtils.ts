@@ -293,3 +293,12 @@ export async function unGzip(data: Uint8Array): Promise<Uint8Array> {
 }
 
 export const isLocalhost = location.hostname === 'localhost' || location.hostname === '127.0.0.1';
+
+export function clipUint8(value: number): number {
+    return value < 0 ? 0 : value > 255 ? 255 : value | 0;
+}
+
+export function encodeSplatSH(val: number): number {
+    const encodeSHval = clipUint8(Math.round(val * 128) + 128);
+    return clipUint8(Math.floor((encodeSHval + 4) / 8) * 8);
+}

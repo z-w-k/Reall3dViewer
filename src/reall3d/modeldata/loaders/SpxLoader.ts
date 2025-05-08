@@ -89,6 +89,7 @@ export async function loadSpx(model: SplatModel) {
 
                 model.header = header;
                 model.modelSplatCount = header.SplatCount;
+                model.dataShDegree = header.ShDegree;
                 headChunks = null;
                 headChunk = null;
 

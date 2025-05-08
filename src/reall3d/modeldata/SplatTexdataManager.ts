@@ -35,6 +35,7 @@ import { isMobile, MobileDownloadLimitSplatCount, PcDownloadLimitSplatCount } fr
 import { isNeedReload } from '../utils/CommonUtils';
 import { loadSpx } from './loaders/SpxLoader';
 import { SplatMeshOptions } from '../meshs/splatmesh/SplatMeshOptions';
+import { loadPly } from './loaders/PlyLoader';
 
 export function setupSplatTextureManager(events: Events) {
     const on = (key: number, fn?: Function, multiFn?: boolean): Function | Function[] => events.on(key, fn, multiFn);
@@ -70,11 +71,11 @@ export function setupSplatTextureManager(events: Events) {
         let modelCnt = await promiseModelSplatCount;
         cnt = Math.min(modelCnt, cnt);
 
-        if (!splatModel.header) return 1; // splat
+        if (!splatModel.dataShDegree) return 1; // splat
         if (shDegree >= 3) {
-            if (splatModel.header.ShDegree < 3) return 1; // 无SH3数据
+            if (splatModel.dataShDegree < 3) return 1; // 无SH3数据
         } else if (shDegree >= 1) {
-            if (splatModel.header.ShDegree < 1) return 1; // 无SH12数据
+            if (splatModel.dataShDegree < 1) return 1; // 无SH12数据
         } else {
             return 1;
         }
@@ -89,8 +90,7 @@ export function setupSplatTextureManager(events: Events) {
         if (opts.bigSceneMode) return 0; // 大场景不支持
 
         await promiseModelSplatCount;
-        if (!splatModel.header) return 0; // splat
-        return splatModel.header.ShDegree;
+        return splatModel.dataShDegree;
     });
 
     on(SetGaussianText, async (text: string, isY: boolean = true) => {
@@ -256,6 +256,8 @@ export function setupSplatTextureManager(events: Events) {
             loadSpx(model);
         } else if (model.opts.format === 'splat') {
             loadSplat(model);
+        } else if (model.opts.format === 'ply') {
+            loadPly(model);
         } else {
             return false;
         }

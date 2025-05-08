@@ -77,6 +77,8 @@ export class SplatModel {
     /** spx格式模型的头信息 */
     public header: SpxHeader = null;
 
+    public dataShDegree: number = 0;
+
     public meta: MetaData;
     public map: Map<string, CutData>;
 

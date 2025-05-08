@@ -217,11 +217,13 @@ export class Reall3dViewer {
             let file = e.dataTransfer.files[0];
             if (!file) return;
 
-            let format: 'splat' | 'spx';
+            let format: 'ply' | 'splat' | 'spx';
             if (file.name.endsWith('.spx')) {
                 format = 'spx';
             } else if (file.name.endsWith('.splat')) {
                 format = 'splat';
+            } else if (file.name.endsWith('.ply')) {
+                format = 'ply';
             } else {
                 return console.error('unsupported format:', file.name);
             }
@@ -434,6 +436,8 @@ export class Reall3dViewer {
                 modelOpts.format = 'spx';
             } else if (modelOpts.url.endsWith('.splat')) {
                 modelOpts.format = 'splat';
+            } else if (modelOpts.url.endsWith('.ply')) {
+                modelOpts.format = 'ply';
             } else {
                 console.error('unknow format!', modelOpts.url);
                 return;
