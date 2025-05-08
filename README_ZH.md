@@ -1,5 +1,5 @@
 <p align=center>
-<img style="width:128px;height:128px" src="https://gotoeasy.github.io/reall3d/logo.svg"/>
+<img style="width:128px;height:128px" src="https://gotoeasy.github.io/reall3d/logo.png"/>
 </p>
 
 # Reall3dViewer
