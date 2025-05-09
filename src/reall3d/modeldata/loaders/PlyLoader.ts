@@ -1,6 +1,7 @@
 // ================================
 // Copyright (c) 2025 reall3d.com
 // ================================
+import { Vector3 } from 'three';
 import { clipUint8, encodeSplatSH } from '../../utils/CommonUtils';
 import {
     DataSize32,
@@ -324,4 +325,5 @@ function setSplatData(model: SplatModel, data: Uint8Array) {
 
     const topY = 0;
     model.currentRadius = Math.sqrt(model.maxX * model.maxX + topY * topY + model.maxZ * model.maxZ);
+    model.aabbCenter = new Vector3((model.minX + model.maxX) / 2, (model.minY + model.maxY) / 2, (model.minZ + model.maxZ) / 2);
 }

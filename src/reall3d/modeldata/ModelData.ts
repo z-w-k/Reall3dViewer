@@ -1,6 +1,7 @@
 // ================================
 // Copyright (c) 2025 reall3d.com
 // ================================
+import { Vector3 } from 'three';
 import { CameraInfo } from '../controls/SetupCameraControls';
 import { ModelOptions } from './ModelOptions';
 
@@ -90,6 +91,7 @@ export class SplatModel {
     public maxZ: number = -Infinity;
     public topY: number = 0;
     public currentRadius: number = 0;
+    public aabbCenter: Vector3;
 
     public notifyFetchStopDone: boolean;
     public smallSceneUploadDone: boolean;

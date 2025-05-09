@@ -1,6 +1,7 @@
 // ================================
 // Copyright (c) 2025 reall3d.com
 // ================================
+import { Vector3 } from 'three';
 import {
     SplatDataSize20,
     SplatDataSize32,
@@ -246,6 +247,7 @@ function setBlockSplatData(model: SplatModel, data: Uint8Array) {
 
         const topY = model.header.MinTopY || 0;
         model.currentRadius = Math.sqrt(model.maxX * model.maxX + topY * topY + model.maxZ * model.maxZ); // 当前模型数据范围离高点的最大半径
+        model.aabbCenter = new Vector3((model.minX + model.maxX) / 2, (model.minY + model.maxY) / 2, (model.minZ + model.maxZ) / 2);
         return;
     }
 

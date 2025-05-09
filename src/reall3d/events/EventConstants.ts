@@ -365,3 +365,8 @@ export const GetModelShDegree = i++;
 export const GetCurrentDisplayShDegree = i++;
 /** 取相机方向 */
 export const GetCameraDirection = i++;
+/** 取模型包围盒中心点 */
+export const GetAabbCenter = i++;
+
+/** 聚焦包围盒中心点 */
+export const FocusAabbCenter = i++;

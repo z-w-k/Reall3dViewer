@@ -1,6 +1,7 @@
 // ================================
 // Copyright (c) 2025 reall3d.com
 // ================================
+import { Vector3 } from 'three';
 import { clipUint8, unGzip } from '../../utils/CommonUtils';
 import {
     isMobile,
@@ -238,6 +239,7 @@ export async function loadSpz(model: SplatModel) {
 
         const topY = 0;
         model.currentRadius = Math.sqrt(model.maxX * model.maxX + topY * topY + model.maxZ * model.maxZ); // 当前模型数据范围离高点的最大半径
+        model.aabbCenter = new Vector3((model.minX + model.maxX) / 2, (model.minY + model.maxY) / 2, (model.minZ + model.maxZ) / 2);
     }
 
     function parseSpzHeader(ui8s: Uint8Array): SpzHeader {

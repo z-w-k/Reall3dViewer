@@ -26,6 +26,7 @@ import {
     SplatUpdateSh3Texture,
     GetModelShDegree,
     SplatUpdateShDegree,
+    GetAabbCenter,
 } from '../events/EventConstants';
 import { Events } from '../events/Events';
 import { MetaData, ModelStatus, SplatModel } from './ModelData';
@@ -37,6 +38,7 @@ import { loadSpx } from './loaders/SpxLoader';
 import { SplatMeshOptions } from '../meshs/splatmesh/SplatMeshOptions';
 import { loadPly } from './loaders/PlyLoader';
 import { loadSpz } from './loaders/SpzLoader';
+import { Vector3 } from 'three';
 
 export function setupSplatTextureManager(events: Events) {
     const on = (key: number, fn?: Function, multiFn?: boolean): Function | Function[] => events.on(key, fn, multiFn);
@@ -50,8 +52,9 @@ export function setupSplatTextureManager(events: Events) {
     let texture0: SplatTexdata = { index: 0, version: 0 };
     let texture1: SplatTexdata = { index: 1, version: 0 };
     let mergeRunning: boolean = false;
-
     const isBigSceneMode: boolean = fire(IsBigSceneMode);
+
+    on(GetAabbCenter, () => splatModel?.aabbCenter || new Vector3());
 
     let fnResolveModelSplatCount: (value: unknown) => void;
     const promiseModelSplatCount: Promise<number> = new Promise(resolve => (fnResolveModelSplatCount = resolve));

@@ -46,6 +46,8 @@ import {
     PrintInfo,
     GetSplatMesh,
     OnViewerUpdate,
+    FocusAabbCenter,
+    GetAabbCenter,
 } from './EventConstants';
 import { Reall3dViewerOptions } from '../viewer/Reall3dViewerOptions';
 import { SplatMesh } from '../meshs/splatmesh/SplatMesh';
@@ -121,6 +123,12 @@ export function setupEventListener(events: Events) {
         const scene: Scene = fire(GetScene);
         scene.traverse((obj: any) => obj instanceof SplatMesh && (obj as SplatMesh).fire(SplatUpdateLightFactor, lightFactor));
     });
+    on(FocusAabbCenter, () => {
+        const scene: Scene = fire(GetScene);
+        let splat: SplatMesh;
+        scene.traverse((obj: any) => obj instanceof SplatMesh && (splat = obj));
+        splat && fire(CameraSetLookAt, splat.fire(GetAabbCenter));
+    });
 
     on(KeyActionCheckAndExecute, () => {
         if (!keySet.size) return;
@@ -165,6 +173,9 @@ export function setupEventListener(events: Events) {
             keySet.clear();
         } else if (keySet.has('KeyI')) {
             fire(PrintInfo);
+            keySet.clear();
+        } else if (keySet.has('KeyF')) {
+            fire(FocusAabbCenter);
             keySet.clear();
         } else if (keySet.has('F2')) {
             !opts.bigSceneMode && window.open('/editor/index.html?url=' + encodeURIComponent((fire(GetSplatMesh) as SplatMesh).meta.url));

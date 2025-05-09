@@ -1,7 +1,8 @@
 // ================================
 // Copyright (c) 2025 reall3d.com
 // ================================
-import { isMobile, MobileDownloadLimitSplatCount, PcDownloadLimitSplatCount } from '../../utils/consts/GlobalConstants';
+import { Vector3 } from 'three';
+import { isMobile, MobileDownloadLimitSplatCount, PcDownloadLimitSplatCount, SplatDataSize32 } from '../../utils/consts/GlobalConstants';
 import { ModelStatus, SplatModel } from '../ModelData';
 import { parseSplatToTexdata } from '../wasm/WasmParser';
 
@@ -122,13 +123,18 @@ export async function loadSplat(model: SplatModel) {
 }
 
 function setSplatData(model: SplatModel, data: Uint8Array) {
-    const stepCnt = 4096;
-    const dataCnt = data.byteLength / 32;
-    !model.splatData && (model.splatData = new Uint8Array(Math.min(model.opts.downloadLimitSplatCount, model.modelSplatCount) * 32));
+    let dataCnt = data.byteLength / SplatDataSize32;
+    const maxSplatDataCnt = Math.min(model.opts.downloadLimitSplatCount, model.modelSplatCount);
+    !model.splatData && (model.splatData = new Uint8Array(maxSplatDataCnt * SplatDataSize32));
     !model.watermarkData && (model.watermarkData = new Uint8Array(0));
+    if (model.dataSplatCount + dataCnt > maxSplatDataCnt) {
+        dataCnt = maxSplatDataCnt - model.dataSplatCount; // 丢弃超出限制的部分
+        model.splatData.set(data.slice(0, dataCnt * SplatDataSize32), model.dataSplatCount * SplatDataSize32);
+    } else {
+        model.splatData.set(data, model.dataSplatCount * SplatDataSize32);
+    }
 
     const f32s: Float32Array = new Float32Array(data.buffer);
-    const ui32s: Uint32Array = new Uint32Array(data.buffer);
     for (let i = 0, x = 0, y = 0, z = 0; i < dataCnt; i++) {
         x = f32s[i * 8];
         y = f32s[i * 8 + 1];
@@ -139,18 +145,10 @@ function setSplatData(model: SplatModel, data: Uint8Array) {
         model.maxY = Math.max(model.maxY, y);
         model.minZ = Math.min(model.minZ, z);
         model.maxZ = Math.max(model.maxZ, z);
-
-        if (ui32s[i * 8 + 3] >> 16) {
-            if (model.watermarkCount * 32 === model.watermarkData.byteLength) {
-                const watermarkData = new Uint8Array((model.watermarkCount + stepCnt) * 32);
-                watermarkData.set(model.watermarkData, 0);
-                model.watermarkData = watermarkData;
-            }
-            model.watermarkData.set(data.slice(i * 32, i * 32 + 32), model.watermarkCount++ * 32);
-        } else {
-            model.splatData.set(data.slice(i * 32, i * 32 + 32), model.dataSplatCount++ * 32);
-        }
     }
+    model.dataSplatCount += dataCnt;
+
     const topY = model.header?.MinTopY || 0;
     model.currentRadius = Math.sqrt(model.maxX * model.maxX + topY * topY + model.maxZ * model.maxZ);
+    model.aabbCenter = new Vector3((model.minX + model.maxX) / 2, (model.minY + model.maxY) / 2, (model.minZ + model.maxZ) / 2);
 }
