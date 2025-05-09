@@ -111,6 +111,8 @@ export class SplatModel {
                 this.opts.format = 'splat';
             } else if (opts.url?.endsWith('.ply')) {
                 this.opts.format = 'ply';
+            } else if (opts.url?.endsWith('.spz')) {
+                this.opts.format = 'spz';
             } else {
                 console.error('unknow format!');
             }

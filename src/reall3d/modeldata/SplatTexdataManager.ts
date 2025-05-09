@@ -36,6 +36,7 @@ import { isNeedReload } from '../utils/CommonUtils';
 import { loadSpx } from './loaders/SpxLoader';
 import { SplatMeshOptions } from '../meshs/splatmesh/SplatMeshOptions';
 import { loadPly } from './loaders/PlyLoader';
+import { loadSpz } from './loaders/SpzLoader';
 
 export function setupSplatTextureManager(events: Events) {
     const on = (key: number, fn?: Function, multiFn?: boolean): Function | Function[] => events.on(key, fn, multiFn);
@@ -258,6 +259,8 @@ export function setupSplatTextureManager(events: Events) {
             loadSplat(model);
         } else if (model.opts.format === 'ply') {
             loadPly(model);
+        } else if (model.opts.format === 'spz') {
+            loadSpz(model);
         } else {
             return false;
         }
