@@ -7,6 +7,7 @@ import {
     isMobile,
     MobileDownloadLimitSplatCount,
     PcDownloadLimitSplatCount,
+    SH_C0,
     SpxBlockFormatSH1,
     SpxBlockFormatSH2,
     SpxBlockFormatSH3,
@@ -15,7 +16,6 @@ import { ModelStatus, SplatModel } from '../ModelData';
 import { parseSplatToTexdata, parseSpxBlockData } from '../wasm/WasmParser';
 
 const maxProcessCnt = isMobile ? 20480 : 51200;
-const SH_C0 = 0.28209479177387814;
 
 export async function loadPly(model: SplatModel) {
     try {
