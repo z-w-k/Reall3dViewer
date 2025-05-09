@@ -134,7 +134,7 @@ export function setupSplatTextureManager(events: Events) {
             (fire(GetOptions) as SplatMeshOptions).viewerEvents?.fire(StopAutoRotate);
             return fire(OnFetchStop, 0) || fire(Information, { renderSplatCount: 0, visibleSplatCount: 0, modelSplatCount: 0 }); // 无效
         }
-        if (!splatModel || !splatModel.downloadSplatCount) return; // 没数据
+        if (!splatModel || !splatModel.downloadSize) return; // 尚未下载
 
         const downloadDone = splatModel.status !== ModelStatus.FetchReady && splatModel.status !== ModelStatus.Fetching;
         if (downloadDone) {
@@ -145,6 +145,8 @@ export function setupSplatTextureManager(events: Events) {
             // 没下载完，更新下载进度条
             fire(OnFetching, (100 * splatModel.downloadSize) / splatModel.fileSize);
         }
+
+        if (!splatModel.downloadSplatCount) return; // 尚无高斯数据
 
         if (mergeRunning) return;
         mergeRunning = true;
