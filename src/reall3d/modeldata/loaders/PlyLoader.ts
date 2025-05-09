@@ -2,7 +2,15 @@
 // Copyright (c) 2025 reall3d.com
 // ================================
 import { clipUint8, encodeSplatSH } from '../../utils/CommonUtils';
-import { DataSize32, isMobile, MobileDownloadLimitSplatCount, PcDownloadLimitSplatCount } from '../../utils/consts/GlobalConstants';
+import {
+    DataSize32,
+    isMobile,
+    MobileDownloadLimitSplatCount,
+    PcDownloadLimitSplatCount,
+    SpxBlockFormatSH1,
+    SpxBlockFormatSH2,
+    SpxBlockFormatSH3,
+} from '../../utils/consts/GlobalConstants';
 import { ModelStatus, SplatModel } from '../ModelData';
 import { parseSplatToTexdata, parseSpxBlockData } from '../wasm/WasmParser';
 
@@ -165,11 +173,11 @@ export async function loadPly(model: SplatModel) {
             const sh3 = new Uint8Array(cntSplat * 21 + 8);
             const u2s = new Uint32Array(2);
             u2s[0] = cntSplat;
-            u2s[1] = 2;
+            u2s[1] = SpxBlockFormatSH2;
             sh2.set(new Uint8Array(u2s.buffer), 0);
             const u3s = new Uint32Array(2);
             u3s[0] = cntSplat;
-            u3s[1] = 3;
+            u3s[1] = SpxBlockFormatSH3;
             sh3.set(new Uint8Array(u3s.buffer), 0);
 
             for (let i = 0, n = 0; i < cntSplat; i++) {
@@ -195,7 +203,7 @@ export async function loadPly(model: SplatModel) {
             const sh2 = new Uint8Array(cntSplat * 24 + 8);
             const u2s = new Uint32Array(2);
             u2s[0] = cntSplat;
-            u2s[1] = 2;
+            u2s[1] = SpxBlockFormatSH2;
             sh2.set(new Uint8Array(u2s.buffer), 0);
 
             for (let i = 0, n = 0; i < cntSplat; i++) {
@@ -212,7 +220,7 @@ export async function loadPly(model: SplatModel) {
             const sh2 = new Uint8Array(cntSplat * 9 + 8);
             const u2s = new Uint32Array(2);
             u2s[0] = cntSplat;
-            u2s[1] = 1;
+            u2s[1] = SpxBlockFormatSH1;
             sh2.set(new Uint8Array(u2s.buffer), 0);
 
             for (let i = 0, n = 0; i < cntSplat; i++) {
