@@ -239,7 +239,7 @@ export function getSplatVertexShader() {
                 if (shDegree > 0) {
                     vColor.rgb += evalSH(v3Cen);
                 }
-                // vColor.rgb = clamp(vColor.rgb, vec3(0.), vec3(1.));
+                vColor.rgb = clamp(vColor.rgb, vec3(0.), vec3(1.));
             }
 
             vec2 eigenVector2 = vec2(eigenVector1.y, -eigenVector1.x);
