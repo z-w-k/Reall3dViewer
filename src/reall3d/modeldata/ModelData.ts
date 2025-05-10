@@ -59,9 +59,13 @@ export class SplatModel {
     public watermarkCount: number = 0;
 
     /** 球谐系数（1级，或1级和2级） */
-    public Sh12Data: Uint8Array[] = [];
+    public sh12Data: Uint8Array[] = [];
     /** 球谐系数（仅3级） */
-    public Sh3Data: Uint8Array[] = [];
+    public sh3Data: Uint8Array[] = [];
+    /** 已下载的球谐系数（1级，或1级和2级）数量 */
+    public sh12Count: number = 0;
+    /** 已下载的球谐系数（仅3级）数量 */
+    public sh3Count: number = 0;
 
     /** 一个高斯点数据长度 */
     public rowLength: number = 0;
@@ -97,6 +101,8 @@ export class SplatModel {
     public smallSceneUploadDone: boolean;
     public textWatermarkVersion: number = 0;
     public lastTextWatermarkVersion: number = 0;
+
+    public fetchLimit: number = 0;
 
     public activePoints: any;
 

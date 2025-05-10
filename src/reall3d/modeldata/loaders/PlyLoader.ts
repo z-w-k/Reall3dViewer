@@ -6,8 +6,6 @@ import { clipUint8, encodeSplatSH } from '../../utils/CommonUtils';
 import {
     DataSize32,
     isMobile,
-    MobileDownloadLimitSplatCount,
-    PcDownloadLimitSplatCount,
     SH_C0,
     SplatDataSize32,
     SpxBlockFormatSH1,
@@ -35,6 +33,7 @@ export async function loadPly(model: SplatModel) {
         model.fileSize = contentLength;
         model.downloadSize = 0;
         model.downloadSplatCount = 0;
+        model.watermarkData = new Uint8Array(0);
 
         let perValue = new Uint8Array(256);
         let perByteLen: number = 0;
@@ -68,8 +67,8 @@ export async function loadPly(model: SplatModel) {
                 value = headData.slice(header.headerLength);
                 model.rowLength = header.rowLength;
                 model.dataShDegree = header.shDegree;
-                model.splatData = new Uint8Array(Math.min(header.vertexCount, model.opts.downloadLimitSplatCount) * 32);
                 model.modelSplatCount = header.vertexCount;
+                model.splatData = new Uint8Array(Math.min(model.modelSplatCount, model.fetchLimit) * 32);
             }
 
             if (perByteLen + value.byteLength < model.rowLength) {
@@ -83,12 +82,7 @@ export async function loadPly(model: SplatModel) {
             }
 
             // 超过限制时终止下载
-            const pcDownloadLimitCount = model.meta.maxRenderCountOfPc || PcDownloadLimitSplatCount;
-            const mobileDownloadLimitCount = model.meta.maxRenderCountOfMobile || MobileDownloadLimitSplatCount;
-            const downloadLimitSplatCount = isMobile ? mobileDownloadLimitCount : pcDownloadLimitCount;
-            const isSingleLimit: boolean = !model.meta?.autoCut && model.downloadSplatCount >= model.opts.downloadLimitSplatCount;
-            const isCutLimit = model.meta?.autoCut && model.downloadSplatCount >= downloadLimitSplatCount;
-            (isSingleLimit || isCutLimit) && model.abortController.abort();
+            model.downloadSplatCount >= model.fetchLimit && model.abortController.abort();
         }
     } catch (e) {
         if (e.name === 'AbortError') {
@@ -122,8 +116,8 @@ export async function loadPly(model: SplatModel) {
             }
 
             // 丢弃超出限制范围外的数据
-            if (model.downloadSplatCount + cntSplat > model.opts.downloadLimitSplatCount) {
-                cntSplat = model.opts.downloadLimitSplatCount - model.downloadSplatCount;
+            if (model.downloadSplatCount + cntSplat > model.fetchLimit) {
+                cntSplat = model.fetchLimit - model.downloadSplatCount;
                 leave = 0;
             }
 
@@ -197,9 +191,9 @@ export async function loadPly(model: SplatModel) {
                 }
             }
             const sh2Block = await parseSpxBlockData(sh2);
-            model.Sh12Data.push(sh2Block.datas);
+            model.sh12Data.push(sh2Block.datas);
             const sh3Block = await parseSpxBlockData(sh3);
-            model.Sh3Data.push(sh3Block.datas);
+            model.sh3Data.push(sh3Block.datas);
         } else if (header.shDegree == 2) {
             const shDim = 8;
             const sh2 = new Uint8Array(cntSplat * 24 + 8);
@@ -216,7 +210,7 @@ export async function loadPly(model: SplatModel) {
                 }
             }
             const sh2Block = await parseSpxBlockData(sh2);
-            model.Sh12Data.push(sh2Block.datas);
+            model.sh12Data.push(sh2Block.datas);
         } else if (header.shDegree == 1) {
             const shDim = 3;
             const sh2 = new Uint8Array(cntSplat * 9 + 8);
@@ -233,7 +227,7 @@ export async function loadPly(model: SplatModel) {
                 }
             }
             const sh2Block = await parseSpxBlockData(sh2);
-            model.Sh12Data.push(sh2Block.datas);
+            model.sh12Data.push(sh2Block.datas);
         }
 
         return await parseSplatToTexdata(splatData, cntSplat);
@@ -298,9 +292,7 @@ export async function loadPly(model: SplatModel) {
 
 function setSplatData(model: SplatModel, data: Uint8Array) {
     let dataCnt = data.byteLength / SplatDataSize32;
-    const maxSplatDataCnt = Math.min(model.opts.downloadLimitSplatCount, model.modelSplatCount);
-    !model.splatData && (model.splatData = new Uint8Array(maxSplatDataCnt * SplatDataSize32));
-    !model.watermarkData && (model.watermarkData = new Uint8Array(0));
+    const maxSplatDataCnt = Math.min(model.fetchLimit, model.modelSplatCount);
     if (model.dataSplatCount + dataCnt > maxSplatDataCnt) {
         dataCnt = maxSplatDataCnt - model.dataSplatCount; // 丢弃超出限制的部分
         model.splatData.set(data.slice(0, dataCnt * SplatDataSize32), model.dataSplatCount * SplatDataSize32);

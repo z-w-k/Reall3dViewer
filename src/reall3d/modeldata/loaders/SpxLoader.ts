@@ -2,16 +2,7 @@
 // Copyright (c) 2025 reall3d.com
 // ================================
 import { Vector3 } from 'three';
-import {
-    SplatDataSize20,
-    SplatDataSize32,
-    MobileDownloadLimitSplatCount,
-    PcDownloadLimitSplatCount,
-    isMobile,
-    SpxHeaderSize,
-    SpxOpenFormat0,
-    SpxExclusiveFormatReall3d,
-} from '../../utils/consts/GlobalConstants';
+import { SplatDataSize20, SplatDataSize32, SpxHeaderSize, SpxOpenFormat0, SpxExclusiveFormatReall3d } from '../../utils/consts/GlobalConstants';
 import { parseSpxBlockData, parseSpxHeader } from '../wasm/WasmParser';
 import { ModelStatus, SplatModel, SpxHeader } from '../ModelData';
 import { unGzip } from '../../utils/CommonUtils';
@@ -91,6 +82,7 @@ export async function loadSpx(model: SplatModel) {
                 model.header = header;
                 model.modelSplatCount = header.SplatCount;
                 model.dataShDegree = header.ShDegree;
+                model.aabbCenter = new Vector3((header.MaxX + header.MaxX) / 2, (header.MinY + header.MaxY) / 2, (header.MinZ + header.MaxZ) / 2);
                 headChunks = null;
                 headChunk = null;
 
@@ -162,8 +154,27 @@ export async function loadSpx(model: SplatModel) {
                 if (spxBlock.isSplat) {
                     model.downloadSplatCount += spxBlock.datas.byteLength / 32;
                     setBlockSplatData(model, spxBlock.datas);
-                } else if (spxBlock.isSh) {
-                    spxBlock.isSh3 ? model.Sh3Data.push(spxBlock.datas) : model.Sh12Data.push(spxBlock.datas);
+                } else {
+                    const maxSplatDataCnt = Math.min(model.fetchLimit, model.modelSplatCount);
+                    if (spxBlock.isSh3) {
+                        if (model.sh3Count + spxBlock.splatCount > maxSplatDataCnt) {
+                            const cnt = maxSplatDataCnt - model.sh3Count;
+                            model.sh3Data.push(spxBlock.datas.slice(0, cnt * 16));
+                            model.sh3Count += cnt;
+                        } else {
+                            model.sh3Data.push(spxBlock.datas);
+                            model.sh3Count += spxBlock.splatCount;
+                        }
+                    } else {
+                        if (model.sh12Count + spxBlock.splatCount > maxSplatDataCnt) {
+                            const cnt = maxSplatDataCnt - model.sh12Count;
+                            model.sh12Data.push(spxBlock.datas.slice(0, cnt * 16));
+                            model.sh12Count += cnt;
+                        } else {
+                            model.sh12Data.push(spxBlock.datas);
+                            model.sh12Count += spxBlock.splatCount;
+                        }
+                    }
                 }
 
                 if (value.byteLength < 4) {
@@ -186,12 +197,14 @@ export async function loadSpx(model: SplatModel) {
             }
 
             // 超过限制时终止下载
-            const pcDownloadLimitCount = model.meta.pcDownloadLimitSplatCount || PcDownloadLimitSplatCount;
-            const mobileDownloadLimitCount = model.meta.mobileDownloadLimitSplatCount || MobileDownloadLimitSplatCount;
-            const downloadLimitSplatCount = isMobile ? mobileDownloadLimitCount : pcDownloadLimitCount;
-            const isSmallSceneLimit: boolean = !model.meta?.autoCut && model.downloadSplatCount >= model.opts.downloadLimitSplatCount;
-            const isLargeSceneLimit = model.meta?.autoCut && model.downloadSplatCount >= downloadLimitSplatCount;
-            (isSmallSceneLimit || isLargeSceneLimit) && model.abortController.abort();
+            const limitCnt = model.fetchLimit;
+            if (model.header.ShDegree === 3) {
+                model.downloadSplatCount >= limitCnt && model.sh12Count >= limitCnt && model.sh3Count >= limitCnt && model.abortController.abort();
+            } else if (model.header.ShDegree) {
+                model.downloadSplatCount >= limitCnt && model.sh12Count >= limitCnt && model.abortController.abort();
+            } else {
+                model.downloadSplatCount >= limitCnt && model.abortController.abort();
+            }
         }
     } catch (e) {
         if (e.name === 'AbortError') {
@@ -212,7 +225,7 @@ function setBlockSplatData(model: SplatModel, data: Uint8Array) {
     let dataCnt = data.byteLength / 32;
     const stepCnt = 4096;
     if (!isCut) {
-        const maxSplatDataCnt = Math.min(model.opts.downloadLimitSplatCount, model.modelSplatCount);
+        const maxSplatDataCnt = Math.min(model.fetchLimit, model.modelSplatCount);
         !model.splatData && (model.splatData = new Uint8Array(maxSplatDataCnt * SplatDataSize32));
         !model.watermarkData && (model.watermarkData = new Uint8Array(0));
         if (model.dataSplatCount + dataCnt > maxSplatDataCnt) {
@@ -247,7 +260,6 @@ function setBlockSplatData(model: SplatModel, data: Uint8Array) {
 
         const topY = model.header.MinTopY || 0;
         model.currentRadius = Math.sqrt(model.maxX * model.maxX + topY * topY + model.maxZ * model.maxZ); // 当前模型数据范围离高点的最大半径
-        model.aabbCenter = new Vector3((model.minX + model.maxX) / 2, (model.minY + model.maxY) / 2, (model.minZ + model.maxZ) / 2);
         return;
     }
 

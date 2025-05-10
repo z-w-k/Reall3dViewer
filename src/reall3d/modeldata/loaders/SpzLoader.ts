@@ -34,6 +34,7 @@ export async function loadSpz(model: SplatModel) {
         model.fileSize = contentLength;
         model.downloadSize = 0;
         model.downloadSplatCount = 0;
+        model.watermarkData = new Uint8Array(0);
 
         const datas = new Uint8Array(contentLength);
         while (true) {
@@ -53,6 +54,7 @@ export async function loadSpz(model: SplatModel) {
         const header = parseSpzHeader(ui8s);
         model.modelSplatCount = header.numPoints;
         model.dataShDegree = header.shDegree;
+        model.splatData = new Uint8Array(Math.min(model.modelSplatCount, model.fetchLimit) * 32);
         await parseSpzAndSetSplatData(header, model, ui8s);
     } catch (e) {
         if (e.name === 'AbortError') {
@@ -80,11 +82,12 @@ export async function loadSpz(model: SplatModel) {
         const offsetRotations = offsetScales + scaleSize;
         const offsetShs = offsetRotations + rotationSize;
 
-        const count = Math.ceil(header.numPoints / maxProcessCnt);
+        const limitCnt = Math.min(header.numPoints, model.fetchLimit);
+        const count = Math.ceil(limitCnt / maxProcessCnt);
         for (let i = 0; i < count; i++) {
-            let splatCnt = i < count - 1 ? maxProcessCnt : header.numPoints - i * maxProcessCnt;
-            if (model.dataSplatCount + splatCnt > model.opts.downloadLimitSplatCount) {
-                splatCnt = model.opts.downloadLimitSplatCount - model.dataSplatCount;
+            let splatCnt = i < count - 1 ? maxProcessCnt : limitCnt - i * maxProcessCnt;
+            if (model.dataSplatCount + splatCnt > model.fetchLimit) {
+                splatCnt = model.fetchLimit - model.dataSplatCount;
             }
             const datas = new Uint8Array(splatCnt * 20 + 8);
             const u32s = new Uint32Array(2);
@@ -162,7 +165,7 @@ export async function loadSpz(model: SplatModel) {
                     offset += 9;
                 }
                 const sh2Block = await parseSpxBlockData(sh2);
-                model.Sh12Data.push(sh2Block.datas);
+                model.sh12Data.push(sh2Block.datas);
             } else if (header.shDegree === 2) {
                 const sh2 = new Uint8Array(splatCnt * 24 + 8);
                 const u2s = new Uint32Array(2);
@@ -173,9 +176,8 @@ export async function loadSpz(model: SplatModel) {
                     sh2.set(value.slice(offsetShs + (i * maxProcessCnt + j) * 24, offsetShs + (i * maxProcessCnt + j) * 24 + 24), offset);
                     offset += 24;
                 }
-                console.info('sh2 splatCnt', splatCnt);
                 const sh2Block = await parseSpxBlockData(sh2);
-                model.Sh12Data.push(sh2Block.datas);
+                model.sh12Data.push(sh2Block.datas);
             } else if (header.shDegree === 3) {
                 const sh2 = new Uint8Array(splatCnt * 24 + 8);
                 const u2s = new Uint32Array(2);
@@ -187,7 +189,7 @@ export async function loadSpz(model: SplatModel) {
                     offset += 24;
                 }
                 const sh2Block = await parseSpxBlockData(sh2);
-                model.Sh12Data.push(sh2Block.datas);
+                model.sh12Data.push(sh2Block.datas);
 
                 const sh3 = new Uint8Array(splatCnt * 21 + 8);
                 const u3s = new Uint32Array(2);
@@ -199,10 +201,10 @@ export async function loadSpz(model: SplatModel) {
                     offset += 21;
                 }
                 const sh3Block = await parseSpxBlockData(sh3);
-                model.Sh3Data.push(sh3Block.datas);
+                model.sh3Data.push(sh3Block.datas);
             }
 
-            if (model.dataSplatCount >= model.opts.downloadLimitSplatCount) {
+            if (model.dataSplatCount >= model.fetchLimit) {
                 break; // 丢弃超出限制范围外的数据
             }
         }
@@ -210,9 +212,7 @@ export async function loadSpz(model: SplatModel) {
 
     function setBlockSplatData(header: SpzHeader, model: SplatModel, data: Uint8Array) {
         let dataCnt = data.byteLength / SplatDataSize32;
-        const maxSplatDataCnt = Math.min(model.opts.downloadLimitSplatCount, header.numPoints);
-        !model.splatData && (model.splatData = new Uint8Array(maxSplatDataCnt * SplatDataSize32));
-        !model.watermarkData && (model.watermarkData = new Uint8Array(0));
+        const maxSplatDataCnt = Math.min(model.fetchLimit, header.numPoints);
         if (model.dataSplatCount + dataCnt > maxSplatDataCnt) {
             dataCnt = maxSplatDataCnt - model.dataSplatCount; // 丢弃超出限制的部分
             model.splatData.set(data.slice(0, dataCnt * SplatDataSize32), model.dataSplatCount * SplatDataSize32);

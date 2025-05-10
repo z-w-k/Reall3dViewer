@@ -142,7 +142,7 @@ export function setupSplatTextureManager(events: Events) {
         const downloadDone = splatModel.status !== ModelStatus.FetchReady && splatModel.status !== ModelStatus.Fetching;
         if (downloadDone) {
             // 已下载完，通知一次进度条
-            const downloadCount = Math.min(splatModel.opts.downloadLimitSplatCount, splatModel.downloadSplatCount);
+            const downloadCount = Math.min(splatModel.fetchLimit, splatModel.downloadSplatCount);
             !splatModel.notifyFetchStopDone && (splatModel.notifyFetchStopDone = true) && fire(OnFetchStop, downloadCount);
         } else {
             // 没下载完，更新下载进度条
@@ -235,10 +235,10 @@ export function setupSplatTextureManager(events: Events) {
 
         if (downloadDone && !splatModel.smallSceneUploadDone) {
             splatModel.smallSceneUploadDone = true;
-            fire(SplatUpdateSh12Texture, splatModel.Sh12Data);
-            fire(SplatUpdateSh3Texture, splatModel.Sh3Data);
-            splatModel.Sh12Data = null;
-            splatModel.Sh3Data = null;
+            fire(SplatUpdateSh12Texture, splatModel.sh12Data);
+            fire(SplatUpdateSh3Texture, splatModel.sh3Data);
+            splatModel.sh12Data = null;
+            splatModel.sh3Data = null;
             const opts: SplatMeshOptions = fire(GetOptions);
             fire(SplatUpdateShDegree, opts.shDegree === undefined ? 3 : opts.shDegree);
             fire(GetSplatActivePoints); // 小场景下载完时主动触发一次坐标分块
@@ -280,15 +280,18 @@ export function setupSplatTextureManager(events: Events) {
 
         opts.fetchReload = isNeedReload(meta.updateDate || 0); // 7天内更新的重新下载
 
-        // 调整下载限制
+        splatModel = new SplatModel(opts, meta);
+
+        // 计算设定下载限制
         if (isBigSceneMode && meta.autoCut) {
-            const bigSceneDownloadLimit = isMobile ? MobileDownloadLimitSplatCount : PcDownloadLimitSplatCount;
-            opts.downloadLimitSplatCount = Math.min(meta.autoCut * meta.autoCut * maxRenderCount + maxRenderCount, bigSceneDownloadLimit);
+            const pcDownloadLimitCount = meta.pcDownloadLimitSplatCount || PcDownloadLimitSplatCount;
+            const mobileDownloadLimitCount = meta.mobileDownloadLimitSplatCount || MobileDownloadLimitSplatCount;
+            const bigSceneDownloadLimit = isMobile ? mobileDownloadLimitCount : pcDownloadLimitCount;
+            splatModel.fetchLimit = Math.min(meta.autoCut * meta.autoCut * maxRenderCount + maxRenderCount, bigSceneDownloadLimit);
         } else {
-            opts.downloadLimitSplatCount = maxRenderCount;
+            splatModel.fetchLimit = maxRenderCount;
         }
 
-        splatModel = new SplatModel(opts, meta);
         const startTime: number = Date.now();
         const fnCheckModelSplatCount = () => {
             if (!splatModel || splatModel.status == ModelStatus.Invalid || splatModel.status == ModelStatus.FetchFailed) {

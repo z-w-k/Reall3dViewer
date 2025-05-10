@@ -19,9 +19,4 @@ export interface ModelOptions {
      *  是否重新下载
      */
     fetchReload?: boolean;
-
-    /**
-     *  限制高斯点数
-     */
-    downloadLimitSplatCount?: number;
 }
