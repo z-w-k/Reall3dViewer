@@ -230,6 +230,7 @@ function setBlockSplatData(model: SplatModel, data: Uint8Array) {
         !model.watermarkData && (model.watermarkData = new Uint8Array(0));
         if (model.dataSplatCount + dataCnt > maxSplatDataCnt) {
             dataCnt = maxSplatDataCnt - model.dataSplatCount; // 丢弃超出限制的部分
+            if (!dataCnt) return;
         }
 
         // 计算当前半径
