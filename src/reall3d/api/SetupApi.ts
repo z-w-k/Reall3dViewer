@@ -13,7 +13,7 @@ export function setupApi(events: Events) {
         const url = meta.url;
         const metaClone: MetaData = { ...meta };
         delete metaClone.url;
-        const metaJson = JSON.stringify(meta, null, 2);
+        const metaJson = JSON.stringify(metaClone, null, 2);
         console.info(metaJson);
     });
 
