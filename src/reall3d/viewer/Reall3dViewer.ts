@@ -143,7 +143,7 @@ export class Reall3dViewer {
                 RunLoopByTime,
                 () => {
                     !this.disposed && (this.needUpdate = true);
-                    oUpdater.count++ >= 150 && (oUpdater.stop = true);
+                    oUpdater.count++ >= 600 && (oUpdater.stop = true);
                 },
                 () => !this.disposed && (fire(IsControlPlaneVisible) || !oUpdater.stop),
                 10,
