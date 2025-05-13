@@ -42,6 +42,7 @@ export function setupViewerUtils(events: Events) {
     on(
         OnViewerUpdate,
         () => {
+            if (disposed) return;
             fire(CountFpsReal);
             fire(IsDebugMode) &&
                 fire(Information, {
@@ -58,6 +59,7 @@ export function setupViewerUtils(events: Events) {
     on(
         OnViewerBeforeUpdate,
         () => {
+            if (disposed) return;
             fire(ControlsUpdate);
             if (fire(IsDebugMode)) {
                 fire(CountFpsDefault);

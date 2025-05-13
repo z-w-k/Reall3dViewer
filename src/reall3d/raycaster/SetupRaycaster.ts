@@ -46,20 +46,6 @@ export function setupRaycaster(events: Events) {
             spheres.push(new Sphere(intersectMeshs[i].point, raycaster.ray.distanceToPoint(intersectMeshs[i].point)));
         }
 
-        // const intersectSplats = raycaster.intersectObjects(objectSplats, true); // 不准确的样子
-        // if (intersectSplats.length) {
-        //     for (let i = 0; i < intersectSplats.length; i++) {
-        //         const activePoints: Float32Array = (intersectSplats[i].object as SplatMesh).fire(GetSplatActivePoints);
-        //         const cnt = activePoints.length / 3;
-        //         for (let j = 0; j < cnt; j++) {
-        //             const point: Vector3 = new Vector3(activePoints[3 * j + 0], activePoints[3 * j + 1], activePoints[3 * j + 2]);
-        //             if (raycaster.ray.distanceToPoint(point) <= MinDistance) {
-        //                 spheres.push(new Sphere(point, raycaster.ray.origin.distanceTo(point)));
-        //             }
-        //         }
-        //     }
-        // }
-
         // console.time('raycaster');
         for (let i = 0; i < objectSplats.length; i++) {
             const rs: any = objectSplats[i].fire(GetSplatActivePoints);

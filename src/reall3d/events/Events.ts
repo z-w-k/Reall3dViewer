@@ -73,5 +73,3 @@ export class Events {
         this.map.clear();
     }
 }
-
-export const uiEvent = new Events();
