@@ -96,6 +96,7 @@ export class Reall3dViewer {
     protected splatMesh: SplatMesh | null;
     protected events: Events | null;
     private updateTime: number = 0;
+    protected isInit = true
 
     public needUpdate: boolean = true;
 

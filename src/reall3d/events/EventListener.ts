@@ -509,7 +509,7 @@ export function setupEventListener(events: Events) {
     window.addEventListener('keydown', keydownEventListener);
     window.addEventListener('keyup', keyupEventListener);
     window.addEventListener('blur', blurEventListener);
-    window.addEventListener('wheel', wheelEventListener, { passive: false });
+    canvas.addEventListener('wheel', wheelEventListener,{passive:false});
     canvas.addEventListener('contextmenu', canvasContextmenuEventListener);
     canvas.addEventListener('mousedown', canvasMousedownEventListener);
     canvas.addEventListener('mousemove', canvasMousemoveEventListener);
@@ -536,7 +536,7 @@ export function setupEventListener(events: Events) {
         window.removeEventListener('keydown', keydownEventListener);
         window.removeEventListener('keyup', keyupEventListener);
         window.removeEventListener('blur', blurEventListener);
-        window.removeEventListener('wheel', wheelEventListener);
+        canvas.removeEventListener('wheel', wheelEventListener);
         canvas.removeEventListener('contextmenu', canvasContextmenuEventListener);
         canvas.removeEventListener('mousedown', canvasMousedownEventListener);
         canvas.removeEventListener('mousemove', canvasMousemoveEventListener);
