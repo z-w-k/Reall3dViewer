@@ -105,6 +105,7 @@ export class Reall3dViewer {
     }
 
     private init(opts: Reall3dViewerOptions) {
+        const that = this;
         opts.position = opts.position ? [...opts.position] : [0, -5, 15];
         opts.lookAt = opts.lookAt ? [...opts.lookAt] : [0, 0, 0];
         opts.lookUp = opts.lookUp ? [...opts.lookUp] : [0, -1, 0];
@@ -118,7 +119,7 @@ export class Reall3dViewer {
 
         const events = new Events();
         opts.viewerEvents = events;
-        this.events = events;
+        that.events = events;
         const on = (key: number, fn?: Function, multiFn?: boolean): Function | Function[] => events.on(key, fn, multiFn);
         const fire = (key: number, ...args: any): any => events.fire(key, ...args);
 
@@ -133,7 +134,7 @@ export class Reall3dViewer {
 
         const aryUpdaters: any[] = [];
         on(ViewerNeedUpdate, () => {
-            this.needUpdate = true;
+            that.needUpdate = true;
             // 稍微多点更新
             while (aryUpdaters.length) aryUpdaters.pop().stop = true; // 已有的都停掉
             let oUpdater = { count: 0, stop: false };
@@ -142,10 +143,10 @@ export class Reall3dViewer {
             fire(
                 RunLoopByTime,
                 () => {
-                    !this.disposed && (this.needUpdate = true);
+                    !that.disposed && (that.needUpdate = true);
                     oUpdater.count++ >= 600 && (oUpdater.stop = true);
                 },
-                () => !this.disposed && (fire(IsControlPlaneVisible) || !oUpdater.stop),
+                () => !that.disposed && (fire(IsControlPlaneVisible) || !oUpdater.stop),
                 10,
             );
         });
@@ -160,18 +161,18 @@ export class Reall3dViewer {
         setupFocusMarker(events);
         setupFlying(events);
 
-        this.splatMesh = new SplatMesh(copyGsViewerOptions(opts));
-        on(GetSplatMesh, () => this.splatMesh);
-        scene.add(this.splatMesh);
+        that.splatMesh = new SplatMesh(copyGsViewerOptions(opts));
+        on(GetSplatMesh, () => that.splatMesh);
+        scene.add(that.splatMesh);
         setupControlPlane(events);
 
         scene.add(new AmbientLight('#ffffff', 2));
         scene.add(fire(CreateFocusMarkerMesh));
-        renderer.setAnimationLoop(this.update.bind(this));
+        renderer.setAnimationLoop(that.update.bind(that));
 
         on(ViewerCheckNeedUpdate, () => {
             controls.update();
-            !this.needUpdate && fire(IsCameraChangedNeedUpdate) && fire(ViewerNeedUpdate);
+            !that.needUpdate && fire(IsCameraChangedNeedUpdate) && fire(ViewerNeedUpdate);
         });
         on(OnViewerBeforeUpdate, () => fire(KeyActionCheckAndExecute), true);
         on(OnViewerBeforeUpdate, () => fire(ViewerCheckNeedUpdate), true);
@@ -179,27 +180,27 @@ export class Reall3dViewer {
             OnViewerUpdate,
             () => {
                 try {
-                    !(this.needUpdate = false) && renderer.render(scene, fire(GetCamera));
+                    !(that.needUpdate = false) && renderer.render(scene, fire(GetCamera));
                 } catch (e) {
                     console.warn(e.message);
                 }
             },
             true,
         );
-        on(OnViewerAfterUpdate, () => {}, true);
-        on(ViewerDispose, () => this.dispose());
+        on(OnViewerAfterUpdate, () => { }, true);
+        on(ViewerDispose, () => that.dispose());
         on(PrintInfo, () => console.info(JSON.stringify(fire(GetSplatMesh).meta || {}, null, 2)));
 
         let watermark: string = '';
         on(OnSetWaterMark, (text: string = '') => {
             watermark = text;
-            this.splatMesh.fire(SetGaussianText, watermark, true); // 水印文字水平朝向
+            that.splatMesh.fire(SetGaussianText, watermark, true); // 水印文字水平朝向
         });
         on(GetCachedWaterMark, () => watermark);
 
         fire(Information, { scale: `1 : ${fire(GetOptions).meterScale} m` });
 
-        this.initGsApi();
+        that.initGsApi();
     }
 
     /**
