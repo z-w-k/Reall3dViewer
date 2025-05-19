@@ -97,6 +97,7 @@ export class SplatMesh extends Mesh {
 
         (async () => {
             this.copy(await events.fire(CreateSplatMesh));
+            opts.matrix && this.applyMatrix4(opts.matrix);
             this.frustumCulled = false;
             this.onBeforeRender = () => {
                 fire(WorkerSort);
