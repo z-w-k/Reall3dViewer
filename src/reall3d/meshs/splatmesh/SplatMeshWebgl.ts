@@ -146,7 +146,7 @@ export function getSplatVertexShader() {
                 cen = texelFetch(splatTexture0, ivec2((splatIndex & 0x3ffu) << 1, splatIndex >> 10), 0);
                 cov3d = texelFetch(splatTexture0, ivec2(((splatIndex & 0x3ffu) << 1) | 1u, splatIndex >> 10), 0);
             }
- 
+
             int waterMarkValue = int((cen.w & 65536u) >> 16u);
             int cenState = int(cen.w & 65535u);
 
@@ -174,14 +174,14 @@ export function getSplatVertexShader() {
 
             vec2 uh1 = unpackHalf2x16(cov3d.x), uh2 = unpackHalf2x16(cov3d.y), uh3 = unpackHalf2x16(cov3d.z);
             mat3 Vrk = mat3(uh1.x, uh1.y, uh2.x, uh1.y, uh2.y, uh3.x, uh2.x, uh3.x, uh3.y);
-        
+
             float ZxZ = cam.z * cam.z;
             mat3 J_m3 = mat3(
-                focal.x / cam.z, 0.0, -(focal.x * cam.x) / ZxZ, 
-                0.0, focal.y / cam.z, -(focal.y * cam.y) / ZxZ, 
+                focal.x / cam.z, 0.0, -(focal.x * cam.x) / ZxZ,
+                0.0, focal.y / cam.z, -(focal.y * cam.y) / ZxZ,
                 0.0, 0.0, 0.0
             );
-        
+
             mat3 T_m3 = transpose(mat3(modelViewMatrix)) * J_m3;
             mat3 cov2d = transpose(T_m3) * Vrk * T_m3;
 
@@ -216,7 +216,6 @@ export function getSplatVertexShader() {
                     }
                 }
             }
-            
 
             int iSelectPoint = 0;
             if (markPoint.w > 0.0 && length(vec3(markPoint.xyz) - v3Cen) < 0.000001){
@@ -248,7 +247,7 @@ export function getSplatVertexShader() {
 
             vec2 v2Center = vec2(pos2d) / pos2d.w;  // NDC坐标
             gl_Position = vec4(
-                v2Center 
+                v2Center
                 + vPosition.x * majorAxis / viewport
                 + vPosition.y * minorAxis / viewport
                 , 1.0, 1.0);

@@ -187,7 +187,7 @@ export class Reall3dViewer {
             },
             true,
         );
-        on(OnViewerAfterUpdate, () => { }, true);
+        on(OnViewerAfterUpdate, () => {}, true);
         on(ViewerDispose, () => that.dispose());
         on(PrintInfo, () => console.info(JSON.stringify(fire(GetSplatMesh).meta || {}, null, 2)));
 
