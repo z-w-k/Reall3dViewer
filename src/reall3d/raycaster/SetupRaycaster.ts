@@ -1,7 +1,7 @@
 // ================================
 // Copyright (c) 2025 reall3d.com
 // ================================
-import { Object3D, PerspectiveCamera, Raycaster, Scene, Sphere, Vector2, Vector3 } from 'three';
+import { Matrix4, Object3D, PerspectiveCamera, Raycaster, Scene, Sphere, Vector2, Vector3, Vector4 } from 'three';
 import { Events } from '../events/Events';
 import {
     GetCamera,
@@ -15,7 +15,7 @@ import { SplatMesh } from '../meshs/splatmesh/SplatMesh';
 
 export function setupRaycaster(events: Events) {
     const raycaster: Raycaster = new Raycaster();
-    const MinDistance: number = 0.1;
+    const MinNdcDistance: number = 0.02;
 
     const on = (key: number, fn?: Function, multiFn?: boolean): Function | Function[] => events.on(key, fn, multiFn);
     const fire = (key: number, ...args: any): any => events.fire(key, ...args);
@@ -41,12 +41,13 @@ export function setupRaycaster(events: Events) {
             }
         });
 
-        const intersectMeshs = raycaster.intersectObjects(objectMeshs, true);
+        const intersectMeshs = raycaster.intersectObjects(objectMeshs, true); // 常规mesh交点检测
         for (let i = 0; i < intersectMeshs.length; i++) {
             spheres.push(new Sphere(intersectMeshs[i].point, raycaster.ray.distanceToPoint(intersectMeshs[i].point)));
         }
 
         // console.time('raycaster');
+        const viewProj: Matrix4 = camera.projectionMatrix.clone().multiply(camera.matrixWorldInverse);
         for (let i = 0; i < objectSplats.length; i++) {
             const rs: any = objectSplats[i].fire(GetSplatActivePoints);
             if (!rs) continue;
@@ -57,22 +58,26 @@ export function setupRaycaster(events: Events) {
                 const cnt = activePoints.length / 3;
                 for (let j = 0; j < cnt; j++) {
                     const point: Vector3 = new Vector3(activePoints[3 * j + 0], activePoints[3 * j + 1], activePoints[3 * j + 2]);
-                    if (raycaster.ray.distanceToPoint(point) <= MinDistance) {
-                        spheres.push(new Sphere(point, raycaster.ray.distanceToPoint(point)));
-                    }
+                    const projectedPoint = new Vector4(point.x, point.y, point.z, 1).applyMatrix4(viewProj);
+                    const ndcX = projectedPoint.x / projectedPoint.w;
+                    const ndcY = projectedPoint.y / projectedPoint.w;
+                    const ndcDistance = Math.sqrt((ndcX - mouse.x) ** 2 + (ndcY - mouse.y) ** 2);
+                    ndcDistance <= MinNdcDistance && spheres.push(new Sphere(point, raycaster.ray.distanceToPoint(point)));
                 }
             } else {
                 // 分块计算
                 for (let key of Object.keys(rs)) {
                     const xyzs: string[] = key.split(',');
-                    const center: Vector3 = new Vector3(Number(xyzs[0]), Number(xyzs[1]), Number(xyzs[2]));
-                    if (raycaster.ray.distanceToPoint(center) <= 1.5) {
+                    const center: Vector3 = new Vector3(Number(xyzs[0]), Number(xyzs[1]), Number(xyzs[2])); // 边长为2的立方体中心点
+                    if (raycaster.ray.distanceToPoint(center) <= 1.4143) {
                         const points: number[] = rs[key];
                         for (let j = 0, cnt = points.length / 3; j < cnt; j++) {
                             const point: Vector3 = new Vector3(points[3 * j + 0], points[3 * j + 1], points[3 * j + 2]);
-                            if (raycaster.ray.distanceToPoint(point) <= MinDistance) {
-                                spheres.push(new Sphere(point, raycaster.ray.distanceToPoint(point)));
-                            }
+                            const projectedPoint = new Vector4(point.x, point.y, point.z, 1).applyMatrix4(viewProj);
+                            const ndcX = projectedPoint.x / projectedPoint.w;
+                            const ndcY = projectedPoint.y / projectedPoint.w;
+                            const ndcDistance = Math.sqrt((ndcX - mouse.x) ** 2 + (ndcY - mouse.y) ** 2);
+                            ndcDistance <= MinNdcDistance && spheres.push(new Sphere(point, raycaster.ray.distanceToPoint(point)));
                         }
                     }
                 }
