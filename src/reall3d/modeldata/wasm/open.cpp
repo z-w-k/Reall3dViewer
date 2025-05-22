@@ -1,5 +1,5 @@
-#include <cstdint>
 #include <cmath>
+#include <cstdint>
 #include <emscripten/emscripten.h>
 
 #ifdef __cplusplus
@@ -8,8 +8,7 @@
 #define EXTERN
 #endif
 
-uint16_t floatToHalf(float value)
-{
+uint16_t floatToHalf(float value) {
     uint32_t f = *reinterpret_cast<uint32_t *>(&value);
 
     uint32_t sign = (f >> 31) & 0x0001;
@@ -17,27 +16,19 @@ uint16_t floatToHalf(float value)
     uint32_t frac = f & 0x007fffff;
 
     uint32_t newExp;
-    if (exp == 0)
-    {
+    if (exp == 0) {
         newExp = 0;
-    }
-    else if (exp < 113)
-    {
+    } else if (exp < 113) {
         newExp = 0;
         frac |= 0x00800000;
         frac >>= (113 - exp);
-        if (frac & 0x01000000)
-        {
+        if (frac & 0x01000000) {
             newExp = 1;
             frac = 0;
         }
-    }
-    else if (exp < 142)
-    {
+    } else if (exp < 142) {
         newExp = exp - 112;
-    }
-    else
-    {
+    } else {
         newExp = 31;
         frac = 0;
     }
@@ -45,8 +36,7 @@ uint16_t floatToHalf(float value)
     return (sign << 15) | (newExp << 10) | (frac >> 13);
 }
 
-uint32_t packHalf2x16(float x, float y)
-{
+uint32_t packHalf2x16(float x, float y) {
     uint16_t hx = floatToHalf(x);
     uint16_t hy = floatToHalf(y);
     return (uint32_t)hx | ((uint32_t)hy << 16);
@@ -57,8 +47,7 @@ uint32_t packHalf2x16(float x, float y)
  * @param b: 输入的文件头字节数组（固定长128，最后4位为校验码）
  * @return: 0-成功，1-失败
  */
-EXTERN EMSCRIPTEN_KEEPALIVE int H(void *b)
-{
+EXTERN EMSCRIPTEN_KEEPALIVE int H(void *b) {
     uint8_t *ui8sInput = (uint8_t *)b;
     uint32_t *ui32sInput = (uint32_t *)b;
 
@@ -69,8 +58,7 @@ EXTERN EMSCRIPTEN_KEEPALIVE int H(void *b)
     return rs == ui32sInput[31] ? 0 : 1;
 }
 
-void computeWriteTexdata(void *b, int offset, float x, float y, float z, float sx, float sy, float sz, float r0, float r1, float r2, float r3, uint32_t rgba)
-{
+void computeWriteTexdata(void *b, int offset, float x, float y, float z, float sx, float sy, float sz, float r0, float r1, float r2, float r3, uint32_t rgba) {
     float *f32sOutput = (float *)b;
     uint32_t *ui32sOutput = (uint32_t *)b;
 
@@ -113,8 +101,7 @@ void computeWriteTexdata(void *b, int offset, float x, float y, float z, float s
  * @param n: 高斯点数
  * @return: 0-成功
  */
-EXTERN EMSCRIPTEN_KEEPALIVE int s(void *b, int n)
-{
+EXTERN EMSCRIPTEN_KEEPALIVE int s(void *b, int n) {
     uint8_t *ui8sInput = (uint8_t *)b;
     uint32_t *ui32sInput = (uint32_t *)b;
     float *f32sInput = (float *)b;
@@ -122,8 +109,7 @@ EXTERN EMSCRIPTEN_KEEPALIVE int s(void *b, int n)
     float x, y, z, sx, sy, sz, RX, RY, RZ, RW;
     uint32_t rgba;
     uint8_t rw, rx, ry, rz;
-    for (int i = 0; i < n; i++)
-    {
+    for (int i = 0; i < n; i++) {
         x = (f32sInput[i * 8 + 0]);
         y = (f32sInput[i * 8 + 1]);
         z = (f32sInput[i * 8 + 2]);
@@ -157,8 +143,7 @@ EXTERN EMSCRIPTEN_KEEPALIVE int s(void *b, int n)
  *           数据排列 [x...]+[y...]+[z...]+[sx...]+[sy...]+[sz...]+[r...]+[g...]+[b...]+[a...]+[rw...]+[rx...]+[ry...]+[rz...]
  * @return: 0-成功
  */
-int spxSplat20(void *o, void *b)
-{
+int spxSplat20(void *o, void *b) {
     uint8_t *ui8sInput = (uint8_t *)b;
     uint32_t *ui32sInput = (uint32_t *)b;
 
@@ -169,8 +154,7 @@ int spxSplat20(void *o, void *b)
     uint32_t rgba;
     uint8_t x0, x1, x2, y0, y1, y2, z0, z1, z2, s0, s1, s2, R, G, B, A, rx, ry, rz, rw;
     int32_t i32x, i32y, i32z;
-    for (int i = 0; i < n; i++)
-    {
+    for (int i = 0; i < n; i++) {
         x0 = ui8sInput[offset + i * 3 + 0];
         x1 = ui8sInput[offset + i * 3 + 1];
         x2 = ui8sInput[offset + i * 3 + 2];
@@ -233,8 +217,7 @@ int spxSplat20(void *o, void *b)
  *           【1】每点含9字节的1级球谐系数（点数4 + 格式4 + 9*n）
  * @return: 0-成功
  */
-int spxSh1(void *o, void *b)
-{
+int spxSh1(void *o, void *b) {
     uint8_t *ui8sInput = (uint8_t *)b;
     uint32_t *ui32sInput = (uint32_t *)b;
     uint8_t *ui8sOutput = (uint8_t *)o;
@@ -244,8 +227,7 @@ int spxSh1(void *o, void *b)
 
     int offset = 8;
     uint32_t sh0, sh1, sh2, sh3, sh4, sh5, sh6, sh7, sh8;
-    for (int i = 0; i < n; i++)
-    {
+    for (int i = 0; i < n; i++) {
         sh0 = (uint32_t)(ui8sInput[offset + i * 9] >> 3);
         sh1 = (uint32_t)(ui8sInput[offset + i * 9 + 1] >> 3);
         sh2 = (uint32_t)(ui8sInput[offset + i * 9 + 2] >> 3);
@@ -272,8 +254,7 @@ int spxSh1(void *o, void *b)
  *           【2】每点含24字节的1级加2级球谐系数（点数4 + 格式4 + (9+15)*n）
  * @return: 0-成功
  */
-int spxSh12(void *o, void *b)
-{
+int spxSh12(void *o, void *b) {
     uint8_t *ui8sInput = (uint8_t *)b;
     uint32_t *ui32sInput = (uint32_t *)b;
     uint32_t *ui32sOutput = (uint32_t *)o;
@@ -282,8 +263,7 @@ int spxSh12(void *o, void *b)
 
     int offset = 8;
     uint32_t sh0, sh1, sh2, sh3, sh4, sh5, sh6, sh7, sh8, sh9, sh10, sh11, sh12, sh13, sh14, sh15, sh16, sh17, sh18, sh19, sh20, sh21, sh22, sh23;
-    for (int i = 0; i < n; i++)
-    {
+    for (int i = 0; i < n; i++) {
         sh0 = (uint32_t)(ui8sInput[offset + i * 24] >> 3);
         sh1 = (uint32_t)(ui8sInput[offset + i * 24 + 1] >> 3);
         sh2 = (uint32_t)(ui8sInput[offset + i * 24 + 2] >> 3);
@@ -325,8 +305,7 @@ int spxSh12(void *o, void *b)
  *           【3】每点含21字节的3级球谐系数（点数4 + 格式4 + 21*n）
  * @return: 0-成功
  */
-int spxSh3(void *o, void *b)
-{
+int spxSh3(void *o, void *b) {
     uint8_t *ui8sInput = (uint8_t *)b;
     uint32_t *ui32sInput = (uint32_t *)b;
     uint32_t *ui32sOutput = (uint32_t *)o;
@@ -335,8 +314,7 @@ int spxSh3(void *o, void *b)
 
     int offset = 8;
     uint32_t sh0, sh1, sh2, sh3, sh4, sh5, sh6, sh7, sh8, sh9, sh10, sh11, sh12, sh13, sh14, sh15, sh16, sh17, sh18, sh19, sh20;
-    for (int i = 0; i < n; i++)
-    {
+    for (int i = 0; i < n; i++) {
         sh0 = (uint32_t)(ui8sInput[offset + i * 21] >> 3);
         sh1 = (uint32_t)(ui8sInput[offset + i * 21 + 1] >> 3);
         sh2 = (uint32_t)(ui8sInput[offset + i * 21 + 2] >> 3);
@@ -378,8 +356,7 @@ int spxSh3(void *o, void *b)
  *           【3】每点含21字节的3级球谐系数（点数4 + 格式4 + (21)*n）
  * @return: 0-成功，1-失败(不支持的版本)
  */
-EXTERN EMSCRIPTEN_KEEPALIVE int D(void *o, void *b)
-{
+EXTERN EMSCRIPTEN_KEEPALIVE int D(void *o, void *b) {
     uint32_t *ui32sInput = (uint32_t *)b;
 
     if (ui32sInput[1] == 20)
