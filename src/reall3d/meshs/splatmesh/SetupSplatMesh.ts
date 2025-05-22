@@ -463,8 +463,8 @@ export function setupSplatMesh(events: Events) {
                     switchProcess.stop = true; // 主动完成
                     arySwitchProcess.length === 1 && arySwitchProcess[0] === switchProcess && arySwitchProcess.pop();
 
-                    showMark && fire(GetOptions).viewerEvents?.fire(MarkUpdateVisible);
-                    fire(GetOptions).viewerEvents?.fire(FlyOnce);
+                    showMark && fire(GetOptions)?.viewerEvents?.fire(MarkUpdateVisible);
+                    fire(GetOptions)?.viewerEvents?.fire(FlyOnce);
                 } else if (switchProcess.currentLightRadius / maxRadius < 0.4) {
                     switchProcess.stepRate = Math.min(switchProcess.stepRate * 1.02, 0.03); // 前半圈提速并限速
                 } else {
