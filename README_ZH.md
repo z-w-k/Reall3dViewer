@@ -9,9 +9,9 @@
 <br>
 
 <p align="center">
-    <a href="https://github.com/reall3d-com/Reall3dViewer/blob/master/README_EN.md"><img src="https://img.shields.io/badge/Readme-Engilsh-brightgreen.svg"></a>
-    <a href="https://github.com/microsoft/TypeScript"><img src="https://img.shields.io/badge/Lang-typescript-brightgreen.svg"></a>
-    <a href="https://github.com/mrdoob/three.js"><img src="https://img.shields.io/badge/Base-threejs-brightgreen.svg"></a>
+    <a href="https://github.com/reall3d-com/Reall3dViewer/blob/master/README_EN.md"><img src="https://img.shields.io/badge/readme-Engilsh-brightgreen.svg"></a>
+    <a href="https://github.com/microsoft/TypeScript"><img src="https://img.shields.io/badge/lang-TypeScript-brightgreen.svg"></a>
+    <a href="https://github.com/mrdoob/three.js"><img src="https://img.shields.io/badge/base-Threejs-brightgreen.svg"></a>
     <a href="https://github.com/reall3d-com/Reall3dViewer/releases/latest"><img src="https://img.shields.io/github/release/reall3d-com/Reall3dViewer.svg"></a>
     <a href="https://github.com/reall3d-com/Reall3dViewer/blob/master/LICENSE"><img src="https://img.shields.io/github/license/reall3d-com/Reall3dViewer"></a>
 <p>
