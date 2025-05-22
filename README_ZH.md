@@ -12,7 +12,7 @@
     <a href="https://github.com/reall3d-com/Reall3dViewer/blob/master/README_EN.md"><img src="https://img.shields.io/badge/Readme-Engilsh-brightgreen.svg"></a>
     <a href="https://github.com/microsoft/TypeScript"><img src="https://img.shields.io/badge/Lang-typescript-brightgreen.svg"></a>
     <a href="https://github.com/mrdoob/three.js"><img src="https://img.shields.io/badge/Base-threejs-brightgreen.svg"></a>
-    <a href="https://repo-sam.inria.fr/fungraph/3d-gaussian-splatting/"><img src="https://img.shields.io/badge/Model-3DGS-brightgreen.svg"></a>
+    <a href="https://github.com/reall3d-com/Reall3dViewer/releases/latest"><img src="https://img.shields.io/github/release/reall3d-com/Reall3dViewer.svg"></a>
     <a href="https://github.com/reall3d-com/Reall3dViewer/blob/master/LICENSE"><img src="https://img.shields.io/github/license/reall3d-com/Reall3dViewer"></a>
 <p>
 
@@ -53,6 +53,7 @@ gsbox p2x -i /path/to/input.ply -o /path/to/output.spx -sh 0
 ## TODO
 - 持续优化增强渲染性能
 - 大场景
+- 地图上渲染3DGS
 
 
 ## 履历
@@ -65,6 +66,7 @@ https://github.com/reall3d-com/Reall3dViewer/releases
 - https://github.com/mkkellogg/GaussianSplats3D
 - https://github.com/huggingface/gsplat.js
 - https://github.com/playcanvas/supersplat
+- https://github.com/sxguojf/three-tile
 
 
 ## 联系
