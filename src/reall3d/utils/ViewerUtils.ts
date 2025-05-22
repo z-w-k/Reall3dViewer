@@ -1,7 +1,7 @@
 // ================================
 // Copyright (c) 2025 reall3d.com
 // ================================
-import { PerspectiveCamera, Scene, Vector3, WebGLRenderer } from 'three';
+import { PerspectiveCamera, Vector3, WebGLRenderer } from 'three';
 import { Events } from '../events/Events';
 import {
     ComputeFps,
@@ -23,7 +23,6 @@ import {
     GetCameraLookUp,
 } from '../events/EventConstants';
 import { SplatMeshOptions } from '../meshs/splatmesh/SplatMeshOptions';
-import { CameraControls } from '../controls/CameraControls';
 import { Reall3dViewerOptions } from '../viewer/Reall3dViewerOptions';
 
 export function setupViewerUtils(events: Events) {
@@ -129,57 +128,40 @@ export function initGsViewerOptions(options: Reall3dViewerOptions): Reall3dViewe
     return opts;
 }
 
-export function initCanvas(opts: Reall3dViewerOptions): HTMLCanvasElement {
-    opts.root ??= '#gsviewer';
-    opts.canvas ??= '#gsviewer-canvas';
-    let canvas: HTMLCanvasElement;
-    if (opts.canvas) {
-        canvas = typeof opts.canvas === 'string' ? document.querySelector(opts.canvas) : opts.canvas;
-    }
-    if (!canvas) {
-        let root: HTMLElement;
-        if (opts.root) {
-            root = typeof opts.root === 'string' ? document.querySelector(opts.root) || document.querySelector('#gsviewer') : opts.root;
-        } else {
-            root = document.querySelector('#gsviewer') || document.querySelector('body');
-        }
-        if (!root) {
-            root = document.createElement('div');
-            root.id = 'gsviewer';
-            document.body.appendChild(root);
-        }
-        canvas = document.createElement('canvas');
-        canvas.id = 'gsviewer-canvas';
-        root.appendChild(canvas);
-    }
-    opts.canvas = canvas;
-    return canvas;
-}
-
 export function initRenderer(opts: Reall3dViewerOptions): WebGLRenderer {
+    let root: HTMLElement;
+    if (opts.root) {
+        root = typeof opts.root === 'string' ? document.querySelector(opts.root) || document.querySelector('#gsviewer') : opts.root;
+    } else {
+        root = document.querySelector('#gsviewer');
+    }
+    if (!root) {
+        root = document.createElement('div');
+        root.id = 'gsviewer';
+        document.body.appendChild(root);
+    }
+
+    let canvas: HTMLCanvasElement = document.querySelector('#gsviewer-canvas') || undefined;
     let renderer = null;
     if (!opts.renderer) {
-        const canvas: HTMLCanvasElement = initCanvas(opts);
-        renderer = new WebGLRenderer({ canvas, antialias: false });
-        renderer.setSize(innerWidth, innerHeight);
+        renderer = new WebGLRenderer({ canvas, antialias: false, stencil: true, logarithmicDepthBuffer: true, precision: 'highp' });
+        renderer.setSize(root.clientWidth, root.clientHeight);
         renderer.setPixelRatio(Math.min(devicePixelRatio, 2));
         opts.renderer = renderer;
     } else {
         renderer = opts.renderer;
     }
-    return renderer;
-}
 
-export function initScene(opts: Reall3dViewerOptions): Scene {
-    const scene: Scene = opts.scene || new Scene();
-    opts.scene = scene;
-    return scene;
+    canvas = renderer.domElement;
+    canvas.id = 'gsviewer-canvas';
+    root.appendChild(renderer.domElement);
+    return renderer;
 }
 
 export function initCamera(opts: Reall3dViewerOptions): PerspectiveCamera {
     let camera = opts.camera;
     if (!camera) {
-        const canvas: HTMLCanvasElement = initCanvas(opts);
+        const canvas: HTMLCanvasElement = opts.renderer.domElement;
         const aspect = canvas.width / canvas.height;
         let lookUp: Vector3 = new Vector3().fromArray(opts.lookUp);
         let lookAt: Vector3 = new Vector3().fromArray(opts.lookAt);
@@ -192,12 +174,6 @@ export function initCamera(opts: Reall3dViewerOptions): PerspectiveCamera {
         opts.camera = camera;
     }
     return opts.camera;
-}
-
-export function initControls(opts: Reall3dViewerOptions): CameraControls {
-    const controls: CameraControls = new CameraControls(opts);
-    opts.controls = controls;
-    return controls;
 }
 
 export function copyGsViewerOptions(gsViewerOptions: Reall3dViewerOptions): SplatMeshOptions {

@@ -3,7 +3,6 @@
 // ================================
 import { Camera, PerspectiveCamera, Vector3 } from 'three';
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js';
-import { initCanvas } from '../utils/ViewerUtils';
 import { Reall3dViewerOptions } from '../viewer/Reall3dViewerOptions';
 import { isMobile } from '../utils/consts/GlobalConstants';
 
@@ -12,9 +11,8 @@ import { isMobile } from '../utils/consts/GlobalConstants';
  */
 export class CameraControls extends OrbitControls {
     constructor(opts: Reall3dViewerOptions) {
-        const canvas: HTMLCanvasElement = initCanvas(opts);
         const camera: Camera = opts.camera;
-        super(camera, canvas);
+        super(camera, opts.renderer.domElement);
 
         const that = this;
         that.dampingFactor = 0.1;

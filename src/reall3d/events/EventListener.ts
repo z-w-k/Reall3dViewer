@@ -520,15 +520,15 @@ export function setupEventListener(events: Events) {
 
     window.addEventListener('resize', resize);
     function resize() {
-        const renderer = fire(GetRenderer);
-        renderer.setSize(innerWidth, innerHeight);
-        renderer.setPixelRatio(Math.min(devicePixelRatio, 2));
         const { width, height } = fire(GetCanvasSize);
         const camera: PerspectiveCamera = fire(GetCamera);
         camera.aspect = width / height;
         camera.updateProjectionMatrix();
         const cSS3DRenderer: CSS3DRenderer = fire(GetCSS3DRenderer);
-        cSS3DRenderer.setSize(innerWidth, innerHeight);
+        cSS3DRenderer.setSize(width, height);
+        const renderer = fire(GetRenderer);
+        renderer.setPixelRatio(Math.min(devicePixelRatio, 2));
+        renderer.setSize(width, height);
     }
 
     on(EventListenerDispose, () => {

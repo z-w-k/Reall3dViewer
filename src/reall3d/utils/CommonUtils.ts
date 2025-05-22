@@ -124,8 +124,8 @@ export function setupCommonUtils(events: Events) {
     });
 
     on(GetCanvasSize, () => {
-        const canvas: HTMLCanvasElement = fire(GetCanvas);
-        const rect = canvas.getBoundingClientRect();
+        const root: HTMLElement = (fire(GetCanvas) as HTMLCanvasElement).parentElement;
+        const rect = root.getBoundingClientRect();
         return { width: rect.width, height: rect.height, left: rect.left, top: rect.top };
     });
 

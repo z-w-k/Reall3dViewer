@@ -62,16 +62,7 @@ import { SplatMesh } from '../meshs/splatmesh/SplatMesh';
 import { ModelOptions } from '../modeldata/ModelOptions';
 import { Events } from '../events/Events';
 import { setupControlPlane } from '../meshs/controlplane/SetupControlPlane';
-import {
-    copyGsViewerOptions,
-    initCamera,
-    initCanvas,
-    initControls,
-    initGsViewerOptions,
-    initRenderer,
-    initScene,
-    setupViewerUtils,
-} from '../utils/ViewerUtils';
+import { copyGsViewerOptions, initCamera, initGsViewerOptions, initRenderer, setupViewerUtils } from '../utils/ViewerUtils';
 import { CameraControls } from '../controls/CameraControls';
 import { Reall3dViewerOptions } from './Reall3dViewerOptions';
 import { setupEventListener } from '../events/EventListener';
@@ -110,11 +101,10 @@ export class Reall3dViewer {
         opts.lookAt = opts.lookAt ? [...opts.lookAt] : [0, 0, 0];
         opts.lookUp = opts.lookUp ? [...opts.lookUp] : [0, -1, 0];
 
-        const canvas: HTMLCanvasElement = initCanvas(opts);
         const renderer: WebGLRenderer = initRenderer(opts);
-        const scene: Scene = initScene(opts);
+        const scene: Scene = (opts.scene = opts.scene || new Scene());
         initCamera(opts);
-        const controls: CameraControls = initControls(opts);
+        const controls = (opts.controls = new CameraControls(opts));
         controls.updateByOptions(opts);
 
         const events = new Events();
@@ -124,7 +114,7 @@ export class Reall3dViewer {
         const fire = (key: number, ...args: any): any => events.fire(key, ...args);
 
         on(GetOptions, () => opts);
-        on(GetCanvas, () => canvas);
+        on(GetCanvas, () => renderer.domElement);
         on(GetRenderer, () => renderer);
         on(GetScene, () => scene);
         on(GetControls, () => controls);

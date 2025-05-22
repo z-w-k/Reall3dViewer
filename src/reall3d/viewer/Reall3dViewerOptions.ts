@@ -73,11 +73,6 @@ export interface Reall3dViewerOptions {
     root?: HTMLElement | string | undefined;
 
     /**
-     *  画布元素或其选择器，默认选择器为'#gsviewer-canvas'，未指定时将在容器节点里面自动创建
-     */
-    canvas?: HTMLCanvasElement | string | undefined;
-
-    /**
      * 相机视场，默认 45
      */
     fov?: number | undefined;
