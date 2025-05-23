@@ -26,7 +26,8 @@
 
 
 ## Live demo
-https://reall3d.com/reall3dviewer/index.html
+[Reall3dViewer](https://reall3d.com/reall3dviewer/index.html)
+[3DGS IN MAP](https://reall3d.com/reall3dviewer/map/index.html)
 
 
 ## `.spx`
