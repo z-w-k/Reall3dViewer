@@ -46,9 +46,9 @@ export class WarpMesh extends Mesh {
                 }
                 const bigSceneMode = data.autoCut && data.autoCut > 1;
                 const pointcloudMode = false;
-                const mapMode = true;
+                const depthTest = false;
                 const showWaterMark = data.showWaterMark !== false;
-                const opts: SplatMeshOptions = { renderer, scene, controls, pointcloudMode, bigSceneMode, matrix, showWaterMark, mapMode };
+                const opts: SplatMeshOptions = { renderer, scene, controls, pointcloudMode, bigSceneMode, matrix, showWaterMark, depthTest };
                 opts.maxRenderCountOfMobile ??= opts.bigSceneMode ? 128 * 10240 : 400 * 10000;
                 opts.maxRenderCountOfPc ??= opts.bigSceneMode ? 320 * 10000 : 400 * 10000;
                 opts.debugMode ??= location.protocol === 'http:' || /^test\./.test(location.host); // 生产环境不开启
