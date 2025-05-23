@@ -370,3 +370,58 @@ export const GetAabbCenter = i++;
 
 /** 聚焦包围盒中心点 */
 export const FocusAabbCenter = i++;
+
+/** 创建地图渲染器 */
+export const MapCreateRenderer = i++;
+/** 创建地图场景 */
+export const MapCreateScene = i++;
+/** 创建地图相机 */
+export const MapCreateCamera = i++;
+/** 创建地图控制器 */
+export const MapCreateControls = i++;
+/** 创建光源 */
+export const MapCreateDirLight = i++;
+/** 取一个活动的splatMesh实例(仅用于地图单个高斯模型调整) */
+export const MapGetSplatMesh = i++;
+/** 按X轴旋转 */
+export const MapSplatMeshRotateX = i++;
+/** 按Y轴旋转 */
+export const MapSplatMeshRotateY = i++;
+/** 按Z轴旋转 */
+export const MapSplatMeshRotateZ = i++;
+/** 按X轴平移 */
+export const MapSplatMeshMoveX = i++;
+/** 按Y轴平移 */
+export const MapSplatMeshMoveY = i++;
+/** 按Z轴平移 */
+export const MapSplatMeshMoveZ = i++;
+/** 设定位置 */
+export const MapSplatMeshSetPosition = i++;
+/** 缩放 */
+export const MapSplatMeshScale = i++;
+/** 切换显示隐藏 */
+export const MapSplatMeshShowHide = i++;
+/** 保存模型矩阵 */
+export const MapSplatMeshSaveModelMatrix = i++;
+/** 对多个SplatMesh实例的渲染顺序进行排序 */
+export const MapSortSplatMeshRenderOrder = i++;
+/** 遍历并清空销毁场景中的所有对象 */
+export const MapSceneTraverseDispose = i++;
+/** 飞向目标 */
+export const MapFlyToTarget = i++;
+/** 屏幕投影是否可见 */
+export const MapIsWarpMeshVisible = i++;
+
+/** 取TileMap对象 */
+export const GetTileMap = i++;
+/** 经纬度转换世界坐标 */
+export const Geo2World = i++;
+
+/** 相机飞行控制 */
+export const TweenFly = i++;
+/** 相机飞行控制(仅一次) */
+export const TweenFlyOnce = i++;
+/** 允许相机飞行控制 */
+export const TweenFlyEnable = i++;
+/** 禁止相机飞行控制 */
+export const TweenFlyDisable = i++;

@@ -1,23 +1,24 @@
 {
-  "name": "reall3dviewer",
-  "version": "1.0.0",
-  "type": "module",
-  "scripts": {
-    "dev": "vite",
-    "build": "tsc && vite build",
-    "preview": "vite preview"
-  },
-  "dependencies": {
-    "three": "^0.171.0"
-    "@gotoeasy/three-tile": "^0.8.7"
-  },
-  "devDependencies": {
-    "@types/node": "^22.13.5",
-    "@types/three": "^0.171.0",
-    "@vituum/vite-plugin-postcss": "^1.1.0",
-    "less": "^4.2.2",
-    "typescript": "^5.6.3",
-    "vite": "^6.1.1",
-    "vite-plugin-svg-icons": "^2.0.1"
-  }
+    "name": "reall3dviewer",
+    "version": "1.0.0",
+    "type": "module",
+    "scripts": {
+        "dev": "vite",
+        "build": "tsc && vite build",
+        "preview": "vite preview"
+    },
+    "dependencies": {
+        "three": "^0.171.0",
+        "@tweenjs/tween.js": "^25.0.0",
+        "@gotoeasy/three-tile": "^0.8.7"
+    },
+    "devDependencies": {
+        "@types/node": "^22.13.5",
+        "@types/three": "^0.171.0",
+        "@vituum/vite-plugin-postcss": "^1.1.0",
+        "less": "^4.2.2",
+        "typescript": "^5.6.3",
+        "vite": "^6.1.1",
+        "vite-plugin-svg-icons": "^2.0.1"
+    }
 }

@@ -180,7 +180,7 @@ export function setupSplatMesh(events: Events) {
             transparent: true,
             alphaTest: 1.0,
             blending: NormalBlending,
-            depthTest: true, // 是否启用深度测试。深度测试用于确保只有离相机更近的物体才会被渲染
+            depthTest: false, // 是否启用深度测试。深度测试用于确保只有离相机更近的物体才会被渲染
             depthWrite: false, // 是否将深度值写入深度缓冲区
             side: DoubleSide,
         });

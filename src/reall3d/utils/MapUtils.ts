@@ -1,0 +1,364 @@
+import {
+    GetControls,
+    GetOptions,
+    MapCreateCamera,
+    MapCreateControls,
+    GetRenderer,
+    GetScene,
+    MapCreateRenderer,
+    MapCreateScene,
+    MapCreateDirLight,
+    GetCamera,
+    ViewerDispose,
+    GetCanvas,
+    MapGetSplatMesh,
+    MapSplatMeshRotateX,
+    MapSplatMeshRotateY,
+    MapSplatMeshRotateZ,
+    MapSplatMeshMoveX,
+    MapSplatMeshMoveY,
+    MapSplatMeshMoveZ,
+    MapSplatMeshScale,
+    MapSplatMeshShowHide,
+    MapSplatMeshSaveModelMatrix,
+    HttpPostMetaData,
+    MapSplatMeshSetPosition,
+    CommonUtilsDispose,
+    CountFpsDefault,
+    GetFpsDefault,
+    CountFpsReal,
+    GetFpsReal,
+    IsDebugMode,
+    ComputeFps,
+    GetCameraFov,
+    GetCameraPosition,
+    GetCameraLookAt,
+    GetCameraLookUp,
+    Geo2World,
+    MapSortSplatMeshRenderOrder,
+    MapSceneTraverseDispose,
+    MapFlyToTarget,
+    MapIsWarpMeshVisible,
+    GetViewProjectionMatrix,
+    GetAabbCenter,
+} from './../events/EventConstants';
+import { Color, DirectionalLight, FogExp2, MathUtils, Matrix4, Object3D, PerspectiveCamera, Scene, Vector3, Vector4, WebGLRenderer } from 'three';
+import { Events } from '../events/Events';
+import { Reall3dMapViewerOptions } from '../viewer/Reall3dMapViewerOptions';
+import { MapControls } from 'three/examples/jsm/controls/MapControls.js';
+import { SplatMesh } from '../meshs/splatmesh/SplatMesh';
+import * as tt from '@gotoeasy/three-tile';
+import { WarpMesh } from '../meshs/warpmesh/WarpMesh';
+import { isMobile } from './consts/GlobalConstants';
+
+export function setupMapUtils(events: Events) {
+    let disposed: boolean = false;
+    const on = (key: number, fn?: Function, multiFn?: boolean): Function | Function[] => events.on(key, fn, multiFn);
+    const fire = (key: number, ...args: any): any => events.fire(key, ...args);
+
+    let splatMesh: SplatMesh;
+    const MaxActiveCount: number = isMobile ? 1 : 20;
+
+    // on(Utils_Dispose, () => (disposed = true));
+
+    const fpsMap: Map<number, any> = new Map();
+    const fpsRealMap: Map<number, any> = new Map();
+    on(CountFpsDefault, () => fire(IsDebugMode) && fpsMap.set(Date.now(), 1));
+    on(GetFpsDefault, () => fire(IsDebugMode) && fire(ComputeFps, fpsMap));
+    on(CountFpsReal, () => fire(IsDebugMode) && fpsRealMap.set(Date.now(), 1));
+    on(GetFpsReal, () => fire(IsDebugMode) && fire(ComputeFps, fpsRealMap));
+    on(ComputeFps, (map: Map<number, any>) => {
+        let dels: number[] = [];
+        let now: number = Date.now();
+        let rs: number = 0;
+        for (const key of map.keys()) {
+            if (now - key <= 1000) {
+                rs++;
+            } else {
+                dels.push(key);
+            }
+        }
+        dels.forEach(key => map.delete(key));
+        return Math.min(rs, 30);
+    });
+
+    on(MapGetSplatMesh, () => {
+        // if (splatMesh) return splatMesh;
+        // fire(GetScene)?.traverse(function (child: Object3D) {
+        //     child instanceof SplatMesh && (splatMesh = child);
+        // });
+        // return splatMesh;
+
+        const scene: Scene = fire(GetScene);
+        const camera: PerspectiveCamera = fire(GetCamera);
+        const warpMeshs: WarpMesh[] = [];
+        scene?.traverse(function (child: any) {
+            if (child.isWarpMesh && (child as WarpMesh).splatMesh?.visible) {
+                warpMeshs.push(child);
+            }
+        });
+
+        warpMeshs.sort((a, b) => {
+            return camera.position.distanceTo(a.position) - camera.position.distanceTo(b.position);
+        });
+        window['splat'] = warpMeshs[0]?.splatMesh;
+        return warpMeshs[0]?.splatMesh;
+    });
+
+    on(MapIsWarpMeshVisible, (matrix: Matrix4) => {
+        let pos2d: Vector4;
+        let clip: number;
+        const range: number = 1.1;
+
+        const camera: PerspectiveCamera = fire(GetCamera);
+        const viewProjMatrix: Matrix4 = camera.projectionMatrix.clone().multiply(camera.matrixWorldInverse).multiply(matrix);
+
+        pos2d = new Vector4(0, 0, 0, 1).applyMatrix4(viewProjMatrix);
+        clip = range * pos2d.w;
+        if (!(pos2d.z < -clip || pos2d.x < -clip || pos2d.x > clip || pos2d.y < -clip || pos2d.y > clip)) {
+            return true; // 可见
+        }
+        return false;
+    });
+
+    on(MapSortSplatMeshRenderOrder, () => {
+        const scene: Scene = fire(GetScene);
+        const camera: PerspectiveCamera = fire(GetCamera);
+        const warpMeshs: WarpMesh[] = [];
+        scene?.traverse(function (child: any) {
+            if (child.isWarpMesh) {
+                warpMeshs.push(child);
+            }
+        });
+
+        warpMeshs.sort((a, b) => {
+            return camera.position.distanceTo(a.position) - camera.position.distanceTo(b.position);
+        });
+        for (let i = 0; i < warpMeshs.length; i++) {
+            warpMeshs[i].active = i < MaxActiveCount;
+            warpMeshs[i].splatMesh && (warpMeshs[i].splatMesh.renderOrder = 1000 - i);
+        }
+    });
+
+    on(MapSceneTraverseDispose, () => {
+        const scene: Scene = fire(GetScene);
+        const objects: any[] = [];
+        scene?.traverse((object: any) => objects.push(object));
+        objects.forEach((object: any) => {
+            if (object.dispose) {
+                object.dispose();
+            } else {
+                object.geometry?.dispose?.();
+                object.material && object.material instanceof Array
+                    ? object.material.forEach((material: any) => material?.dispose?.())
+                    : object.material?.dispose?.();
+            }
+        });
+        scene?.clear();
+    });
+
+    on(MapSplatMeshRotateX, (deg: number = 0.1) => {
+        const splatMesh: SplatMesh = fire(MapGetSplatMesh);
+        splatMesh && splatMesh.visible && splatMesh.rotateOnAxis(new Vector3(1, 0, 0), MathUtils.degToRad(deg));
+    });
+    on(MapSplatMeshRotateY, (deg: number = 0.1) => {
+        const splatMesh: SplatMesh = fire(MapGetSplatMesh);
+        splatMesh && splatMesh.visible && splatMesh.rotateOnAxis(new Vector3(0, 1, 0), MathUtils.degToRad(deg));
+    });
+    on(MapSplatMeshRotateZ, (deg: number = 0.1) => {
+        const splatMesh: SplatMesh = fire(MapGetSplatMesh);
+        splatMesh && splatMesh.visible && splatMesh.rotateOnAxis(new Vector3(0, 0, 1), MathUtils.degToRad(deg));
+    });
+    on(MapSplatMeshMoveX, (step: number = 0.01) => {
+        const splatMesh: SplatMesh = fire(MapGetSplatMesh);
+        splatMesh && splatMesh.visible && (splatMesh.position.x += step);
+    });
+    on(MapSplatMeshMoveY, (step: number = 0.01) => {
+        const splatMesh: SplatMesh = fire(MapGetSplatMesh);
+        splatMesh && splatMesh.visible && (splatMesh.position.y += step);
+    });
+    on(MapSplatMeshMoveZ, (step: number = 0.01) => {
+        const splatMesh: SplatMesh = fire(MapGetSplatMesh);
+        splatMesh && splatMesh.visible && (splatMesh.position.z += step);
+    });
+    on(MapSplatMeshSetPosition, (v3: Vector3) => {
+        const splatMesh: SplatMesh = fire(MapGetSplatMesh);
+        splatMesh && splatMesh.visible && v3 && splatMesh.position.copy(v3);
+        console.info(splatMesh, v3);
+    });
+    on(MapSplatMeshScale, (step: number = 0.01) => {
+        const splatMesh: SplatMesh = fire(MapGetSplatMesh);
+        splatMesh && splatMesh.visible && splatMesh.scale.set(splatMesh.scale.x + step, splatMesh.scale.y + step, splatMesh.scale.z + step);
+    });
+    on(MapSplatMeshShowHide, () => {
+        const splatMesh: SplatMesh = fire(MapGetSplatMesh);
+        splatMesh && (splatMesh.visible = !splatMesh.visible);
+    });
+    on(MapSplatMeshSaveModelMatrix, async (splatMesh?: SplatMesh) => {
+        !splatMesh && (splatMesh = fire(MapGetSplatMesh));
+        if (!splatMesh) return;
+        const meta = splatMesh.meta || {};
+        meta.transform = splatMesh.matrix.toArray();
+        return await fire(HttpPostMetaData, JSON.stringify(meta), splatMesh.meta.url);
+    });
+
+    on(MapCreateRenderer, () => {
+        const { antialias, logarithmicDepthBuffer, stencil } = fire(GetOptions) as Reall3dMapViewerOptions;
+
+        const renderer = new WebGLRenderer({
+            antialias,
+            logarithmicDepthBuffer,
+            stencil,
+            alpha: true,
+            precision: 'highp',
+        });
+        // renderer.debug.checkShaderErrors = true;
+        // renderer.toneMapping = 3;
+        // renderer.toneMappingExposure = 1;
+        // renderer.sortObjects = false;
+        renderer.setPixelRatio(window.devicePixelRatio);
+
+        on(GetRenderer, () => renderer);
+        on(GetCanvas, () => renderer.domElement);
+        return renderer;
+    });
+
+    on(MapCreateScene, () => {
+        const scene = new Scene();
+        const backColor = 0xdbf0ff;
+        scene.background = new Color(backColor);
+        scene.fog = new FogExp2(backColor, 0);
+
+        on(GetScene, () => scene);
+        return scene;
+    });
+
+    on(MapCreateCamera, () => {
+        const { position } = fire(GetOptions) as Reall3dMapViewerOptions;
+        const camera = new PerspectiveCamera(60, 1, 0.01, 10000);
+        position && camera.position.copy(position);
+        on(GetCamera, () => camera);
+
+        return camera;
+    });
+
+    on(MapCreateControls, () => {
+        const fogFactor = 1.0;
+        const camera: PerspectiveCamera = fire(GetCamera);
+        const scene: Scene = fire(GetScene);
+        const opts: Reall3dMapViewerOptions = fire(GetOptions);
+        const controls = new MapControls(fire(GetCamera), opts.root as HTMLElement);
+        controls.target.copy(opts.lookAt);
+        controls.screenSpacePanning = false;
+        controls.minDistance = 0.1;
+        controls.maxDistance = 30000;
+        controls.maxPolarAngle = 1.2;
+        controls.enableDamping = true;
+        controls.dampingFactor = 0.07;
+        controls.zoomToCursor = true;
+        controls.minAzimuthAngle = 0;
+        controls.maxAzimuthAngle = 0;
+
+        // controls.listenToKeyEvents(window);
+        controls.addEventListener('change', () => {
+            // camera polar
+            const polar = Math.max(controls.getPolarAngle(), 0.1);
+            // dist of camera to controls
+            const dist = Math.max(controls.getDistance(), 0.1);
+            // set zoom speed on dist
+            controls.zoomSpeed = Math.max(Math.log(dist), 0) + 0.5;
+
+            // set far and near on dist/polar
+            camera.far = MathUtils.clamp((dist / polar) * 8, 100, 50000);
+            camera.near = camera.far / 1000;
+            camera.updateProjectionMatrix();
+
+            // set fog density on dist/polar
+            if (scene.fog instanceof FogExp2) {
+                scene.fog.density = (polar / (dist + 5)) * fogFactor * 0.25;
+            }
+
+            // limit the max polar on dist
+            controls.maxPolarAngle = Math.min(Math.pow(10000 / dist, 4), 1.2);
+        });
+
+        on(GetControls, () => controls);
+
+        on(GetCameraFov, () => camera.fov);
+        on(GetCameraPosition, (copy: boolean = false) => (copy ? camera.position.clone() : camera.position));
+        on(GetCameraLookAt, (copy: boolean = false) => (copy ? controls.target.clone() : controls.target));
+        on(GetCameraLookUp, (copy: boolean = false) => (copy ? camera.up.clone() : camera.up));
+
+        return controls;
+    });
+
+    // on(MapFlyToTarget, (target: Vector3) => {
+    //     const controls: MapControls = fire(GetControls);
+    //     controls.target = target;
+
+    //     const distance = 10; // 相机与目标点的距离
+    //     const cameraToP1 = target.clone().sub(controls.object.position); // 获取相机到目标点的向量
+    //     cameraToP1.normalize(); // 归一化向量
+    //     const newCameraPosition = target.clone().sub(cameraToP1.multiplyScalar(distance)); // 计算新的相机位置
+    //     controls.object.position.copy(newCameraPosition); // 更新相机位置
+    // });
+
+    on(MapCreateDirLight, () => {
+        const { lookAt } = fire(GetOptions) as Reall3dMapViewerOptions;
+        const dirLight = new DirectionalLight(0xffffff, 1);
+        dirLight.position.set(0, 2e3, 1e3);
+        dirLight.target.position.copy(lookAt);
+        return dirLight;
+    });
+
+    window.addEventListener('beforeunload', () => fire(ViewerDispose));
+}
+
+export function initMapViewerOptions(options: Reall3dMapViewerOptions): Reall3dMapViewerOptions {
+    let {
+        lookAtLLH = new Vector3(118.711783, 30.909666, 0.01), // 科创城
+        positionLLH = new Vector3(118.711783, 30.909666, 0.2),
+        lookAt,
+        position,
+        antialias = false,
+        stencil = true,
+        logarithmicDepthBuffer = true,
+        root = '#gsviewer',
+    } = options;
+
+    const el: HTMLElement = typeof root === 'string' ? document.querySelector(root) : root;
+
+    const tileMap = initTileMap();
+    !lookAt && (lookAt = tileMap.geo2world(lookAtLLH));
+    !position && (position = tileMap.geo2world(positionLLH));
+    // tileMap.material.depthTest = false;
+
+    const opts: Reall3dMapViewerOptions = { lookAt, position, antialias, stencil, logarithmicDepthBuffer, root: el, tileMap };
+    opts.debugMode ??= location.protocol === 'http:' || /^test\./.test(location.host); // 生产环境不开启
+
+    return opts;
+}
+
+export function initTileMap(): tt.TileMap {
+    const DEV_MAPBOX_API_KEY = '7f8f4f56f3ccda758f9a497e2b981018'; // 企业级别的key
+    const tdtImgSource = new tt.plugin.TDTSource({
+        token: DEV_MAPBOX_API_KEY,
+        style: 'img_w',
+    });
+    const tdtVecSource = new tt.plugin.TDTSource({
+        token: DEV_MAPBOX_API_KEY,
+        style: 'cia_w',
+    });
+    // 创建地图对象
+    const tileMap = new tt.TileMap({
+        // imgSource: [tdtImgSource, tdtVecSource], // 影像数据源
+        imgSource: location.protocol === 'http:' ? new tt.plugin.BingSource() : [tdtImgSource, tdtVecSource], // 影像数据源
+        lon0: 90, // 地图投影中央经线经度
+        minLevel: 2, // 最小缩放级别
+        maxLevel: 16, // 最大缩放级别
+    });
+    tileMap.scale.set(10, 10, 10);
+    tileMap.rotateX(-Math.PI / 2); // 地图旋转到xz平面
+    tileMap.autoUpdate = false;
+    return tileMap;
+}

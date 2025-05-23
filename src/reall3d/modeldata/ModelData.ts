@@ -205,6 +205,8 @@ export interface MetaData {
     meterScale?: number;
     /** 文字水印 */
     watermark?: string;
+    /** 是否显示水印 */
+    showWaterMark?: boolean;
     /** 相机参数 */
     cameraInfo?: CameraInfo;
     /** 标注 */
@@ -218,6 +220,8 @@ export interface MetaData {
     autoCut?: number;
     /** 变换矩阵 */
     transform?: number[];
+    /** 定位坐标(EPSG:4326 WGS 84) */
+    WGS84?: number[];
     /** 模型地址 */
     url?: string;
 }
