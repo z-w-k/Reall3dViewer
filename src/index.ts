@@ -120,5 +120,7 @@ function fnClick(className: string) {
         viewer.fire(8);
     } else if (className == 'sub-sh') {
         viewer.fire(8, -1);
+    } else if (className == 'map') {
+        window.open('https://reall3d.com/reall3dviewer/map/index.html', '_blank');
     }
 }
