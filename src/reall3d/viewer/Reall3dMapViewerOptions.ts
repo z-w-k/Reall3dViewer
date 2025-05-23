@@ -8,15 +8,26 @@ import { TileMap } from '@gotoeasy/three-tile';
  * 地图配置项
  */
 export interface Reall3dMapViewerOptions {
-    lookAtLLH?: Vector3; // 地图中心点经纬度
-    positionLLH?: Vector3; // 相机位置经纬度
+    /**
+     *  容器元素或其选择器，默认选择器为'#gsviewer'，自动创建画布时若找不到容器节点，将在body下自动创建容器
+     */
+    root?: HTMLElement | string | undefined;
+
+    /**
+     * 初始相机视点
+     */
     lookAt?: Vector3;
+
+    /**
+     * 初始相机位置
+     */
     position?: Vector3;
-    antialias?: boolean;
-    stencil?: boolean;
-    logarithmicDepthBuffer?: boolean;
-    root?: HTMLElement | string | undefined; // 容器元素或其选择器
+
+    /**
+     * 地图
+     */
     tileMap?: TileMap;
+
     /**
      *  是否调试模式，生产环境默认false
      */

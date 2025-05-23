@@ -1,3 +1,6 @@
+// ================================
+// Copyright (c) 2025 reall3d.com
+// ================================
 import { Events } from '../events/Events';
 import {
     AddFlyPosition,

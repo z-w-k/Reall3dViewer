@@ -39,7 +39,7 @@ import { initMapViewerOptions, setupMapUtils } from '../utils/MapUtils';
 import { setupCommonUtils } from '../utils/CommonUtils';
 import { setupMapEventListener } from '../events/MapEventListener';
 import { setupApi } from '../api/SetupApi';
-import { setupMapRaycaster } from '../raycaster/SetupMapRaycaster';
+import { setupRaycaster } from '../raycaster/SetupRaycaster';
 import { setupMark } from '../meshs/mark/SetupMark';
 import { CSS3DRenderer } from 'three/examples/jsm/Addons.js';
 import { WarpMesh } from '../meshs/warpmesh/WarpMesh';
@@ -79,7 +79,7 @@ export class Reall3dMapViewer extends EventDispatcher<tt.plugin.GLViewerEventMap
         setupCommonUtils(events);
         setupApi(events);
         setupMapUtils(events);
-        setupMapRaycaster(events);
+        setupRaycaster(events);
         setupMark(events);
 
         const el = opts.root;

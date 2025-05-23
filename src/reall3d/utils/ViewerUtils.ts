@@ -73,11 +73,7 @@ export function setupViewerUtils(events: Events) {
         let now: number = Date.now();
         let rs: number = 0;
         for (const key of map.keys()) {
-            if (now - key <= 1000) {
-                rs++;
-            } else {
-                dels.push(key);
-            }
+            now - key <= 1000 ? rs++ : dels.push(key);
         }
         dels.forEach(key => map.delete(key));
         return Math.min(rs, 30);

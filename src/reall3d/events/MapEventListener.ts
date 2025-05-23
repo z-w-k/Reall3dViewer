@@ -1,3 +1,6 @@
+// ================================
+// Copyright (c) 2025 reall3d.com
+// ================================
 import { Vector3, MathUtils } from 'three';
 import { Events } from './Events';
 import {
@@ -6,8 +9,6 @@ import {
     KeyActionCheckAndExecute,
     RaycasterRayIntersectPoints,
     SelectPointAndLookAt,
-    GetCanvasSize,
-    GetCSS3DRenderer,
     MarkFinish,
     CancelCurrentMark,
     MapGetSplatMesh,
@@ -19,7 +20,6 @@ import {
     MapSplatMeshMoveY,
 } from './EventConstants';
 import { SplatMesh } from '../meshs/splatmesh/SplatMesh';
-import { CSS3DRenderer } from 'three/addons/renderers/CSS3DRenderer.js';
 import { MarkDistanceLine } from '../meshs/mark/MarkDistanceLine';
 import { MarkMultiLines } from '../meshs/mark/MarkMultiLines';
 import { MarkMultiPlans } from '../meshs/mark/MarkMulitPlans';
@@ -47,7 +47,6 @@ export function setupMapEventListener(events: Events) {
 
     let disposed: boolean;
     let mouseState: MouseState = new MouseState();
-    let controlPlaneVisibleChecking: boolean = false;
     let lastActionTome: number;
 
     on(KeyActionCheckAndExecute, () => {
@@ -416,20 +415,6 @@ export function setupMapEventListener(events: Events) {
     canvas.addEventListener('touchmove', canvasTouchmoveEventListener, { passive: false });
     canvas.addEventListener('touchend', canvasTouchendEventListener, { passive: false });
 
-    // window.addEventListener('resize', resize);
-    // function resize() {
-    //     const { width, height } = fire(GetCanvasSize);
-    //     // const renderer = fire(GetRenderer);
-    //     // renderer.setSize(width, height);
-    //     // renderer.setPixelRatio(Math.min(devicePixelRatio, 2));
-    //     // const camera: PerspectiveCamera = fire(GetCamera);
-    //     // camera.aspect = width / height;
-    //     // camera.updateProjectionMatrix();
-    //     const cSS3DRenderer: CSS3DRenderer = fire(GetCSS3DRenderer);
-    //     // cSS3DRenderer.setSize(width, height);
-    //     cSS3DRenderer.setSize(innerWidth, innerHeight);
-    // }
-
     on(EventListenerDispose, () => {
         disposed = true;
         window.removeEventListener('keydown', keydownEventListener);
@@ -443,12 +428,10 @@ export function setupMapEventListener(events: Events) {
         canvas.removeEventListener('touchstart', canvasTouchstartEventListener);
         canvas.removeEventListener('touchmove', canvasTouchmoveEventListener);
         canvas.removeEventListener('touchend', canvasTouchendEventListener);
-        // window.removeEventListener('resize', resize);
     });
 
     on(SelectPointAndLookAt, async (x: number, y: number) => {
         const rs: Vector3[] = await fire(RaycasterRayIntersectPoints, x, y);
-        // console.info(rs);
         return rs;
     });
 }
