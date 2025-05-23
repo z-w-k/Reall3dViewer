@@ -34,6 +34,8 @@ export function setupCommonUtils(events: Events) {
     const on = (key: number, fn?: Function, multiFn?: boolean): Function | Function[] => events.on(key, fn, multiFn);
     const fire = (key: number, ...args: any): any => events.fire(key, ...args);
 
+    const isMap: boolean = !!fire(GetOptions).tileMap;
+
     on(IsDebugMode, () => fire(GetOptions).debugMode);
 
     on(CommonUtilsDispose, () => (disposed = true));
@@ -219,7 +221,7 @@ export function setupCommonUtils(events: Events) {
             fps !== undefined && setInfo('fps', fps);
             realFps !== undefined && setInfo('realFps', `raw ${realFps}`);
             sortTime !== undefined && setInfo('sort', `${sortTime} ms`);
-            fire(IsBigSceneMode) ? cuts !== undefined && setInfo('cuts', `（${cuts} cuts）`) : setInfo('cuts', '');
+            !isMap && fire(IsBigSceneMode) ? cuts !== undefined && setInfo('cuts', `（${cuts} cuts）`) : setInfo('cuts', '');
             worker && setInfo('worker', `${worker}`);
             // updateSceneData && setInfo('updateSceneData', `（up ${updateSceneData} ms）`);
             scene && setInfo('scene', scene);

@@ -124,7 +124,7 @@ export function setupMapEventListener(events: Events) {
         } else if (keySet.has('KeyD')) {
             fire(MapSplatMeshRotateZ, -0.1);
         } else if (keySet.has('KeyY')) {
-            fire(MapSplatMeshMoveY, (keySet.has('ShiftLeft') || keySet.has('ShiftRight')) ? -0.1 : 0.1);
+            fire(MapSplatMeshMoveY, keySet.has('ShiftLeft') || keySet.has('ShiftRight') ? -0.1 : 0.1);
         } else if (keySet.has('KeyC')) {
             console.info('position=', (fire(GetCameraPosition) as Vector3).toArray(), 'lookat=', (fire(GetCameraLookAt) as Vector3).toArray());
         }
@@ -416,19 +416,19 @@ export function setupMapEventListener(events: Events) {
     canvas.addEventListener('touchmove', canvasTouchmoveEventListener, { passive: false });
     canvas.addEventListener('touchend', canvasTouchendEventListener, { passive: false });
 
-    window.addEventListener('resize', resize);
-    function resize() {
-        const { width, height } = fire(GetCanvasSize);
-        // const renderer = fire(GetRenderer);
-        // renderer.setSize(width, height);
-        // renderer.setPixelRatio(Math.min(devicePixelRatio, 2));
-        // const camera: PerspectiveCamera = fire(GetCamera);
-        // camera.aspect = width / height;
-        // camera.updateProjectionMatrix();
-        const cSS3DRenderer: CSS3DRenderer = fire(GetCSS3DRenderer);
-        // cSS3DRenderer.setSize(width, height);
-        cSS3DRenderer.setSize(innerWidth, innerHeight);
-    }
+    // window.addEventListener('resize', resize);
+    // function resize() {
+    //     const { width, height } = fire(GetCanvasSize);
+    //     // const renderer = fire(GetRenderer);
+    //     // renderer.setSize(width, height);
+    //     // renderer.setPixelRatio(Math.min(devicePixelRatio, 2));
+    //     // const camera: PerspectiveCamera = fire(GetCamera);
+    //     // camera.aspect = width / height;
+    //     // camera.updateProjectionMatrix();
+    //     const cSS3DRenderer: CSS3DRenderer = fire(GetCSS3DRenderer);
+    //     // cSS3DRenderer.setSize(width, height);
+    //     cSS3DRenderer.setSize(innerWidth, innerHeight);
+    // }
 
     on(EventListenerDispose, () => {
         disposed = true;
@@ -443,7 +443,7 @@ export function setupMapEventListener(events: Events) {
         canvas.removeEventListener('touchstart', canvasTouchstartEventListener);
         canvas.removeEventListener('touchmove', canvasTouchmoveEventListener);
         canvas.removeEventListener('touchend', canvasTouchendEventListener);
-        window.removeEventListener('resize', resize);
+        // window.removeEventListener('resize', resize);
     });
 
     on(SelectPointAndLookAt, async (x: number, y: number) => {

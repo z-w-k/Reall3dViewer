@@ -1,18 +1,7 @@
 // ================================
 // Copyright (c) 2025 reall3d.com
 // ================================
-import {
-    AmbientLight,
-    BaseEvent,
-    Clock,
-    DirectionalLight,
-    EventDispatcher,
-    Object3DEventMap,
-    PerspectiveCamera,
-    Scene,
-    Vector3,
-    WebGLRenderer,
-} from 'three';
+import { AmbientLight, Clock, DirectionalLight, EventDispatcher, PerspectiveCamera, Scene, Vector3, WebGLRenderer } from 'three';
 import { MapControls } from 'three/examples/jsm/controls/MapControls.js';
 import { Events } from '../events/Events';
 import { Reall3dMapViewerOptions } from './Reall3dMapViewerOptions';
@@ -55,18 +44,12 @@ import { setupMark } from '../meshs/mark/SetupMark';
 import { CSS3DRenderer } from 'three/examples/jsm/Addons.js';
 import { WarpMesh } from '../meshs/warpmesh/WarpMesh';
 import { ViewerVersion } from '../utils/consts/GlobalConstants';
-
-/**
- * 地图渲染器EventMap
- */
-export interface MapViewerEventMap extends Object3DEventMap {
-    update: BaseEvent & { delta: number };
-}
+import * as tt from '@gotoeasy/three-tile';
 
 /**
  * 地图渲染器
  */
-export class Reall3dMapViewer extends EventDispatcher<MapViewerEventMap> {
+export class Reall3dMapViewer extends EventDispatcher<tt.plugin.GLViewerEventMap> {
     public scene: Scene;
     public renderer: WebGLRenderer;
     public camera: PerspectiveCamera;
@@ -74,13 +57,14 @@ export class Reall3dMapViewer extends EventDispatcher<MapViewerEventMap> {
     public ambLight: AmbientLight;
     public dirLight: DirectionalLight;
     public container: HTMLElement;
-    private _clock: Clock = new Clock();
+
+    private clock: Clock = new Clock();
     private updateTime: number = 0;
     private events: Events;
     private disposed: boolean = false;
 
-    constructor(container: HTMLElement | string = '#map', options: Reall3dMapViewerOptions = {}) {
-        console.info('MapViewer', ViewerVersion);
+    constructor(container: HTMLElement | string = '#gsviewer', options: Reall3dMapViewerOptions = {}) {
+        console.info('Reall3dMapViewer', ViewerVersion);
         super();
 
         const events = new Events();
@@ -113,7 +97,7 @@ export class Reall3dMapViewer extends EventDispatcher<MapViewerEventMap> {
             this.container.appendChild(this.renderer.domElement);
             window.addEventListener('resize', this.resize.bind(this));
             this.resize();
-            this.renderer.setAnimationLoop(this.#animate.bind(this));
+            this.renderer.setAnimationLoop(this.animate.bind(this));
         } else {
             throw `${container} not found!}`;
         }
@@ -136,7 +120,7 @@ export class Reall3dMapViewer extends EventDispatcher<MapViewerEventMap> {
         on(
             OnViewerAfterUpdate,
             () => {
-                this.dispatchEvent({ type: 'update', delta: this._clock.getDelta() });
+                this.dispatchEvent({ type: 'update', delta: this.clock.getDelta() });
                 this.updateTime = Date.now();
 
                 fire(IsDebugMode) &&
@@ -166,30 +150,8 @@ export class Reall3dMapViewer extends EventDispatcher<MapViewerEventMap> {
         );
     }
 
-    public resize() {
-        const width = this.container.clientWidth;
-        const height = this.container.clientHeight;
-        this.renderer.setPixelRatio(window.devicePixelRatio);
-        this.renderer.setSize(width, height);
-        this.camera.aspect = width / height;
-        this.camera.updateProjectionMatrix();
-        const cSS3DRenderer: CSS3DRenderer = this.events.fire(GetCSS3DRenderer);
-        cSS3DRenderer.setSize(innerWidth, innerHeight);
-        return this;
-    }
-
-    #animate() {
+    public addScene(indexUrl: string) {
         const fire = (key: number, ...args: any): any => this.events.fire(key, ...args);
-
-        fire(CountFpsDefault);
-        if (Date.now() - this.updateTime > 30) {
-            fire(OnViewerBeforeUpdate);
-            fire(OnViewerUpdate);
-            fire(OnViewerAfterUpdate);
-        }
-    }
-
-    public initScenes(indexUrl: string) {
         fetch(indexUrl, { mode: 'cors', credentials: 'omit', cache: 'reload' })
             .then(response => (!response.ok ? {} : response.json()))
             .then((data: any) => {
@@ -197,7 +159,7 @@ export class Reall3dMapViewer extends EventDispatcher<MapViewerEventMap> {
                     this.controls.target.set(data.lookAt.world.x, data.lookAt.world.y, data.lookAt.world.z);
                 } else if (data.lookAt?.geo) {
                     const geo = new Vector3(data.lookAt.geo.lon, data.lookAt.geo.lat, data.lookAt.geo.height);
-                    const opts: Reall3dMapViewerOptions = this.events.fire(GetOptions);
+                    const opts: Reall3dMapViewerOptions = fire(GetOptions);
                     const target = opts.tileMap.geo2world(geo);
                     this.controls.target.copy(target);
                 }
@@ -205,14 +167,15 @@ export class Reall3dMapViewer extends EventDispatcher<MapViewerEventMap> {
                     this.controls.object.position.copy(data.position.world);
                 } else if (data.position?.geo) {
                     const geo = new Vector3(data.position.geo.lon, data.position.geo.lat, data.position.geo.height);
-                    const opts: Reall3dMapViewerOptions = this.events.fire(GetOptions);
+                    const opts: Reall3dMapViewerOptions = fire(GetOptions);
                     const position = opts.tileMap.geo2world(geo);
                     this.controls.object.position.copy(position);
                 }
                 const set = new Set();
+                const { renderer, scene, controls, events } = this;
                 for (let url of data.scenes) {
                     if (!set.has(url)) {
-                        this.addScene(url);
+                        new WarpMesh(url, renderer, scene, controls, events);
                         set.add(url);
                     }
                 }
@@ -222,14 +185,27 @@ export class Reall3dMapViewer extends EventDispatcher<MapViewerEventMap> {
             });
     }
 
-    public addScene(sceneUrl: string) {
-        const { renderer, scene, controls, events } = this;
-        new WarpMesh(sceneUrl, renderer, scene, controls, events);
+    private resize() {
+        if (this.disposed) return;
+        const width = this.container.clientWidth;
+        const height = this.container.clientHeight;
+        this.renderer.setPixelRatio(Math.min(devicePixelRatio, 2));
+        this.renderer.setSize(width, height);
+        this.camera.aspect = width / height;
+        this.camera.updateProjectionMatrix();
+        const cSS3DRenderer: CSS3DRenderer = this.events.fire(GetCSS3DRenderer);
+        cSS3DRenderer.setSize(width, height);
     }
 
-    public fire(key: number, ...args: any): any {
-        if (this.disposed) return;
-        return this.events.fire(key, ...args);
+    private animate() {
+        const fire = (key: number, ...args: any): any => this.events.fire(key, ...args);
+
+        fire(CountFpsDefault);
+        if (Date.now() - this.updateTime > 30) {
+            fire(OnViewerBeforeUpdate);
+            fire(OnViewerUpdate);
+            fire(OnViewerAfterUpdate);
+        }
     }
 
     public dispose(): void {
@@ -249,7 +225,7 @@ export class Reall3dMapViewer extends EventDispatcher<MapViewerEventMap> {
         this.ambLight = null;
         this.dirLight = null;
         this.container = null;
-        this._clock = null;
+        this.clock = null;
         this.events = null;
     }
 }
