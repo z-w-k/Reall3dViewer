@@ -24,7 +24,7 @@ export interface Reall3dMapViewerOptions {
     position?: Vector3;
 
     /**
-     * 地图
+     * 地图（内部自动创建）
      */
     tileMap?: TileMap;
 

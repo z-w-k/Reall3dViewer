@@ -63,12 +63,13 @@ export class Reall3dMapViewer extends EventDispatcher<tt.plugin.GLViewerEventMap
     private events: Events;
     private disposed: boolean = false;
 
-    constructor(container: HTMLElement | string = '#gsviewer', options: Reall3dMapViewerOptions = {}) {
+    constructor(options: Reall3dMapViewerOptions = {}) {
         console.info('Reall3dMapViewer', ViewerVersion);
         super();
 
+        const that = this;
         const events = new Events();
-        this.events = events;
+        that.events = events;
         const on = (key: number, fn?: Function, multiFn?: boolean): Function | Function[] => events.on(key, fn, multiFn);
         const fire = (key: number, ...args: any): any => events.fire(key, ...args);
 
@@ -82,36 +83,31 @@ export class Reall3dMapViewer extends EventDispatcher<tt.plugin.GLViewerEventMap
         setupRaycaster(events);
         setupMark(events);
 
-        const el = opts.root;
-        if (el instanceof HTMLElement) {
-            this.container = el;
-            this.renderer = fire(MapCreateRenderer);
-            this.scene = fire(MapCreateScene);
-            this.camera = fire(MapCreateCamera);
-            this.controls = fire(MapCreateControls);
-            this.ambLight = new AmbientLight(0xffffff, 1);
-            this.scene.add(this.ambLight);
-            this.dirLight = fire(MapCreateDirLight);
-            this.scene.add(this.dirLight);
-            this.scene.add(opts.tileMap);
-            this.container.appendChild(this.renderer.domElement);
-            window.addEventListener('resize', this.resize.bind(this));
-            this.resize();
-            this.renderer.setAnimationLoop(this.animate.bind(this));
-        } else {
-            throw `${container} not found!}`;
-        }
+        that.container = opts.root as HTMLElement;
+        that.renderer = fire(MapCreateRenderer);
+        that.scene = fire(MapCreateScene);
+        that.camera = fire(MapCreateCamera);
+        that.controls = fire(MapCreateControls);
+        that.ambLight = new AmbientLight(0xffffff, 1);
+        that.scene.add(that.ambLight);
+        that.dirLight = fire(MapCreateDirLight);
+        that.scene.add(that.dirLight);
+        that.scene.add(opts.tileMap);
+        that.container.appendChild(that.renderer.domElement);
+        window.addEventListener('resize', that.resize.bind(that));
+        that.resize();
+        that.renderer.setAnimationLoop(that.animate.bind(that));
 
         setupMapEventListener(events);
 
         on(Geo2World, (wgs84: number[]) => opts.tileMap.geo2world(new Vector3().fromArray(wgs84)));
-        on(ViewerDispose, () => this.dispose());
+        on(ViewerDispose, () => that.dispose());
 
         on(
             OnViewerBeforeUpdate,
             () => {
                 fire(CountFpsReal);
-                this.controls.update();
+                that.controls.update();
                 fire(MapSortSplatMeshRenderOrder);
                 fire(KeyActionCheckAndExecute);
             },
@@ -120,8 +116,8 @@ export class Reall3dMapViewer extends EventDispatcher<tt.plugin.GLViewerEventMap
         on(
             OnViewerAfterUpdate,
             () => {
-                this.dispatchEvent({ type: 'update', delta: this.clock.getDelta() });
-                this.updateTime = Date.now();
+                that.dispatchEvent({ type: 'update', delta: that.clock.getDelta() });
+                that.updateTime = Date.now();
 
                 fire(IsDebugMode) &&
                     fire(Information, {
@@ -139,9 +135,9 @@ export class Reall3dMapViewer extends EventDispatcher<tt.plugin.GLViewerEventMap
         on(
             OnViewerUpdate,
             () => {
-                opts.tileMap.update(this.camera);
+                opts.tileMap.update(that.camera);
                 try {
-                    this.renderer.render(this.scene, this.camera);
+                    that.renderer.render(that.scene, that.camera);
                 } catch (e) {
                     console.warn(e.message);
                 }
@@ -151,28 +147,29 @@ export class Reall3dMapViewer extends EventDispatcher<tt.plugin.GLViewerEventMap
     }
 
     public addScene(indexUrl: string) {
-        const fire = (key: number, ...args: any): any => this.events.fire(key, ...args);
+        const that = this;
+        const fire = (key: number, ...args: any): any => that.events.fire(key, ...args);
         fetch(indexUrl, { mode: 'cors', credentials: 'omit', cache: 'reload' })
             .then(response => (!response.ok ? {} : response.json()))
             .then((data: any) => {
                 if (data.lookAt?.world) {
-                    this.controls.target.set(data.lookAt.world.x, data.lookAt.world.y, data.lookAt.world.z);
+                    that.controls.target.set(data.lookAt.world.x, data.lookAt.world.y, data.lookAt.world.z);
                 } else if (data.lookAt?.geo) {
                     const geo = new Vector3(data.lookAt.geo.lon, data.lookAt.geo.lat, data.lookAt.geo.height);
                     const opts: Reall3dMapViewerOptions = fire(GetOptions);
                     const target = opts.tileMap.geo2world(geo);
-                    this.controls.target.copy(target);
+                    that.controls.target.copy(target);
                 }
                 if (data.position?.world) {
-                    this.controls.object.position.copy(data.position.world);
+                    that.controls.object.position.copy(data.position.world);
                 } else if (data.position?.geo) {
                     const geo = new Vector3(data.position.geo.lon, data.position.geo.lat, data.position.geo.height);
                     const opts: Reall3dMapViewerOptions = fire(GetOptions);
                     const position = opts.tileMap.geo2world(geo);
-                    this.controls.object.position.copy(position);
+                    that.controls.object.position.copy(position);
                 }
                 const set = new Set();
-                const { renderer, scene, controls, events } = this;
+                const { renderer, scene, controls, events } = that;
                 for (let url of data.scenes) {
                     if (!set.has(url)) {
                         new WarpMesh(url, renderer, scene, controls, events);
@@ -186,22 +183,23 @@ export class Reall3dMapViewer extends EventDispatcher<tt.plugin.GLViewerEventMap
     }
 
     private resize() {
-        if (this.disposed) return;
-        const width = this.container.clientWidth;
-        const height = this.container.clientHeight;
-        this.renderer.setPixelRatio(Math.min(devicePixelRatio, 2));
-        this.renderer.setSize(width, height);
-        this.camera.aspect = width / height;
-        this.camera.updateProjectionMatrix();
-        const cSS3DRenderer: CSS3DRenderer = this.events.fire(GetCSS3DRenderer);
+        const that = this;
+        if (that.disposed) return;
+        const width = that.container.clientWidth;
+        const height = that.container.clientHeight;
+        that.renderer.setPixelRatio(Math.min(devicePixelRatio, 2));
+        that.renderer.setSize(width, height);
+        that.camera.aspect = width / height;
+        that.camera.updateProjectionMatrix();
+        const cSS3DRenderer: CSS3DRenderer = that.events.fire(GetCSS3DRenderer);
         cSS3DRenderer.setSize(width, height);
     }
 
     private animate() {
-        const fire = (key: number, ...args: any): any => this.events.fire(key, ...args);
-
+        const that = this;
+        const fire = (key: number, ...args: any): any => that.events.fire(key, ...args);
         fire(CountFpsDefault);
-        if (Date.now() - this.updateTime > 30) {
+        if (Date.now() - that.updateTime > 30) {
             fire(OnViewerBeforeUpdate);
             fire(OnViewerUpdate);
             fire(OnViewerAfterUpdate);
@@ -209,23 +207,24 @@ export class Reall3dMapViewer extends EventDispatcher<tt.plugin.GLViewerEventMap
     }
 
     public dispose(): void {
-        if (this.disposed) return;
-        this.disposed = true;
+        const that = this;
+        if (that.disposed) return;
+        that.disposed = true;
 
-        this.events.fire(CSS3DRendererDispose);
-        this.events.fire(MapSceneTraverseDispose);
-        this.renderer.clear();
-        this.renderer.dispose();
-        this.events.clear();
+        that.events.fire(CSS3DRendererDispose);
+        that.events.fire(MapSceneTraverseDispose);
+        that.renderer.clear();
+        that.renderer.dispose();
+        that.events.clear();
 
-        this.scene = null;
-        this.renderer = null;
-        this.camera = null;
-        this.controls = null;
-        this.ambLight = null;
-        this.dirLight = null;
-        this.container = null;
-        this.clock = null;
-        this.events = null;
+        that.scene = null;
+        that.renderer = null;
+        that.camera = null;
+        that.controls = null;
+        that.ambLight = null;
+        that.dirLight = null;
+        that.container = null;
+        that.clock = null;
+        that.events = null;
     }
 }

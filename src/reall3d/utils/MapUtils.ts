@@ -232,7 +232,7 @@ export function setupMapUtils(events: Events) {
         const scene: Scene = fire(GetScene);
         const opts: Reall3dMapViewerOptions = fire(GetOptions);
         const controls = new MapControls(fire(GetCamera), opts.root as HTMLElement);
-        controls.target.copy(opts.lookAt);
+        opts.lookAt && controls.target.copy(opts.lookAt);
         controls.screenSpacePanning = false;
         controls.minDistance = 0.1;
         controls.maxDistance = 30000;
@@ -243,7 +243,6 @@ export function setupMapUtils(events: Events) {
         controls.minAzimuthAngle = 0;
         controls.maxAzimuthAngle = 0;
 
-        // controls.listenToKeyEvents(window);
         controls.addEventListener('change', () => {
             // camera polar
             const polar = Math.max(controls.getPolarAngle(), 0.1);
@@ -280,7 +279,7 @@ export function setupMapUtils(events: Events) {
         const { lookAt } = fire(GetOptions) as Reall3dMapViewerOptions;
         const dirLight = new DirectionalLight(0xffffff, 1);
         dirLight.position.set(0, 2e3, 1e3);
-        dirLight.target.position.copy(lookAt);
+        lookAt && dirLight.target.position.copy(lookAt);
         return dirLight;
     });
 

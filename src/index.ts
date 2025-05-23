@@ -6,6 +6,7 @@ import 'virtual:svg-icons-register';
 
 import { Reall3dViewer } from './reall3d/viewer/Reall3dViewer';
 import { Reall3dViewerOptions } from './reall3d/viewer/Reall3dViewerOptions';
+import { Reall3dMapViewer } from './reall3d/viewer/Reall3dMapViewer';
 
 const params: URLSearchParams = new URLSearchParams(location.search);
 let url = params.get('url');
@@ -19,6 +20,9 @@ if (url) {
 } else {
     viewer = new Reall3dViewer({ debugMode: true, maxRenderCountOfPc: 384 * 10000, shDegree: 3 });
     viewer.addModel(`https://reall3d.com/demo-models/hornedlizard.spx`);
+
+    // let mapViewer = new Reall3dMapViewer();
+    // mapViewer.addScene('https://reall3d.com/demo-models/map/0.scenes.json');
 
     initDevMode();
 }

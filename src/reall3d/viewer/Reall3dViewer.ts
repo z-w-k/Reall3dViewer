@@ -240,30 +240,32 @@ export class Reall3dViewer {
      * 刷新
      */
     public update(): void {
-        if (this.disposed) return;
-        const fire = (key: number, ...args: any): any => this.events.fire(key, ...args);
+        const that = this;
+        if (that.disposed) return;
+        const fire = (key: number, ...args: any): any => that.events.fire(key, ...args);
 
-        if (Date.now() - this.updateTime > 30) {
+        if (Date.now() - that.updateTime > 30) {
             fire(OnViewerBeforeUpdate);
-            this.needUpdate && fire(OnViewerUpdate);
+            that.needUpdate && fire(OnViewerUpdate);
             fire(OnViewerAfterUpdate);
         }
     }
 
     // 开发调试用临时接口
     public fire(n: number, p1?: any, p2?: any): void {
-        n === 1 && this.splatMesh.fire(SplatUpdateShowWaterMark, p1); // 显示/隐藏水印
-        n === 2 && this.events.fire(AddFlyPosition);
-        n === 3 && this.events.fire(Flying, true);
-        n === 4 && this.events.fire(ClearFlyPosition);
-        n === 5 && this.events.fire(FlySavePositions);
-        n === 6 && this.events.fire(MetaMarkSaveData);
-        n === 7 && this.events.fire(MetaMarkRemoveData);
+        const that = this;
+        n === 1 && that.splatMesh.fire(SplatUpdateShowWaterMark, p1); // 显示/隐藏水印
+        n === 2 && that.events.fire(AddFlyPosition);
+        n === 3 && that.events.fire(Flying, true);
+        n === 4 && that.events.fire(ClearFlyPosition);
+        n === 5 && that.events.fire(FlySavePositions);
+        n === 6 && that.events.fire(MetaMarkSaveData);
+        n === 7 && that.events.fire(MetaMarkRemoveData);
         if (n === 8) {
             (async () => {
-                let shDegree: number = await this.splatMesh.fire(GetModelShDegree);
-                if (p1) shDegree = this.splatMesh.fire(GetCurrentDisplayShDegree) + p1;
-                this.splatMesh.fire(SplatUpdateShDegree, shDegree);
+                let shDegree: number = await that.splatMesh.fire(GetModelShDegree);
+                if (p1) shDegree = that.splatMesh.fire(GetCurrentDisplayShDegree) + p1;
+                that.splatMesh.fire(SplatUpdateShDegree, shDegree);
             })();
         }
     }
@@ -274,8 +276,9 @@ export class Reall3dViewer {
      * @returns 最新配置项
      */
     public options(opts?: Reall3dViewerOptions): Reall3dViewerOptions {
-        if (this.disposed) return {};
-        const fire = (key: number, ...args: any): any => this.events.fire(key, ...args);
+        const that = this;
+        if (that.disposed) return {};
+        const fire = (key: number, ...args: any): any => that.events.fire(key, ...args);
         let splatOpts: SplatMeshOptions;
         const scene: Scene = fire(GetScene);
         scene.traverse((obj: any) => !splatOpts && obj instanceof SplatMesh && (splatOpts = (obj as SplatMesh).options()));
@@ -317,9 +320,10 @@ export class Reall3dViewer {
      * 重置
      */
     public reset(opts: Reall3dViewerOptions = {}): void {
-        this.dispose();
-        this.disposed = false;
-        this.init(initGsViewerOptions(opts));
+        const that = this;
+        that.dispose();
+        that.disposed = false;
+        that.init(initGsViewerOptions(opts));
     }
 
     /**
@@ -327,8 +331,9 @@ export class Reall3dViewer {
      * @returns
      */
     public switchDeiplayMode() {
-        if (this.disposed) return;
-        this.events.fire(SplatSwitchDisplayMode);
+        const that = this;
+        if (that.disposed) return;
+        that.events.fire(SplatSwitchDisplayMode);
     }
 
     /**
@@ -336,8 +341,9 @@ export class Reall3dViewer {
      * @param sceneUrl 场景地址
      */
     public async addScene(sceneUrl: string) {
-        if (this.disposed) return;
-        const fire = (key: number, ...args: any): any => this.events.fire(key, ...args);
+        const that = this;
+        if (that.disposed) return;
+        const fire = (key: number, ...args: any): any => that.events.fire(key, ...args);
 
         let meta: MetaData = {};
         try {
@@ -359,13 +365,13 @@ export class Reall3dViewer {
         const opts: Reall3dViewerOptions = { ...meta, ...(meta.cameraInfo || {}) };
         meta.autoCut = Math.min(Math.max(meta.autoCut || 0, 0), 50); // 限制0~50
         opts.bigSceneMode = meta.autoCut > 1; // 切割多块的为大场景
-        this.reset({ ...opts });
+        that.reset({ ...opts });
 
         !opts.bigSceneMode && delete meta.autoCut; // 小场景或没有配置成切割多块，都不支持切割
 
         // 按元数据调整更新相机、标注等信息
-        this.splatMesh.meta = meta;
-        isMobile && (meta.cameraInfo?.position || meta.cameraInfo?.lookAt) && this.events.fire(GetControls)._dollyOut(0.75); // 手机适当缩小
+        that.splatMesh.meta = meta;
+        isMobile && (meta.cameraInfo?.position || meta.cameraInfo?.lookAt) && that.events.fire(GetControls)._dollyOut(0.75); // 手机适当缩小
 
         if (opts.bigSceneMode) {
             fire(OnSetFlyPositions, meta.flyPositions || []);
@@ -375,7 +381,7 @@ export class Reall3dViewer {
         }
 
         // 加载模型
-        await this.splatMesh.addModel({ url: meta.url }, meta);
+        await that.splatMesh.addModel({ url: meta.url }, meta);
         await fire(OnSetWaterMark, meta.watermark);
         fire(GetControls).updateRotateAxis();
     }
@@ -385,8 +391,9 @@ export class Reall3dViewer {
      * @param urlOpts 高斯模型链接或元数据文件链接或选项
      */
     public async addModel(urlOpts: string | ModelOptions): Promise<void> {
-        if (this.disposed) return;
-        const fire = (key: number, ...args: any): any => this.events.fire(key, ...args);
+        const that = this;
+        if (that.disposed) return;
+        const fire = (key: number, ...args: any): any => that.events.fire(key, ...args);
 
         // 参数整理
         let metaUrl = '';
@@ -443,7 +450,7 @@ export class Reall3dViewer {
         fire(LoadSmallSceneMetaData, meta);
 
         // 加载模型
-        await this.splatMesh.addModel(modelOpts, meta);
+        await that.splatMesh.addModel(modelOpts, meta);
         await fire(OnSetWaterMark, meta.watermark);
     }
 
@@ -522,9 +529,10 @@ export class Reall3dViewer {
      * 销毁渲染器不再使用
      */
     public dispose(): void {
-        if (this.disposed) return;
-        this.disposed = true;
-        const fire = (key: number, ...args: any): any => this.events.fire(key, ...args);
+        const that = this;
+        if (that.disposed) return;
+        that.disposed = true;
+        const fire = (key: number, ...args: any): any => that.events.fire(key, ...args);
 
         fire(CommonUtilsDispose);
         fire(ViewerUtilsDispose);
@@ -538,8 +546,8 @@ export class Reall3dViewer {
         renderer.clear();
         renderer.dispose();
 
-        this.splatMesh = null;
-        this.events.clear();
-        this.events = null;
+        that.splatMesh = null;
+        that.events.clear();
+        that.events = null;
     }
 }
