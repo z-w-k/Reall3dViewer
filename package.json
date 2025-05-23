@@ -9,6 +9,7 @@
   },
   "dependencies": {
     "three": "^0.171.0"
+    "@gotoeasy/three-tile": "^0.8.7"
   },
   "devDependencies": {
     "@types/node": "^22.13.5",
