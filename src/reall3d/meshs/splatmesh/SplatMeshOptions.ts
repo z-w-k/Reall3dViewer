@@ -83,7 +83,7 @@ export interface SplatMeshOptions {
     shDegree?: number | undefined;
 
     /**
-     * 是否地图模式，默认为false
+     * 是否开启深度测试，默认true
      */
-    mapMode?: boolean;
+    depthTest?: boolean;
 }
