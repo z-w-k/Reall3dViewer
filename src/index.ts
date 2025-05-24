@@ -6,13 +6,14 @@ import 'virtual:svg-icons-register';
 
 import { Reall3dViewer } from './reall3d/viewer/Reall3dViewer';
 import { Reall3dViewerOptions } from './reall3d/viewer/Reall3dViewerOptions';
-import { Reall3dMapViewer } from './reall3d/viewer/Reall3dMapViewer';
+import { Reall3dMapViewer } from './reall3d/mapviewer/Reall3dMapViewer';
 
 const params: URLSearchParams = new URLSearchParams(location.search);
 let url = params.get('url');
 const debugMode = !!params.get('debug');
 
 let viewer: Reall3dViewer;
+let mapViewer: Reall3dMapViewer;
 if (url) {
     viewer = new Reall3dViewer({ debugMode });
     viewer.addModel(url);
@@ -20,9 +21,6 @@ if (url) {
 } else {
     viewer = new Reall3dViewer({ debugMode: true, maxRenderCountOfPc: 384 * 10000, shDegree: 3 });
     viewer.addModel(`https://reall3d.com/demo-models/hornedlizard.spx`);
-
-    // let mapViewer = new Reall3dMapViewer();
-    // mapViewer.addScene('https://reall3d.com/demo-models/map/0.scenes.json');
 
     initDevMode();
 }
@@ -47,7 +45,7 @@ function initDevMode(infoOnly = false) {
     const gstext: HTMLInputElement = document.querySelector('.gstext');
     if (gstext) {
         gstext.addEventListener('keyup', function (e: Event) {
-            window['$api']?.setWaterMark(gstext.value, false);
+            viewer && window['$api']?.setWaterMark(gstext.value, false);
         });
     }
 }
@@ -60,71 +58,85 @@ function fnClick(className: string) {
         let txt = document.querySelector('#gsviewer .operation table').classList.toggle('plus') ? '＋' : '－';
         document.querySelector('#gsviewer .op-show').innerHTML = txt;
     } else if (className == 'demo1') {
+        mapViewer?.dispose();
+        viewer = viewer || new Reall3dViewer({ debugMode: true, maxRenderCountOfPc: 384 * 10000, shDegree: 3 });
         viewer.reset({ debugMode: true });
         setTimeout(() => viewer.addModel(`https://reall3d.com/demo-models/yz.meta.json`), 50); // Let it GC
     } else if (className == 'demo2') {
+        mapViewer?.dispose();
+        viewer = viewer || new Reall3dViewer({ debugMode: true, maxRenderCountOfPc: 384 * 10000, shDegree: 3 });
         viewer.reset({ debugMode: true });
         setTimeout(() => viewer.addModel(`https://reall3d.com/demo-models/jtstjg.spx`), 50); // Let it GC
     } else if (className == 'demo3') {
+        mapViewer?.dispose();
+        viewer = viewer || new Reall3dViewer({ debugMode: true, maxRenderCountOfPc: 384 * 10000, shDegree: 3 });
         viewer.reset({ debugMode: true });
         setTimeout(() => viewer.addModel(`https://reall3d.com/demo-models/djj.spx`), 50); // Let it GC
     } else if (className == 'demo4') {
+        mapViewer?.dispose();
+        viewer = viewer || new Reall3dViewer({ debugMode: true, maxRenderCountOfPc: 384 * 10000, shDegree: 3 });
         viewer.reset({ debugMode: true });
         setTimeout(() => viewer.addModel(`https://reall3d.com/demo-models/bzg.spx`), 50); // Let it GC
     } else if (className == 'big-lod') {
         // TODO 大场景LOD，重构改进使用spx
         // setTimeout(() => viewer.addScene(`https://reall3d.com/demo-models/lod-demo-spx.scene.json`), 50); // Let it GC
     } else if (className == 'switch-rotate') {
-        let opts: Reall3dViewerOptions = viewer.options();
-        viewer.options({ autoRotate: !opts.autoRotate });
+        let opts: Reall3dViewerOptions = viewer?.options();
+        viewer?.options({ autoRotate: !opts.autoRotate });
     } else if (className == 'switch-pointcloudMode') {
-        viewer.options({ pointcloudMode: !viewer.options().pointcloudMode });
+        viewer?.options({ pointcloudMode: !viewer?.options().pointcloudMode });
     } else if (className == 'switch-deiplay-mode') {
-        viewer.switchDeiplayMode();
+        viewer?.switchDeiplayMode();
     } else if (className == 'add-lightFactor') {
-        viewer.options({ lightFactor: viewer.options().lightFactor + 0.1 });
+        viewer?.options({ lightFactor: viewer?.options().lightFactor + 0.1 });
     } else if (className == 'default-lightFactor') {
-        viewer.options({ lightFactor: 1 });
+        viewer?.options({ lightFactor: 1 });
     } else if (className == 'sub-lightFactor') {
-        let opts: Reall3dViewerOptions = viewer.options();
-        viewer.options({ lightFactor: opts.lightFactor - 0.1 });
+        let opts: Reall3dViewerOptions = viewer?.options();
+        viewer?.options({ lightFactor: opts.lightFactor - 0.1 });
     } else if (className == 'show-watermark') {
-        viewer.fire(1, 1);
+        viewer?.fire(1, 1);
     } else if (className == 'hide-watermark') {
-        viewer.fire(1, 0);
+        viewer?.fire(1, 0);
     } else if (className == 'mark-show') {
-        viewer.options({ markVisible: true });
+        viewer?.options({ markVisible: true });
     } else if (className == 'mark-hide') {
-        viewer.options({ markVisible: false });
+        viewer?.options({ markVisible: false });
     } else if (className == 'mark-save') {
-        viewer.fire(6);
+        viewer?.fire(6);
     } else if (className == 'mark-del') {
-        viewer.fire(7);
+        viewer?.fire(7);
     } else if (className == 'mark-point') {
-        viewer.options({ markMode: true, markType: 'point' });
+        viewer?.options({ markMode: true, markType: 'point' });
     } else if (className == 'mark-lines') {
-        viewer.options({ markMode: true, markType: 'lines' });
+        viewer?.options({ markMode: true, markType: 'lines' });
     } else if (className == 'mark-plans') {
-        viewer.options({ markMode: true, markType: 'plans' });
+        viewer?.options({ markMode: true, markType: 'plans' });
     } else if (className == 'mark-distance') {
-        viewer.options({ markMode: true, markType: 'distance' });
+        viewer?.options({ markMode: true, markType: 'distance' });
     } else if (className == 'mark-circle') {
-        viewer.options({ markMode: true, markType: 'circle' });
+        viewer?.options({ markMode: true, markType: 'circle' });
     } else if (className == 'add-pos') {
-        viewer.fire(2);
+        viewer?.fire(2);
     } else if (className == 'fly') {
-        viewer.fire(3);
+        viewer?.fire(3);
     } else if (className == 'clear-pos') {
-        viewer.fire(4);
+        viewer?.fire(4);
     } else if (className == 'fly-save') {
-        viewer.fire(5);
+        viewer?.fire(5);
     } else if (className == 'add-sh') {
-        viewer.fire(8, 1);
+        viewer?.fire(8, 1);
     } else if (className == 'default-sh') {
-        viewer.fire(8);
+        viewer?.fire(8);
     } else if (className == 'sub-sh') {
-        viewer.fire(8, -1);
+        viewer?.fire(8, -1);
     } else if (className == 'map') {
-        window.open('https://reall3d.com/reall3dviewer/map/index.html', '_blank');
+        // window.open('https://reall3d.com/reall3dviewer/map/index.html', '_blank');
+        viewer?.dispose();
+        mapViewer?.dispose();
+        viewer = null;
+        document.querySelector('#map')?.classList?.remove('hidden');
+        mapViewer = new Reall3dMapViewer({ root: '#map' });
+        mapViewer.addScene('https://reall3d.com/demo-models/map/0.scenes.json');
     }
 }

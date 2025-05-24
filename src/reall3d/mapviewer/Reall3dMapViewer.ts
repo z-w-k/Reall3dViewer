@@ -35,14 +35,14 @@ import {
     GetCSS3DRenderer,
     Geo2World,
 } from '../events/EventConstants';
-import { initMapViewerOptions, setupMapUtils } from '../utils/MapUtils';
+import { initMapViewerOptions, setupMapUtils } from './utils/MapUtils';
 import { setupCommonUtils } from '../utils/CommonUtils';
-import { setupMapEventListener } from '../events/MapEventListener';
+import { setupMapEventListener } from './events/MapEventListener';
 import { setupApi } from '../api/SetupApi';
 import { setupRaycaster } from '../raycaster/SetupRaycaster';
 import { setupMark } from '../meshs/mark/SetupMark';
 import { CSS3DRenderer } from 'three/examples/jsm/Addons.js';
-import { WarpMesh } from '../meshs/warpmesh/WarpMesh';
+import { WarpMesh } from './warpmesh/WarpMesh';
 import { ViewerVersion } from '../utils/consts/GlobalConstants';
 import * as tt from '@gotoeasy/three-tile';
 
@@ -211,6 +211,8 @@ export class Reall3dMapViewer extends EventDispatcher<tt.plugin.GLViewerEventMap
         if (that.disposed) return;
         that.disposed = true;
 
+        const canvas = that.renderer.domElement;
+
         that.events.fire(CSS3DRendererDispose);
         that.events.fire(MapSceneTraverseDispose);
         that.renderer.clear();
@@ -223,6 +225,8 @@ export class Reall3dMapViewer extends EventDispatcher<tt.plugin.GLViewerEventMap
         that.controls = null;
         that.ambLight = null;
         that.dirLight = null;
+        that.container.removeChild(canvas);
+        that.container.classList.add('hidden');
         that.container = null;
         that.clock = null;
         that.events = null;

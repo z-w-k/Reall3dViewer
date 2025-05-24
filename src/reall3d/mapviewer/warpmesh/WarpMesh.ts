@@ -3,8 +3,8 @@ import { Camera, Matrix4, Mesh, PerspectiveCamera, Renderer, Scene, Vector3 } fr
 import { Geo2World, SetGaussianText } from '../../events/EventConstants';
 import { CSS3DSprite } from 'three/examples/jsm/Addons.js';
 import { Easing, Tween } from '@tweenjs/tween.js';
-import { SplatMesh } from '../splatmesh/SplatMesh';
-import { SplatMeshOptions } from '../splatmesh/SplatMeshOptions';
+import { SplatMesh } from '../../meshs/splatmesh/SplatMesh';
+import { SplatMeshOptions } from '../../meshs/splatmesh/SplatMeshOptions';
 import { ModelOptions } from '../../modeldata/ModelOptions';
 import { MetaData } from '../../modeldata/ModelData';
 import { Events } from '../../events/Events';

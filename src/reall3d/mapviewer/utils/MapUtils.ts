@@ -40,14 +40,14 @@ import {
     MapSortSplatMeshRenderOrder,
     MapSceneTraverseDispose,
     MapIsWarpMeshVisible,
-} from './../events/EventConstants';
-import { Events } from '../events/Events';
-import { Reall3dMapViewerOptions } from '../viewer/Reall3dMapViewerOptions';
+} from '../../events/EventConstants';
+import { Events } from '../../events/Events';
+import { Reall3dMapViewerOptions } from '../Reall3dMapViewerOptions';
 import { MapControls } from 'three/examples/jsm/controls/MapControls.js';
-import { SplatMesh } from '../meshs/splatmesh/SplatMesh';
+import { SplatMesh } from '../../meshs/splatmesh/SplatMesh';
 import * as tt from '@gotoeasy/three-tile';
-import { WarpMesh } from '../meshs/warpmesh/WarpMesh';
-import { isMobile } from './consts/GlobalConstants';
+import { WarpMesh } from '../warpmesh/WarpMesh';
+import { isMobile } from '../../utils/consts/GlobalConstants';
 
 export function setupMapUtils(events: Events) {
     const on = (key: number, fn?: Function, multiFn?: boolean): Function | Function[] => events.on(key, fn, multiFn);

@@ -1,7 +1,7 @@
 // ================================
 // Copyright (c) 2025 reall3d.com
 // ================================
-import { Events } from '../events/Events';
+import { Events } from '../../events/Events';
 import {
     AddFlyPosition,
     ClearFlyPosition,
@@ -17,9 +17,9 @@ import {
     TweenFlyDisable,
     TweenFlyEnable,
     TweenFlyOnce,
-} from '../events/EventConstants';
+} from '../../events/EventConstants';
 import { Easing, Tween } from '@tweenjs/tween.js';
-import { CameraControls } from '../controls/CameraControls';
+import { CameraControls } from '../../controls/CameraControls';
 import { Vector3 } from 'three';
 export function setupTween(events: Events) {
     const fire = (key: number, ...args: any): any => events.fire(key, ...args);
