@@ -75,7 +75,7 @@ export interface SplatMeshOptions {
     /**
      * 是否显示水印
      */
-    showWaterMark?: boolean | undefined;
+    showWatermark?: boolean | undefined;
 
     /**
      * 球谐系数的渲染级别，默认为模型数据的最大可渲染级别

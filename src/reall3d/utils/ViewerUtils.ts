@@ -90,7 +90,7 @@ export function initSplatMeshOptions(options: SplatMeshOptions): SplatMeshOption
     opts.pointcloudMode ??= !opts.bigSceneMode; // 小场景默认点云模式，大场景默认正常模式
     opts.lightFactor ??= 1.0;
     opts.name ??= '';
-    opts.showWaterMark ??= true;
+    opts.showWatermark ??= true;
 
     return opts;
 }

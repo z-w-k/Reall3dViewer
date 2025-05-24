@@ -167,7 +167,7 @@ export function setupSplatTextureManager(events: Events) {
         const txtWatermarkData = textWatermarkData;
         let dataSplatCount = splatModel.dataSplatCount;
         let watermarkCount = downloadDone ? splatModel.watermarkCount : 0;
-        let textWatermarkCount = downloadDone ? (txtWatermarkData?.byteLength || 0) / 32 : 0; // 动态输入的文字水印数
+        let textWatermarkCount = splatModel.meta.showWatermark && downloadDone ? (txtWatermarkData?.byteLength || 0) / 32 : 0; // 动态输入的文字水印数
         splatModel.renderSplatCount = dataSplatCount + watermarkCount + textWatermarkCount; // 渲染数
 
         if (splatModel.renderSplatCount >= maxRenderCount) {

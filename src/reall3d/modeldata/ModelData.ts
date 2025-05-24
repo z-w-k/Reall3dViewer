@@ -206,7 +206,7 @@ export interface MetaData {
     /** 文字水印 */
     watermark?: string;
     /** 是否显示水印 */
-    showWaterMark?: boolean;
+    showWatermark?: boolean;
     /** 相机参数 */
     cameraInfo?: CameraInfo;
     /** 标注 */

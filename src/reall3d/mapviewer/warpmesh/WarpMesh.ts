@@ -47,8 +47,8 @@ export class WarpMesh extends Mesh {
                 const bigSceneMode = data.autoCut && data.autoCut > 1;
                 const pointcloudMode = false;
                 const depthTest = false;
-                const showWaterMark = data.showWaterMark !== false;
-                const opts: SplatMeshOptions = { renderer, scene, controls, pointcloudMode, bigSceneMode, matrix, showWaterMark, depthTest };
+                const showWatermark = data.showWatermark !== false;
+                const opts: SplatMeshOptions = { renderer, scene, controls, pointcloudMode, bigSceneMode, matrix, showWatermark, depthTest };
                 opts.maxRenderCountOfMobile ??= opts.bigSceneMode ? 128 * 10240 : 400 * 10000;
                 opts.maxRenderCountOfPc ??= opts.bigSceneMode ? 320 * 10000 : 400 * 10000;
                 opts.debugMode ??= location.protocol === 'http:' || /^test\./.test(location.host); // 生产环境不开启
@@ -142,10 +142,11 @@ export class WarpMesh extends Mesh {
                     splatMesh.applyMatrix4(this.opts.matrix);
                     splatMesh.updateMatrix();
                     splatMesh.meta = meta;
-                    // const watermark = meta.watermark?.text || meta.name || ''; // 水印文字
+                    const watermark = meta.watermark || meta.name || ''; // 水印文字
+                    meta.showWatermark = meta.showWatermark !== false; // 是否显示水印文字
                     // const isVertical = meta.watermark?.vertical !== false; // 水印文字是否竖向（面向天空时设定为false）
                     // const isNgative = meta.watermark?.ngative !== false; // 水印文字是否反向（模型坐标倒立时设定为false）
-                    // splatMesh.fire(SetGaussianText, watermark, isVertical, isNgative);
+                    splatMesh.fire(SetGaussianText, watermark, true, false);
                     splatMesh.addModel({ url: this.meta.url }, this.meta);
                 }
             }

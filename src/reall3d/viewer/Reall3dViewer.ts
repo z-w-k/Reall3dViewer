@@ -428,6 +428,7 @@ export class Reall3dViewer {
         }
 
         // 检查整理
+        meta.showWatermark = meta.showWatermark !== false; // 是否显示水印文字
         meta.url = meta.url || modelOpts.url;
         delete meta.autoCut; // 小场景没有切割
         if (!modelOpts.format) {
