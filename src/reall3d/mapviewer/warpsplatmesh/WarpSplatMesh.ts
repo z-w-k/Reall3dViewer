@@ -1,39 +1,38 @@
+// ================================
+// Copyright (c) 2025 reall3d.com
+// ================================
+import { Matrix4, Mesh, Vector3 } from 'three';
 import { MapControls } from 'three/examples/jsm/controls/MapControls.js';
-import { Camera, Matrix4, Mesh, PerspectiveCamera, Renderer, Scene, Vector3 } from 'three';
-import { Geo2World, SetGaussianText } from '../../events/EventConstants';
+import { SetGaussianText } from '../../events/EventConstants';
 import { CSS3DSprite } from 'three/examples/jsm/Addons.js';
 import { Easing, Tween } from '@tweenjs/tween.js';
 import { SplatMesh } from '../../meshs/splatmesh/SplatMesh';
 import { SplatMeshOptions } from '../../meshs/splatmesh/SplatMeshOptions';
-import { ModelOptions } from '../../modeldata/ModelOptions';
 import { MetaData } from '../../modeldata/ModelData';
-import { Events } from '../../events/Events';
+import { Reall3dMapViewer } from '../Reall3dMapViewer';
 
 const isMobile = navigator.userAgent.includes('Mobi');
 
-export class WarpMesh extends Mesh {
-    public readonly isWarpMesh: boolean = true;
+export class WarpSplatMesh extends Mesh {
+    public readonly isWarpSplatMesh: boolean = true;
     public meta: MetaData;
     public lastActiveTime: number = Date.now(); // 备用
     public splatMesh: SplatMesh;
     public active: boolean = false;
     private opts: SplatMeshOptions;
     private css3dTag: CSS3DSprite;
-    private viewEvents: Events;
+    private mapViewer: Reall3dMapViewer;
     private disposed: boolean = false;
 
-    /**
-     * 构造函数
-     * @param options 渲染器、场景、相机都应该传入
-     */
-    constructor(sceneUrl: string, renderer: Renderer, scene: Scene, controls: MapControls, events: Events) {
+    constructor(sceneUrl: string, mapViewer: Reall3dMapViewer) {
         super();
-        this.viewEvents = events;
-        this.addScene(sceneUrl, renderer, scene, controls);
+        this.mapViewer = mapViewer;
+        this.addScene(sceneUrl);
         this.frustumCulled = false;
     }
 
-    private async addScene(sceneUrl: string, renderer: Renderer, scene: Scene, controls: MapControls) {
+    private async addScene(sceneUrl: string) {
+        const { renderer, scene, controls, tileMap } = this.mapViewer;
         fetch(sceneUrl, { mode: 'cors', credentials: 'omit', cache: 'reload' })
             .then(response => (!response.ok ? {} : response.json()))
             .then((data: MetaData) => {
@@ -41,7 +40,7 @@ export class WarpMesh extends Mesh {
                 if (data.transform) {
                     matrix.fromArray(data.transform);
                 } else if (data.WGS84) {
-                    const pos = this.viewEvents.fire(Geo2World, data.WGS84);
+                    const pos = tileMap.geo2world(new Vector3().fromArray(data.WGS84));
                     matrix.makeTranslation(pos.x, pos.y, pos.z);
                 }
                 const bigSceneMode = data.autoCut && data.autoCut > 1;
@@ -64,6 +63,7 @@ export class WarpMesh extends Mesh {
     }
 
     private async initCSS3DSprite(opts: SplatMeshOptions) {
+        const that = this;
         const tagWarp: HTMLDivElement = document.createElement('div');
         tagWarp.innerHTML = `<div title="${this.meta.name}" style='flex-direction: column;align-items: center;display: flex;pointer-events: auto;margin-bottom: 20px;'>
                                <svg height="20" width="20" style="color:#eeee00;opacity:0.9;"><use href="#svgicon-point3" fill="currentColor" /></svg>
@@ -75,7 +75,7 @@ export class WarpMesh extends Mesh {
         let tween: Tween = null;
         tagWarp.onclick = () => {
             if (tween) return;
-            const target = new Vector3().applyMatrix4(opts.matrix);
+            const target = that.position;
             const controls: MapControls = opts.controls;
             const pos: Vector3 = controls.object.position.clone();
             const distance = isMobile ? 6 : 2; // 相机与目标点的距离
@@ -109,12 +109,11 @@ export class WarpMesh extends Mesh {
             tween?.update();
 
             const MinDistance = isMobile ? 50 : 40;
-            const distance = new Vector3().applyMatrix4(opts.matrix).distanceTo(this.opts.controls.object.position);
+            const distance = that.position.distanceTo(that.mapViewer.controls.object.position);
             if (distance > MinDistance) {
                 this.css3dTag.visible = this.opts.controls.object.position.y > 2;
                 let scale = 0.002 * distance;
                 css3dTag.scale.set(scale, scale, scale);
-
                 this.css3dTag.visible = true;
                 this.splatMesh && (this.splatMesh.visible = false);
             } else {
@@ -137,15 +136,11 @@ export class WarpMesh extends Mesh {
                     meta.autoCut && (opts.bigSceneMode = true);
                     const splatMesh = new SplatMesh(opts);
                     this.splatMesh = splatMesh;
-                    // splatMesh.applyMatrix4(this.opts.matrix);
                     this.opts.scene.add(splatMesh);
                     splatMesh.applyMatrix4(this.opts.matrix);
-                    splatMesh.updateMatrix();
                     splatMesh.meta = meta;
                     const watermark = meta.watermark || meta.name || ''; // 水印文字
                     meta.showWatermark = meta.showWatermark !== false; // 是否显示水印文字
-                    // const isVertical = meta.watermark?.vertical !== false; // 水印文字是否竖向（面向天空时设定为false）
-                    // const isNgative = meta.watermark?.ngative !== false; // 水印文字是否反向（模型坐标倒立时设定为false）
                     splatMesh.fire(SetGaussianText, watermark, true, false);
                     splatMesh.addModel({ url: this.meta.url }, this.meta);
                 }

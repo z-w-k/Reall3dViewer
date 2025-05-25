@@ -39,15 +39,15 @@ import {
     GetCameraLookUp,
     MapSortSplatMeshRenderOrder,
     MapSceneTraverseDispose,
-    MapIsWarpMeshVisible,
+    MapIsWarpSplatMeshVisible,
 } from '../../events/EventConstants';
 import { Events } from '../../events/Events';
 import { Reall3dMapViewerOptions } from '../Reall3dMapViewerOptions';
 import { MapControls } from 'three/examples/jsm/controls/MapControls.js';
 import { SplatMesh } from '../../meshs/splatmesh/SplatMesh';
-import * as tt from '@gotoeasy/three-tile';
-import { WarpMesh } from '../warpmesh/WarpMesh';
+import { WarpSplatMesh } from '../warpsplatmesh/WarpSplatMesh';
 import { isMobile } from '../../utils/consts/GlobalConstants';
+import * as tt from '@gotoeasy/three-tile';
 
 export function setupMapUtils(events: Events) {
     const on = (key: number, fn?: Function, multiFn?: boolean): Function | Function[] => events.on(key, fn, multiFn);
@@ -75,9 +75,9 @@ export function setupMapUtils(events: Events) {
     on(MapGetSplatMesh, () => {
         const scene: Scene = fire(GetScene);
         const camera: PerspectiveCamera = fire(GetCamera);
-        const warpMeshs: WarpMesh[] = [];
+        const warpMeshs: WarpSplatMesh[] = [];
         scene?.traverse(function (child: any) {
-            if (child.isWarpMesh && (child as WarpMesh).splatMesh?.visible) {
+            if (child.isWarpSplatMesh && (child as WarpSplatMesh).splatMesh?.visible) {
                 warpMeshs.push(child);
             }
         });
@@ -87,7 +87,7 @@ export function setupMapUtils(events: Events) {
         return warpMeshs[0]?.splatMesh;
     });
 
-    on(MapIsWarpMeshVisible, (matrix: Matrix4) => {
+    on(MapIsWarpSplatMeshVisible, (matrix: Matrix4) => {
         let pos2d: Vector4;
         let clip: number;
         const range: number = 1.1;
@@ -106,9 +106,9 @@ export function setupMapUtils(events: Events) {
     on(MapSortSplatMeshRenderOrder, () => {
         const scene: Scene = fire(GetScene);
         const camera: PerspectiveCamera = fire(GetCamera);
-        const warpMeshs: WarpMesh[] = [];
+        const warpMeshs: WarpSplatMesh[] = [];
         scene?.traverse(function (child: any) {
-            child.isWarpMesh && warpMeshs.push(child);
+            child.isWarpSplatMesh && warpMeshs.push(child);
         });
 
         warpMeshs.sort((a, b) => camera.position.distanceTo(a.position) - camera.position.distanceTo(b.position));
@@ -287,19 +287,28 @@ export function setupMapUtils(events: Events) {
 }
 
 export function initMapViewerOptions(options: Reall3dMapViewerOptions): Reall3dMapViewerOptions {
-    let { lookAt, position, root = '#gsviewer' } = options;
-    const el: HTMLElement = typeof root === 'string' ? document.querySelector(root) : root;
-    const tileMap = initTileMap();
-    const opts: Reall3dMapViewerOptions = { lookAt, position, root: el, tileMap };
+    let { lookAt, position, root = '#map' } = options;
+
+    if (root) {
+        root = typeof root === 'string' ? ((document.querySelector(root) || document.querySelector('#map')) as HTMLElement) : root;
+    } else {
+        root = document.querySelector('#map') as HTMLElement;
+    }
+    if (!root) {
+        root = document.createElement('div');
+        root.id = 'map';
+        document.querySelector('#gsviewer').appendChild(root);
+    }
+
+    const opts: Reall3dMapViewerOptions = { lookAt, position, root };
     opts.debugMode ??= location.protocol === 'http:' || /^test\./.test(location.host); // 生产环境不开启
     return opts;
 }
 
 export function initTileMap(): tt.TileMap {
-    const TDT_TOKEN = '7f8f4f56f3ccda758f9a497e2b981018';
-    const tdtImgSource = new tt.plugin.TDTSource({ token: TDT_TOKEN, style: 'img_w' });
-    const tdtVecSource = new tt.plugin.TDTSource({ token: TDT_TOKEN, style: 'cia_w' });
-    // 创建地图对象
+    const TOKEN = '7f8f4f56f3ccda758f9a497e2b981018';
+    const tdtImgSource = new tt.plugin.TDTSource({ token: TOKEN, style: 'img_w' });
+    const tdtVecSource = new tt.plugin.TDTSource({ token: TOKEN, style: 'cia_w' });
     const tileMap = new tt.TileMap({
         imgSource: location.protocol === 'http:' ? new tt.plugin.BingSource() : [tdtImgSource, tdtVecSource], // 影像数据源
         lon0: 90, // 地图投影中央经线经度

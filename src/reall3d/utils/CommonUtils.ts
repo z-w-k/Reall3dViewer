@@ -34,7 +34,7 @@ export function setupCommonUtils(events: Events) {
     const on = (key: number, fn?: Function, multiFn?: boolean): Function | Function[] => events.on(key, fn, multiFn);
     const fire = (key: number, ...args: any): any => events.fire(key, ...args);
 
-    const isMap: boolean = !!fire(GetOptions).tileMap;
+    const isMap: boolean = !fire(GetOptions).renderer;
 
     on(IsDebugMode, () => fire(GetOptions).debugMode);
 

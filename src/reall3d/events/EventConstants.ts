@@ -13,7 +13,6 @@ export const HttpPostMetaData = i++;
 export const HttpQueryGaussianText = i++;
 /** 计算平面中心点 */
 export const ComputePlansCenter = i++;
-
 /** 计算多个平面的面积 */
 export const ComputePlansArea = i++;
 /** 按数据重新计算多个平面的面积 */
@@ -35,7 +34,6 @@ export const GetCameraInfo = i++;
 export const CameraSetLookAt = i++;
 /** 取相机视点 */
 export const GetCameraLookAt = i++;
-
 /** 取相机上向量 */
 export const GetCameraLookUp = i++;
 /** 取相机位置 */
@@ -57,7 +55,6 @@ export const WorkerSort = i++;
 export const WorkerDispose = i++;
 /** 销毁 */
 export const EventListenerDispose = i++;
-
 /** 编码 base64 */
 export const EncodeBase64 = i++;
 /** 解码 base64 */
@@ -79,7 +76,6 @@ export const ComputeFps = i++;
 export const CreateSplatUniforms = i++;
 /** Splat几何体 */
 export const CreateSplatGeometry = i++;
-
 /** Splat材质 */
 export const CreateSplatMaterial = i++;
 /** Splat网格 */
@@ -101,7 +97,6 @@ export const SplatUpdateTexture = i++;
 export const SplatUpdateUsingIndex = i++;
 /** Splat更新点云模式 */
 export const SplatUpdatePointMode = i++;
-
 /** Splat更新场景模式 */
 export const SplatUpdateBigSceneMode = i++;
 /** Splat更新亮度系数 */
@@ -125,7 +120,6 @@ export const SplatUpdateDebugEffect = i++;
 export const SplatUpdateShDegree = i++;
 /** Splat几何体销毁 */
 export const SplatGeometryDispose = i++;
-
 /** Splat材质销毁 */
 export const SplatMaterialDispose = i++;
 /** 默认渲染帧率计数器更新 */
@@ -134,9 +128,9 @@ export const CountFpsDefault = i++;
 export const GetFpsDefault = i++;
 /** 真实渲染帧率计数器更新 */
 export const CountFpsReal = i++;
+
 /** 真实渲染帧率 */
 export const GetFpsReal = i++;
-
 /** 销毁 */
 export const ViewerUtilsDispose = i++;
 /** 销毁 */
@@ -147,7 +141,6 @@ export const GetOptions = i++;
 export const GetCanvasSize = i++;
 /** 取渲染器 */
 export const GetRenderer = i++;
-
 /** 取场景 */
 export const GetScene = i++;
 /** 渲染器销毁 */
@@ -156,9 +149,9 @@ export const ViewerDispose = i++;
 export const IsCameraChangedNeedUpdate = i++;
 /** 是否相机视角发生变化需要重新加载数据 */
 export const IsCameraChangedNeedLoadData = i++;
+
 /** 是否大场景模式 */
 export const IsBigSceneMode = i++;
-
 /** 是否点云模式 */
 export const IsPointcloudMode = i++;
 /** 是否调试模式 */
@@ -169,7 +162,6 @@ export const SplatTexdataManagerAddModel = i++;
 export const SplatTexdataManagerDataChanged = i++;
 /** 销毁 */
 export const SplatTexdataManagerDispose = i++;
-
 /** 销毁 */
 export const SplatMeshDispose = i++;
 /** 切换显示模式（通常仅小场景使用） */
@@ -178,9 +170,9 @@ export const SplatMeshSwitchDisplayMode = i++;
 export const SplatMeshCycleZoom = i++;
 /** 转字符串 */
 export const Vector3ToString = i++;
+
 /** 模型文件下载开始 */
 export const OnFetchStart = i++;
-
 /** 模型文件下载中 */
 export const OnFetching = i++;
 /** 模型文件下载结束 */
@@ -191,7 +183,6 @@ export const IsFetching = i++;
 export const OnTextureReadySplatCount = i++;
 /** 数据是否已下载结束并准备就绪（小场景适用） */
 export const IsSmallSceneRenderDataReady = i++;
-
 /** 是否可以更新纹理 */
 export const CanUpdateTexture = i++;
 /** 检查执行键盘按键动作处理 */
@@ -200,9 +191,9 @@ export const KeyActionCheckAndExecute = i++;
 export const RotateAt = i++;
 /** 视线轴左旋 */
 export const RotateLeft = i++;
+
 /** 视线轴右旋 */
 export const RotateRight = i++;
-
 /** 取活动点数据 */
 export const GetSplatActivePoints = i++;
 /** 射线拾取点 */
@@ -213,7 +204,6 @@ export const RaycasterRayDistanceToPoint = i++;
 export const SelectPointAndLookAt = i++;
 /** 标注选点 */
 export const SelectMarkPoint = i++;
-
 /** 清除标注选点 */
 export const ClearMarkPoint = i++;
 /** 创建焦点标记网格 */
@@ -222,9 +212,9 @@ export const CreateFocusMarkerMesh = i++;
 export const GetFocusMarkerMaterial = i++;
 /** 刷新焦点标记网格 */
 export const FocusMarkerMeshUpdate = i++;
+
 /** 焦点标记材质设定透明度 */
 export const FocusMarkerMaterialSetOpacity = i++;
-
 /** 焦点标记自动消失 */
 export const FocusMarkerMeshAutoDisappear = i++;
 /** 焦点标记销毁 */
@@ -235,7 +225,6 @@ export const GetControlPlane = i++;
 export const ControlPlaneSwitchVisible = i++;
 /** 控制平面刷新 */
 export const ControlPlaneUpdate = i++;
-
 /** 控制平面是否可见 */
 export const IsControlPlaneVisible = i++;
 /** 渲染前处理 */
@@ -244,9 +233,9 @@ export const OnViewerBeforeUpdate = i++;
 export const OnViewerUpdate = i++;
 /** 渲染后处理 */
 export const OnViewerAfterUpdate = i++;
+
 /** 设定水印文字 */
 export const OnSetWaterMark = i++;
-
 /** 取当前缓存的水印文字 */
 export const GetCachedWaterMark = i++;
 /** 通知渲染器需要刷新 */
@@ -257,7 +246,6 @@ export const ViewerNeedUpdate = i++;
 export const ViewerSetPointcloudMode = i++;
 /** 渲染器检查是否需要刷新 */
 export const ViewerCheckNeedUpdate = i++;
-
 /** 渲染器设定Splat点云模式 */
 export const SplatSetPointcloudMode = i++;
 /** 渲染器切换Splat显示模式 */
@@ -266,9 +254,9 @@ export const SplatSwitchDisplayMode = i++;
 export const GetMarkWarpElement = i++;
 /** 取CSS3DRenderer */
 export const GetCSS3DRenderer = i++;
+
 /** 销毁 */
 export const CSS3DRendererDispose = i++;
-
 /** 添加标注弱引用缓存 */
 export const AddMarkToWeakRef = i++;
 /** 从弱引用缓存取标注对象 */
@@ -279,7 +267,6 @@ export const DeleteMarkWeakRef = i++;
 export const UpdateMarkByName = i++;
 /** 按米比例尺更新全部标注 */
 export const UpdateAllMarkByMeterScale = i++;
-
 /** 按名称取标注数据 */
 export const GetMarkDataByName = i++;
 /** 标注点 */
@@ -288,9 +275,9 @@ export const MarkPoint = i++;
 export const MarkLine = i++;
 /** 标注面 */
 export const MarkPlan = i++;
+
 /** 标注距离 */
 export const MarkDistance = i++;
-
 /** 标注面积 */
 export const MarkArea = i++;
 /** 标注结束 */
@@ -301,7 +288,6 @@ export const MarkUpdateVisible = i++;
 export const MetaMarkSaveData = i++;
 /** 保存小场景相机信息 */
 export const MetaSaveSmallSceneCameraInfo = i++;
-
 /** 标注数据删除 */
 export const MetaMarkRemoveData = i++;
 /** 保存水印 */
@@ -310,9 +296,9 @@ export const MetaSaveWatermark = i++;
 export const LoadSmallSceneMetaData = i++;
 /** 遍历销毁并清空Object3D的子对象 */
 export const TraverseDisposeAndClear = i++;
+
 /** 取消当前正在进行的标注 */
 export const CancelCurrentMark = i++;
-
 /** 取高斯文本 */
 export const GetGaussianText = i++;
 /** 设定高斯文本 */
@@ -323,7 +309,6 @@ export const GetFlyPositions = i++;
 export const GetFlyPositionArray = i++;
 /** 取相机飞行视点轨迹（数组形式，用于存盘） */
 export const GetFlyTargetArray = i++;
-
 /** 添加相机飞行轨迹点 */
 export const AddFlyPosition = i++;
 /** 保存相机飞行轨迹点 */
@@ -332,9 +317,9 @@ export const FlySavePositions = i++;
 export const ClearFlyPosition = i++;
 /** 设定相机飞行轨迹 */
 export const OnSetFlyPositions = i++;
+
 /** 设定相机飞行视点轨迹 */
 export const OnSetFlyTargets = i++;
-
 /** 相机飞行控制 */
 export const Flying = i++;
 /** 相机飞行控制(仅一次) */
@@ -345,7 +330,6 @@ export const FlyEnable = i++;
 export const FlyDisable = i++;
 /** 取SplatMesh实例 */
 export const GetSplatMesh = i++;
-
 /** 打印信息（开发调试用） */
 export const PrintInfo = i++;
 /** 上传纹理 */
@@ -354,9 +338,9 @@ export const UploadSplatTexture = i++;
 export const UploadSplatTextureDone = i++;
 /** 球谐系数纹理高度 */
 export const GetShTexheight = i++;
+
 /** Splat更新球谐系数纹理(1,2级) */
 export const SplatUpdateSh12Texture = i++;
-
 /** Splat更新球谐系数纹理(3级) */
 export const SplatUpdateSh3Texture = i++;
 /** 模型数据的球谐系数级别 */
@@ -367,7 +351,6 @@ export const GetCurrentDisplayShDegree = i++;
 export const GetCameraDirection = i++;
 /** 取模型包围盒中心点 */
 export const GetAabbCenter = i++;
-
 /** 聚焦包围盒中心点 */
 export const FocusAabbCenter = i++;
 
@@ -410,12 +393,7 @@ export const MapSceneTraverseDispose = i++;
 /** 飞向目标 */
 export const MapFlyToTarget = i++;
 /** 屏幕投影是否可见 */
-export const MapIsWarpMeshVisible = i++;
-
-/** 取TileMap对象 */
-export const GetTileMap = i++;
-/** 经纬度转换世界坐标 */
-export const Geo2World = i++;
+export const MapIsWarpSplatMeshVisible = i++;
 
 /** 相机飞行控制 */
 export const TweenFly = i++;

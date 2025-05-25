@@ -24,7 +24,6 @@ import {
     MapCreateDirLight,
     MapCreateRenderer,
     MapCreateScene,
-    GetTileMap,
     OnViewerAfterUpdate,
     OnViewerBeforeUpdate,
     OnViewerUpdate,
@@ -33,16 +32,15 @@ import {
     MapSceneTraverseDispose,
     CSS3DRendererDispose,
     GetCSS3DRenderer,
-    Geo2World,
 } from '../events/EventConstants';
-import { initMapViewerOptions, setupMapUtils } from './utils/MapUtils';
+import { initMapViewerOptions, initTileMap, setupMapUtils } from './utils/MapUtils';
 import { setupCommonUtils } from '../utils/CommonUtils';
 import { setupMapEventListener } from './events/MapEventListener';
 import { setupApi } from '../api/SetupApi';
 import { setupRaycaster } from '../raycaster/SetupRaycaster';
 import { setupMark } from '../meshs/mark/SetupMark';
 import { CSS3DRenderer } from 'three/examples/jsm/Addons.js';
-import { WarpMesh } from './warpmesh/WarpMesh';
+import { WarpSplatMesh } from './warpsplatmesh/WarpSplatMesh';
 import { ViewerVersion } from '../utils/consts/GlobalConstants';
 import * as tt from '@gotoeasy/three-tile';
 
@@ -57,6 +55,7 @@ export class Reall3dMapViewer extends EventDispatcher<tt.plugin.GLViewerEventMap
     public ambLight: AmbientLight;
     public dirLight: DirectionalLight;
     public container: HTMLElement;
+    public tileMap: tt.TileMap;
 
     private clock: Clock = new Clock();
     private updateTime: number = 0;
@@ -73,9 +72,9 @@ export class Reall3dMapViewer extends EventDispatcher<tt.plugin.GLViewerEventMap
         const on = (key: number, fn?: Function, multiFn?: boolean): Function | Function[] => events.on(key, fn, multiFn);
         const fire = (key: number, ...args: any): any => events.fire(key, ...args);
 
+        that.tileMap = initTileMap();
         const opts: Reall3dMapViewerOptions = initMapViewerOptions(options);
         on(GetOptions, () => opts);
-        on(GetTileMap, () => opts.tileMap);
 
         setupCommonUtils(events);
         setupApi(events);
@@ -92,7 +91,7 @@ export class Reall3dMapViewer extends EventDispatcher<tt.plugin.GLViewerEventMap
         that.scene.add(that.ambLight);
         that.dirLight = fire(MapCreateDirLight);
         that.scene.add(that.dirLight);
-        that.scene.add(opts.tileMap);
+        that.scene.add(that.tileMap);
         that.container.appendChild(that.renderer.domElement);
         window.addEventListener('resize', that.resize.bind(that));
         that.resize();
@@ -100,7 +99,6 @@ export class Reall3dMapViewer extends EventDispatcher<tt.plugin.GLViewerEventMap
 
         setupMapEventListener(events);
 
-        on(Geo2World, (wgs84: number[]) => opts.tileMap.geo2world(new Vector3().fromArray(wgs84)));
         on(ViewerDispose, () => that.dispose());
 
         on(
@@ -135,7 +133,7 @@ export class Reall3dMapViewer extends EventDispatcher<tt.plugin.GLViewerEventMap
         on(
             OnViewerUpdate,
             () => {
-                opts.tileMap.update(that.camera);
+                that.tileMap.update(that.camera);
                 try {
                     that.renderer.render(that.scene, that.camera);
                 } catch (e) {
@@ -156,23 +154,20 @@ export class Reall3dMapViewer extends EventDispatcher<tt.plugin.GLViewerEventMap
                     that.controls.target.set(data.lookAt.world.x, data.lookAt.world.y, data.lookAt.world.z);
                 } else if (data.lookAt?.geo) {
                     const geo = new Vector3(data.lookAt.geo.lon, data.lookAt.geo.lat, data.lookAt.geo.height);
-                    const opts: Reall3dMapViewerOptions = fire(GetOptions);
-                    const target = opts.tileMap.geo2world(geo);
+                    const target = that.tileMap.geo2world(geo);
                     that.controls.target.copy(target);
                 }
                 if (data.position?.world) {
                     that.controls.object.position.copy(data.position.world);
                 } else if (data.position?.geo) {
                     const geo = new Vector3(data.position.geo.lon, data.position.geo.lat, data.position.geo.height);
-                    const opts: Reall3dMapViewerOptions = fire(GetOptions);
-                    const position = opts.tileMap.geo2world(geo);
+                    const position = that.tileMap.geo2world(geo);
                     that.controls.object.position.copy(position);
                 }
                 const set = new Set();
-                const { renderer, scene, controls, events } = that;
                 for (let url of data.scenes) {
                     if (!set.has(url)) {
-                        new WarpMesh(url, renderer, scene, controls, events);
+                        new WarpSplatMesh(url, that);
                         set.add(url);
                     }
                 }
@@ -230,5 +225,6 @@ export class Reall3dMapViewer extends EventDispatcher<tt.plugin.GLViewerEventMap
         that.container = null;
         that.clock = null;
         that.events = null;
+        that.tileMap = null;
     }
 }
