@@ -23,11 +23,11 @@
 - [x] Support mark and measurement
 - [x] Support text watermark
 - [x] Support 1st to 3nd degree spherical harmonics
+- [x] Supports rendering models within maps
 
 
 ## Live demo
-- [Reall3dViewer](https://reall3d.com/reall3dviewer/index.html)
-- [3DGS IN MAP](https://reall3d.com/reall3dviewer/map/index.html)
+- https://reall3d.com/reall3dviewer/index.html
 
 
 ## `.spx`
@@ -53,7 +53,6 @@ gsbox p2x -i /path/to/input.ply -o /path/to/output.spx -sh 0
 ## TODO
 - Continuously optimize and enhance rendering performance
 - Large scene
-- 3DGS in MAP
 
 ## Release History
 https://github.com/reall3d-com/Reall3dViewer/releases

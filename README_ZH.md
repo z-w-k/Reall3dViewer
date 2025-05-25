@@ -23,11 +23,11 @@
 - [x] 支持标注测量
 - [x] 支持文字水印
 - [x] 支持1~3级球谐系数
+- [x] 支持地图场景渲染
 
 
 ## 在线演示
-- [Reall3dViewer](https://reall3d.com/reall3dviewer/index.html)
-- [3DGS IN MAP](https://reall3d.com/reall3dviewer/map/index.html)
+- https://reall3d.com/reall3dviewer/index.html
 
 
 ## `.spx`
@@ -54,7 +54,6 @@ gsbox p2x -i /path/to/input.ply -o /path/to/output.spx -sh 0
 ## TODO
 - 持续优化增强渲染性能
 - 大场景
-- 地图上渲染3DGS
 
 
 ## 履历
