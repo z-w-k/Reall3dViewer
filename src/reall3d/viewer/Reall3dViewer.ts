@@ -1,6 +1,6 @@
-// ================================
-// Copyright (c) 2025 reall3d.com
-// ================================
+// ==============================================
+// Copyright (c) 2025 reall3d.com, MIT license
+// ==============================================
 import '../style/style.less';
 import { Scene, AmbientLight, WebGLRenderer } from 'three';
 import {

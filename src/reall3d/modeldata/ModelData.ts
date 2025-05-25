@@ -1,6 +1,6 @@
-// ================================
-// Copyright (c) 2025 reall3d.com
-// ================================
+// ==============================================
+// Copyright (c) 2025 reall3d.com, MIT license
+// ==============================================
 import { Vector3 } from 'three';
 import { CameraInfo } from '../controls/SetupCameraControls';
 import { ModelOptions } from './ModelOptions';

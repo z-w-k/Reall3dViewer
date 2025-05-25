@@ -1,6 +1,6 @@
-// ================================
-// Copyright (c) 2025 reall3d.com
-// ================================
+// ==============================================
+// Copyright (c) 2025 reall3d.com, MIT license
+// ==============================================
 import { BufferAttribute, BufferGeometry, DoubleSide, Group, Mesh, MeshBasicMaterial, Vector3 } from 'three';
 import { CSS3DSprite, Line2, LineGeometry, LineMaterial } from 'three/examples/jsm/Addons.js';
 import { Events } from '../../events/Events';

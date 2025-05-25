@@ -1,6 +1,7 @@
-// ================================
-// Copyright (c) 2025 reall3d.com
-// ================================
+// ==============================================
+// Copyright (c) 2025 reall3d.com, MIT license
+// ==============================================
+import { Object3D, PerspectiveCamera, ShaderChunk, Vector3 } from 'three';
 import { Events } from '../events/Events';
 import {
     Vector3ToString,
@@ -25,7 +26,6 @@ import {
     GetCamera,
     CommonUtilsDispose,
 } from '../events/EventConstants';
-import { Object3D, PerspectiveCamera, ShaderChunk, Vector3 } from 'three';
 import { SplatMeshOptions } from '../meshs/splatmesh/SplatMeshOptions';
 import { ViewerVersion } from './consts/GlobalConstants';
 

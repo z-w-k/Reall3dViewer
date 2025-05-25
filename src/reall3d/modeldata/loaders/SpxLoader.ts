@@ -1,6 +1,6 @@
-// ================================
-// Copyright (c) 2025 reall3d.com
-// ================================
+// ==============================================
+// Copyright (c) 2025 reall3d.com, MIT license
+// ==============================================
 import { Vector3 } from 'three';
 import { SplatDataSize20, SplatDataSize32, SpxHeaderSize, SpxOpenFormat0, SpxExclusiveFormatReall3d } from '../../utils/consts/GlobalConstants';
 import { parseSpxBlockData, parseSpxHeader } from '../wasm/WasmParser';

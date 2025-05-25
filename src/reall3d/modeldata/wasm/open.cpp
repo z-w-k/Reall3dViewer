@@ -1,3 +1,6 @@
+// ==============================================
+// Copyright (c) 2025 reall3d.com, MIT license
+// ==============================================
 #include <cmath>
 #include <cstdint>
 #include <emscripten/emscripten.h>

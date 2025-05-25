@@ -1,6 +1,6 @@
-// ================================
-// Copyright (c) 2025 reall3d.com
-// ================================
+// ==============================================
+// Copyright (c) 2025 reall3d.com, MIT license
+// ==============================================
 import { Color, DirectionalLight, FogExp2, MathUtils, Matrix4, PerspectiveCamera, Scene, Vector3, Vector4, WebGLRenderer } from 'three';
 import {
     GetControls,

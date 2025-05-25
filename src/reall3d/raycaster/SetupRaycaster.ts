@@ -1,6 +1,6 @@
-// ================================
-// Copyright (c) 2025 reall3d.com
-// ================================
+// ==============================================
+// Copyright (c) 2025 reall3d.com, MIT license
+// ==============================================
 import { Matrix4, Object3D, PerspectiveCamera, Raycaster, Scene, Sphere, Vector2, Vector3, Vector4 } from 'three';
 import { Events } from '../events/Events';
 import {

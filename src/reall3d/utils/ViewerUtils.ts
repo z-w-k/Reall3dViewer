@@ -1,6 +1,6 @@
-// ================================
-// Copyright (c) 2025 reall3d.com
-// ================================
+// ==============================================
+// Copyright (c) 2025 reall3d.com, MIT license
+// ==============================================
 import { PerspectiveCamera, Vector3, WebGLRenderer } from 'three';
 import { Events } from '../events/Events';
 import {

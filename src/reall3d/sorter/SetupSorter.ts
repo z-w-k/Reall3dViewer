@@ -1,6 +1,6 @@
-// ================================
-// Copyright (c) 2025 reall3d.com
-// ================================
+// ==============================================
+// Copyright (c) 2025 reall3d.com, MIT license
+// ==============================================
 import { Events } from '../events/Events';
 import { GetWorker, WorkerSort, WorkerDispose, GetViewProjectionMatrixArray, GetMaxRenderCount, IsBigSceneMode } from '../events/EventConstants';
 import { WkInit, WkIsBigSceneMode, WkMaxRenderCount, WkViewProjection } from '../utils/consts/WkConstants';

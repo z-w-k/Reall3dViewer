@@ -1,6 +1,6 @@
-// ================================
-// Copyright (c) 2025 reall3d.com
-// ================================
+// ==============================================
+// Copyright (c) 2025 reall3d.com, MIT license
+// ==============================================
 import { Color, FrontSide, Matrix4, Mesh, PerspectiveCamera, ShaderMaterial, SphereGeometry, Vector2, Vector3 } from 'three';
 import { Events } from '../../events/Events';
 import {

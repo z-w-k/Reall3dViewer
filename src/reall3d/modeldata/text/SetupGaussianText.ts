@@ -1,6 +1,6 @@
-// ================================
-// Copyright (c) 2025 reall3d.com
-// ================================
+// ==============================================
+// Copyright (c) 2025 reall3d.com, MIT license
+// ==============================================
 import { GetGaussianText, HttpQueryGaussianText } from '../../events/EventConstants';
 import { Events } from '../../events/Events';
 import { HalfChars, SplatDataSize32 } from '../../utils/consts/GlobalConstants';

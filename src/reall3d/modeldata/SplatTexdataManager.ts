@@ -1,7 +1,7 @@
-import { SpxHeader } from './ModelData';
-// ================================
-// Copyright (c) 2025 reall3d.com
-// ================================
+// ==============================================
+// Copyright (c) 2025 reall3d.com, MIT license
+// ==============================================
+import { Vector3 } from 'three';
 import {
     OnFetchStart,
     SplatTexdataManagerDispose,
@@ -38,7 +38,6 @@ import { loadSpx } from './loaders/SpxLoader';
 import { SplatMeshOptions } from '../meshs/splatmesh/SplatMeshOptions';
 import { loadPly } from './loaders/PlyLoader';
 import { loadSpz } from './loaders/SpzLoader';
-import { Vector3 } from 'three';
 
 export function setupSplatTextureManager(events: Events) {
     const on = (key: number, fn?: Function, multiFn?: boolean): Function | Function[] => events.on(key, fn, multiFn);

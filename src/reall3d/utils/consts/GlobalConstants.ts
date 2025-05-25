@@ -1,6 +1,6 @@
-// ================================
-// Copyright (c) 2025 reall3d.com
-// ================================
+// ==============================================
+// Copyright (c) 2025 reall3d.com, MIT license
+// ==============================================
 export const ViewerVersion = 'v1.5.0-dev-map'; // Reall3dViewer 版本
 
 export const isMobile = navigator.userAgent.includes('Mobi');

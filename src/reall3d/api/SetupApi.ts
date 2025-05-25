@@ -1,6 +1,6 @@
-// ================================
-// Copyright (c) 2025 reall3d.com
-// ================================
+// ==============================================
+// Copyright (c) 2025 reall3d.com, MIT license
+// ==============================================
 import { Events } from '../events/Events';
 import { HttpPostMetaData, HttpQueryGaussianText } from '../events/EventConstants';
 import { ViewerVersion } from '../utils/consts/GlobalConstants';

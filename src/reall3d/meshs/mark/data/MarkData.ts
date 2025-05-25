@@ -1,6 +1,6 @@
-// ================================
-// Copyright (c) 2025 reall3d.com
-// ================================
+// ==============================================
+// Copyright (c) 2025 reall3d.com, MIT license
+// ==============================================
 export interface MarkData {
     /** 类型 */
     type?: 'MarkDistanceLine' | 'MarkSinglePoint' | 'MarkMultiLines' | 'MarkMultiPlans' | 'MarkCirclePlan' | undefined;

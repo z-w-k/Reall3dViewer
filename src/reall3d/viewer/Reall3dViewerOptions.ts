@@ -1,6 +1,6 @@
-// ================================
-// Copyright (c) 2025 reall3d.com
-// ================================
+// ==============================================
+// Copyright (c) 2025 reall3d.com, MIT license
+// ==============================================
 import { PerspectiveCamera, Renderer, Scene } from 'three';
 import { OrbitControls } from 'three/examples/jsm/Addons.js';
 import { Events } from '../events/Events';

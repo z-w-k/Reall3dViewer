@@ -1,6 +1,6 @@
-// ================================
-// Copyright (c) 2025 reall3d.com
-// ================================
+// ==============================================
+// Copyright (c) 2025 reall3d.com, MIT license
+// ==============================================
 export * from '../meshs/splatmesh/SplatMeshWebgl';
 export * from '../meshs/focusmaker/FocusMarkerWebgl';
 

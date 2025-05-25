@@ -1,6 +1,6 @@
-// ================================
-// Copyright (c) 2025 reall3d.com
-// ================================
+// ==============================================
+// Copyright (c) 2025 reall3d.com, MIT license
+// ==============================================
 import { CylinderGeometry, DoubleSide, Mesh, MeshBasicMaterial, Object3D, Vector3 } from 'three';
 
 export class ArrowHelper extends Object3D {

@@ -1,6 +1,6 @@
-// ================================
-// Copyright (c) 2025 reall3d.com
-// ================================
+// ==============================================
+// Copyright (c) 2025 reall3d.com, MIT license
+// ==============================================
 import { Matrix4, Renderer, Scene } from 'three';
 import { Events } from '../../events/Events';
 import { OrbitControls } from 'three/examples/jsm/Addons.js';
