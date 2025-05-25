@@ -3,13 +3,14 @@
 // ==============================================
 import { Matrix4, Mesh, Vector3 } from 'three';
 import { MapControls } from 'three/examples/jsm/controls/MapControls.js';
-import { SetGaussianText } from '../../events/EventConstants';
+import { GetOptions, SetGaussianText } from '../../events/EventConstants';
 import { CSS3DSprite } from 'three/examples/jsm/Addons.js';
 import { Easing, Tween } from '@tweenjs/tween.js';
 import { SplatMesh } from '../../meshs/splatmesh/SplatMesh';
 import { SplatMeshOptions } from '../../meshs/splatmesh/SplatMeshOptions';
 import { MetaData } from '../../modeldata/ModelData';
 import { Reall3dMapViewer } from '../Reall3dMapViewer';
+import { Reall3dMapViewerOptions } from '../Reall3dMapViewerOptions';
 
 const isMobile = navigator.userAgent.includes('Mobi');
 
@@ -52,7 +53,7 @@ export class WarpSplatMesh extends Mesh {
                 const opts: SplatMeshOptions = { renderer, scene, controls, pointcloudMode, bigSceneMode, matrix, showWatermark, depthTest };
                 opts.maxRenderCountOfMobile ??= opts.bigSceneMode ? 128 * 10240 : 400 * 10000;
                 opts.maxRenderCountOfPc ??= opts.bigSceneMode ? 320 * 10000 : 400 * 10000;
-                opts.debugMode ??= location.protocol === 'http:' || /^test\./.test(location.host); // 生产环境不开启
+                opts.debugMode = (this.mapViewer.events.fire(GetOptions) as Reall3dMapViewerOptions).debugMode;
                 that.opts = opts;
                 that.meta = data;
                 scene.add(that);

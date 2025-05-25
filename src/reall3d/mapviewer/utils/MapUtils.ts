@@ -229,7 +229,7 @@ export function setupMapUtils(events: Events) {
 }
 
 export function initMapViewerOptions(options: Reall3dMapViewerOptions): Reall3dMapViewerOptions {
-    let { root = '#map' } = options;
+    let { root = '#map', debugMode } = options;
     if (root) {
         root = typeof root === 'string' ? ((document.querySelector(root) || document.querySelector('#map')) as HTMLElement) : root;
     } else {
@@ -241,8 +241,7 @@ export function initMapViewerOptions(options: Reall3dMapViewerOptions): Reall3dM
         document.querySelector('#gsviewer').appendChild(root);
     }
 
-    const opts: Reall3dMapViewerOptions = { root };
-    opts.debugMode ??= location.protocol === 'http:' || /^test\./.test(location.host); // 生产环境不开启
+    const opts: Reall3dMapViewerOptions = { root, debugMode };
     return opts;
 }
 

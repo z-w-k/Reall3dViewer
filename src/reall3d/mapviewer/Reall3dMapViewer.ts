@@ -57,10 +57,10 @@ export class Reall3dMapViewer extends EventDispatcher<tt.plugin.GLViewerEventMap
     public dirLight: DirectionalLight;
     public container: HTMLElement;
     public tileMap: tt.TileMap;
+    public events: Events;
 
     private clock: Clock = new Clock();
     private updateTime: number = 0;
-    private events: Events;
     private disposed: boolean = false;
 
     constructor(options: Reall3dMapViewerOptions = {}) {

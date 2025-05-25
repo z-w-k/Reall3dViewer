@@ -142,7 +142,7 @@ function fnClick(className: string) {
         mapViewer?.dispose();
         viewer = null;
         document.querySelector('#map')?.classList?.remove('hidden');
-        mapViewer = new Reall3dMapViewer();
+        mapViewer = new Reall3dMapViewer({ debugMode: true });
         mapViewer.addScenes('https://reall3d.com/demo-models/map/00.scenes.json');
     }
 }
