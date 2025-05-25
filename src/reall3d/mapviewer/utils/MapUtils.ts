@@ -75,11 +75,8 @@ export function setupMapUtils(events: Events) {
         const camera: PerspectiveCamera = fire(GetCamera);
         const warpMeshs: WarpSplatMesh[] = [];
         scene?.traverse(function (child: any) {
-            if (child.isWarpSplatMesh && (child as WarpSplatMesh).splatMesh?.visible) {
-                warpMeshs.push(child);
-            }
+            child.isWarpSplatMesh && (child as WarpSplatMesh).splatMesh?.visible && warpMeshs.push(child);
         });
-
         warpMeshs.sort((a, b) => camera.position.distanceTo(a.position) - camera.position.distanceTo(b.position));
         window['splat'] = warpMeshs[0]?.splatMesh;
         return warpMeshs[0]?.splatMesh;
@@ -92,7 +89,6 @@ export function setupMapUtils(events: Events) {
         scene?.traverse(function (child: any) {
             child.isWarpSplatMesh && warpMeshs.push(child);
         });
-
         warpMeshs.sort((a, b) => camera.position.distanceTo(a.position) - camera.position.distanceTo(b.position));
         for (let i = 0; i < warpMeshs.length; i++) {
             warpMeshs[i].active = i < MaxActiveCount;
@@ -164,13 +160,7 @@ export function setupMapUtils(events: Events) {
 
     on(MapCreateRenderer, () => {
         const root = fire(GetOptions).root as HTMLElement;
-        const renderer = new WebGLRenderer({
-            antialias: false,
-            logarithmicDepthBuffer: true,
-            stencil: true,
-            alpha: true,
-            precision: 'highp',
-        });
+        const renderer = new WebGLRenderer({ antialias: false, logarithmicDepthBuffer: true, stencil: true, alpha: true, precision: 'highp' });
         renderer.setSize(root.clientWidth, root.clientHeight);
         renderer.setPixelRatio(Math.min(devicePixelRatio, 2));
 
@@ -205,25 +195,18 @@ export function setupMapUtils(events: Events) {
         controls.maxAzimuthAngle = 0;
 
         controls.addEventListener('change', () => {
-            // camera polar
-            const polar = Math.max(controls.getPolarAngle(), 0.1);
-            // dist of camera to controls
-            const dist = Math.max(controls.getDistance(), 0.1);
-            // set zoom speed on dist
-            controls.zoomSpeed = Math.max(Math.log(dist), 0) + 0.5;
+            const polar = Math.max(controls.getPolarAngle(), 0.1); // camera polar
+            const dist = Math.max(controls.getDistance(), 0.1); // dist of camera to controls
+            controls.zoomSpeed = Math.max(Math.log(dist), 0) + 0.5; // set zoom speed on dist
 
-            // set far and near on dist/polar
-            camera.far = MathUtils.clamp((dist / polar) * 8, 100, 200000);
+            camera.far = MathUtils.clamp((dist / polar) * 8, 100, 200000); // set far and near on dist/polar
             camera.near = camera.far / 1000;
             camera.updateProjectionMatrix();
 
-            // set fog density on dist/polar
             if (scene.fog instanceof FogExp2) {
-                scene.fog.density = (polar / (dist + 5)) * fogFactor * 0.25;
+                scene.fog.density = (polar / (dist + 5)) * fogFactor * 0.25; // set fog density on dist/polar
             }
-
-            // limit the max polar on dist
-            controls.maxPolarAngle = Math.min(Math.pow(10000 / dist, 4), 1.2);
+            controls.maxPolarAngle = Math.min(Math.pow(10000 / dist, 4), 1.2); // limit the max polar on dist
         });
 
         on(GetControls, () => controls);
@@ -247,7 +230,6 @@ export function setupMapUtils(events: Events) {
 
 export function initMapViewerOptions(options: Reall3dMapViewerOptions): Reall3dMapViewerOptions {
     let { root = '#map' } = options;
-
     if (root) {
         root = typeof root === 'string' ? ((document.querySelector(root) || document.querySelector('#map')) as HTMLElement) : root;
     } else {
@@ -268,14 +250,10 @@ export function initTileMap(): tt.TileMap {
     const TOKEN = '7f8f4f56f3ccda758f9a497e2b981018';
     const tdtImgSource = new tt.plugin.TDTSource({ token: TOKEN, style: 'img_w' });
     const tdtVecSource = new tt.plugin.TDTSource({ token: TOKEN, style: 'cia_w' });
-    const tileMap = new tt.TileMap({
-        imgSource: location.protocol === 'http:' ? new tt.plugin.BingSource() : [tdtImgSource, tdtVecSource], // 影像数据源
-        lon0: 90, // 地图投影中央经线经度
-        minLevel: 2, // 最小缩放级别
-        maxLevel: 16, // 最大缩放级别
-    });
+    const imgSource = location.host.includes('reall3d.com') ? [tdtImgSource, tdtVecSource] : new tt.plugin.BingSource();
+    const tileMap = new tt.TileMap({ imgSource, lon0: 90, minLevel: 2, maxLevel: 16 });
     tileMap.scale.set(10, 10, 10);
-    tileMap.rotateX(-Math.PI / 2); // 地图旋转到xz平面
+    tileMap.rotateX(-Math.PI / 2);
     tileMap.autoUpdate = false;
     return tileMap;
 }

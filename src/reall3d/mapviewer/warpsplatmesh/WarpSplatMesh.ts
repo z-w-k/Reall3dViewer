@@ -16,7 +16,7 @@ const isMobile = navigator.userAgent.includes('Mobi');
 export class WarpSplatMesh extends Mesh {
     public readonly isWarpSplatMesh: boolean = true;
     public meta: MetaData;
-    public lastActiveTime: number = Date.now(); // 备用
+    public lastActiveTime: number = Date.now();
     public splatMesh: SplatMesh;
     public active: boolean = false;
     private opts: SplatMeshOptions;
@@ -32,7 +32,8 @@ export class WarpSplatMesh extends Mesh {
     }
 
     private async addScene(sceneUrl: string) {
-        const { renderer, scene, controls, tileMap } = this.mapViewer;
+        const that = this;
+        const { renderer, scene, controls, tileMap } = that.mapViewer;
         fetch(sceneUrl, { mode: 'cors', credentials: 'omit', cache: 'reload' })
             .then(response => (!response.ok ? {} : response.json()))
             .then((data: MetaData) => {
@@ -43,6 +44,7 @@ export class WarpSplatMesh extends Mesh {
                     const pos = tileMap.geo2world(new Vector3().fromArray(data.WGS84));
                     matrix.makeTranslation(pos.x, pos.y, pos.z);
                 }
+                data.autoCut && (data.autoCut = Math.min(Math.max(data.autoCut, 1), 50));
                 const bigSceneMode = data.autoCut && data.autoCut > 1;
                 const pointcloudMode = false;
                 const depthTest = false;
@@ -51,11 +53,11 @@ export class WarpSplatMesh extends Mesh {
                 opts.maxRenderCountOfMobile ??= opts.bigSceneMode ? 128 * 10240 : 400 * 10000;
                 opts.maxRenderCountOfPc ??= opts.bigSceneMode ? 320 * 10000 : 400 * 10000;
                 opts.debugMode ??= location.protocol === 'http:' || /^test\./.test(location.host); // 生产环境不开启
-                this.opts = opts;
-                this.meta = data;
-                scene.add(this);
-                this.initCSS3DSprite(opts);
-                this.applyMatrix4(matrix);
+                that.opts = opts;
+                that.meta = data;
+                scene.add(that);
+                that.initCSS3DSprite(opts);
+                that.applyMatrix4(matrix);
             })
             .catch(e => {
                 console.error(e.message);
@@ -65,7 +67,7 @@ export class WarpSplatMesh extends Mesh {
     private async initCSS3DSprite(opts: SplatMeshOptions) {
         const that = this;
         const tagWarp: HTMLDivElement = document.createElement('div');
-        tagWarp.innerHTML = `<div title="${this.meta.name}" style='flex-direction: column;align-items: center;display: flex;pointer-events: auto;margin-bottom: 20px;'>
+        tagWarp.innerHTML = `<div title="${that.meta.name}" style='flex-direction: column;align-items: center;display: flex;pointer-events: auto;margin-bottom: 20px;'>
                                <svg height="20" width="20" style="color:#eeee00;opacity:0.9;"><use href="#svgicon-point3" fill="currentColor" /></svg>
                             </div>`;
         tagWarp.classList.add('splatmesh-point');
@@ -102,56 +104,56 @@ export class WarpSplatMesh extends Mesh {
         css3dTag.element.style.pointerEvents = 'none';
         css3dTag.visible = false;
         css3dTag.applyMatrix4(opts.matrix);
-        this.css3dTag = css3dTag;
+        that.css3dTag = css3dTag;
         opts.scene.add(css3dTag);
 
-        this.onBeforeRender = () => {
+        that.onBeforeRender = () => {
             tween?.update();
 
-            const MinDistance = isMobile ? 50 : 40;
+            const MinDistance = isMobile ? 50 : 30;
             const distance = that.position.distanceTo(that.mapViewer.controls.object.position);
             if (distance > MinDistance) {
-                this.css3dTag.visible = this.opts.controls.object.position.y > 2;
+                that.css3dTag.visible = that.opts.controls.object.position.y > 2;
                 let scale = 0.002 * distance;
                 css3dTag.scale.set(scale, scale, scale);
-                this.css3dTag.visible = true;
-                this.splatMesh && (this.splatMesh.visible = false);
+                that.css3dTag.visible = true;
+                that.splatMesh && (that.splatMesh.visible = false);
             } else {
-                if (!this.active) {
-                    this.splatMesh && (this.splatMesh.visible = false);
+                if (!that.active) {
+                    that.splatMesh && (that.splatMesh.visible = false);
                     let scale = 0.002 * distance;
                     css3dTag.scale.set(scale, scale, scale);
-                    this.css3dTag.visible = true;
+                    that.css3dTag.visible = true;
                     return;
                 }
 
-                this.lastActiveTime = Date.now();
-                this.css3dTag.visible = false;
+                that.lastActiveTime = Date.now();
+                that.css3dTag.visible = false;
 
-                if (this.splatMesh) {
-                    this.splatMesh.visible = true;
+                if (that.splatMesh) {
+                    that.splatMesh.visible = true;
                 } else {
-                    const meta = this.meta;
-                    const opts: SplatMeshOptions = { ...this.opts };
+                    const meta = that.meta;
+                    const opts: SplatMeshOptions = { ...that.opts };
                     meta.autoCut && (opts.bigSceneMode = true);
                     const splatMesh = new SplatMesh(opts);
-                    this.splatMesh = splatMesh;
-                    this.opts.scene.add(splatMesh);
-                    splatMesh.applyMatrix4(this.opts.matrix);
+                    that.splatMesh = splatMesh;
+                    that.opts.scene.add(splatMesh);
+                    splatMesh.applyMatrix4(that.opts.matrix);
                     splatMesh.meta = meta;
                     const watermark = meta.watermark || meta.name || ''; // 水印文字
                     meta.showWatermark = meta.showWatermark !== false; // 是否显示水印文字
                     splatMesh.fire(SetGaussianText, watermark, true, false);
-                    splatMesh.addModel({ url: this.meta.url }, this.meta);
+                    splatMesh.addModel({ url: that.meta.url }, that.meta);
                 }
             }
         };
 
-        this.onAfterRender = () => {
-            if (this.splatMesh && (!this.active || Date.now() - this.lastActiveTime > 1 * 60 * 1000)) {
+        that.onAfterRender = () => {
+            if (that.splatMesh && (!that.active || Date.now() - that.lastActiveTime > 1 * 60 * 1000)) {
                 setTimeout(() => {
-                    this.splatMesh?.dispose();
-                    this.splatMesh = null;
+                    that.splatMesh?.dispose();
+                    that.splatMesh = null;
                 }, 5);
             }
         };
@@ -161,14 +163,17 @@ export class WarpSplatMesh extends Mesh {
      * 销毁
      */
     public dispose(): void {
-        if (this.disposed) return;
-        this.disposed = true;
+        const that = this;
+        if (that.disposed) return;
+        that.disposed = true;
 
-        this.opts.scene.remove(this.css3dTag);
-        this.splatMesh?.dispose();
+        that.opts.scene.remove(that.css3dTag);
+        that.splatMesh?.dispose();
 
-        this.meta = null;
-        this.opts = null;
-        this.css3dTag = null;
+        that.meta = null;
+        that.splatMesh = null;
+        that.opts = null;
+        that.css3dTag = null;
+        that.mapViewer = null;
     }
 }
