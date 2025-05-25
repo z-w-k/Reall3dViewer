@@ -181,19 +181,7 @@ export function setupMapUtils(events: Events) {
     });
 
     on(MapCreateRenderer, () => {
-        const opts: Reall3dMapViewerOptions = fire(GetOptions);
-        let root: HTMLElement;
-        if (opts.root) {
-            root = typeof opts.root === 'string' ? document.querySelector(opts.root) || document.querySelector('#gsviewer') : opts.root;
-        } else {
-            root = document.querySelector('#gsviewer');
-        }
-        if (!root) {
-            root = document.createElement('div');
-            root.id = 'gsviewer';
-            document.body.appendChild(root);
-        }
-
+        const root = fire(GetOptions).root as HTMLElement;
         const renderer = new WebGLRenderer({
             antialias: false,
             logarithmicDepthBuffer: true,
