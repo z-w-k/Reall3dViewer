@@ -88,19 +88,19 @@ export function setupMapEventListener(events: Events) {
             // keySet.clear();
         } else if (keySet.has('ArrowUp')) {
             const splatMesh: SplatMesh = fire(MapGetSplatMesh);
-            splatMesh && splatMesh.visible && (splatMesh.position.z += 0.5);
+            splatMesh && splatMesh.visible && (splatMesh.position.z += 0.1);
             // keySet.clear();
         } else if (keySet.has('ArrowDown')) {
             const splatMesh: SplatMesh = fire(MapGetSplatMesh);
-            splatMesh && splatMesh.visible && (splatMesh.position.z -= 0.5);
+            splatMesh && splatMesh.visible && (splatMesh.position.z -= 0.1);
             // keySet.clear();
         } else if (keySet.has('ArrowRight')) {
             const splatMesh: SplatMesh = fire(MapGetSplatMesh);
-            splatMesh && splatMesh.visible && (splatMesh.position.x += 0.5);
+            splatMesh && splatMesh.visible && (splatMesh.position.x += 0.1);
             // keySet.clear();
         } else if (keySet.has('ArrowLeft')) {
             const splatMesh: SplatMesh = fire(MapGetSplatMesh);
-            splatMesh && splatMesh.visible && (splatMesh.position.x -= 0.5);
+            splatMesh && splatMesh.visible && (splatMesh.position.x -= 0.1);
             // keySet.clear();
         } else if (keySet.has('KeyU')) {
             const splatMesh: SplatMesh = fire(MapGetSplatMesh);

@@ -32,6 +32,7 @@ import {
     MapSceneTraverseDispose,
     CSS3DRendererDispose,
     GetCSS3DRenderer,
+    GetCamera,
 } from '../events/EventConstants';
 import { initMapViewerOptions, initTileMap, setupMapUtils } from './utils/MapUtils';
 import { setupCommonUtils } from '../utils/CommonUtils';
@@ -82,10 +83,12 @@ export class Reall3dMapViewer extends EventDispatcher<tt.plugin.GLViewerEventMap
         setupRaycaster(events);
         setupMark(events);
 
+        that.camera = new PerspectiveCamera(60, 1, 0.01, 10000);
+        on(GetCamera, () => that.camera);
+
         that.container = opts.root as HTMLElement;
         that.renderer = fire(MapCreateRenderer);
         that.scene = fire(MapCreateScene);
-        that.camera = fire(MapCreateCamera);
         that.controls = fire(MapCreateControls);
         that.ambLight = new AmbientLight(0xffffff, 1);
         that.scene.add(that.ambLight);
@@ -144,26 +147,21 @@ export class Reall3dMapViewer extends EventDispatcher<tt.plugin.GLViewerEventMap
         );
     }
 
-    public addScene(indexUrl: string) {
+    /**
+     * 打开地图场景
+     * @param 场景索引文件地址
+     */
+    public addScenes(urlScenesJson: string) {
         const that = this;
-        const fire = (key: number, ...args: any): any => that.events.fire(key, ...args);
-        fetch(indexUrl, { mode: 'cors', credentials: 'omit', cache: 'reload' })
+        fetch(urlScenesJson, { mode: 'cors', credentials: 'omit', cache: 'reload' })
             .then(response => (!response.ok ? {} : response.json()))
-            .then((data: any) => {
-                if (data.lookAt?.world) {
-                    that.controls.target.set(data.lookAt.world.x, data.lookAt.world.y, data.lookAt.world.z);
-                } else if (data.lookAt?.geo) {
-                    const geo = new Vector3(data.lookAt.geo.lon, data.lookAt.geo.lat, data.lookAt.geo.height);
-                    const target = that.tileMap.geo2world(geo);
-                    that.controls.target.copy(target);
-                }
-                if (data.position?.world) {
-                    that.controls.object.position.copy(data.position.world);
-                } else if (data.position?.geo) {
-                    const geo = new Vector3(data.position.geo.lon, data.position.geo.lat, data.position.geo.height);
-                    const position = that.tileMap.geo2world(geo);
-                    that.controls.object.position.copy(position);
-                }
+            .then((data: ScenesJsonData) => {
+                const position = new Vector3().fromArray(data.position || [17000, 30000, -35000]);
+                const lookAt = new Vector3().fromArray(data.lookAt || [17000, 0, -35000]);
+                that.controls.object.position.copy(position);
+                that.controls.target.copy(lookAt);
+                that.dirLight.target.position.copy(lookAt);
+
                 const set = new Set();
                 for (let url of data.scenes) {
                     if (!set.has(url)) {
@@ -201,7 +199,10 @@ export class Reall3dMapViewer extends EventDispatcher<tt.plugin.GLViewerEventMap
         }
     }
 
-    public dispose(): void {
+    /**
+     * 销毁
+     */
+    public dispose() {
         const that = this;
         if (that.disposed) return;
         that.disposed = true;
@@ -227,4 +228,34 @@ export class Reall3dMapViewer extends EventDispatcher<tt.plugin.GLViewerEventMap
         that.events = null;
         that.tileMap = null;
     }
+}
+
+/**
+ * 地图入口索引文件
+ */
+interface ScenesJsonData {
+    /**
+     *  名称
+     */
+    name?: string;
+
+    /**
+     * 版本
+     */
+    version?: string;
+
+    /**
+     * 初始相机位置
+     */
+    position?: number[];
+
+    /**
+     * 初始相机视点
+     */
+    lookAt?: number[];
+
+    /**
+     * 场景url列表
+     */
+    scenes?: string[];
 }

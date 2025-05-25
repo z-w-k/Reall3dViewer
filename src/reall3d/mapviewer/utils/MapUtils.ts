@@ -5,7 +5,6 @@ import { Color, DirectionalLight, FogExp2, MathUtils, Matrix4, PerspectiveCamera
 import {
     GetControls,
     GetOptions,
-    MapCreateCamera,
     MapCreateControls,
     GetRenderer,
     GetScene,
@@ -39,7 +38,6 @@ import {
     GetCameraLookUp,
     MapSortSplatMeshRenderOrder,
     MapSceneTraverseDispose,
-    MapIsWarpSplatMeshVisible,
 } from '../../events/EventConstants';
 import { Events } from '../../events/Events';
 import { Reall3dMapViewerOptions } from '../Reall3dMapViewerOptions';
@@ -85,22 +83,6 @@ export function setupMapUtils(events: Events) {
         warpMeshs.sort((a, b) => camera.position.distanceTo(a.position) - camera.position.distanceTo(b.position));
         window['splat'] = warpMeshs[0]?.splatMesh;
         return warpMeshs[0]?.splatMesh;
-    });
-
-    on(MapIsWarpSplatMeshVisible, (matrix: Matrix4) => {
-        let pos2d: Vector4;
-        let clip: number;
-        const range: number = 1.1;
-
-        const camera: PerspectiveCamera = fire(GetCamera);
-        const viewProjMatrix: Matrix4 = camera.projectionMatrix.clone().multiply(camera.matrixWorldInverse).multiply(matrix);
-
-        pos2d = new Vector4(0, 0, 0, 1).applyMatrix4(viewProjMatrix);
-        clip = range * pos2d.w;
-        if (!(pos2d.z < -clip || pos2d.x < -clip || pos2d.x > clip || pos2d.y < -clip || pos2d.y > clip)) {
-            return true; // 可见
-        }
-        return false;
     });
 
     on(MapSortSplatMeshRenderOrder, () => {
@@ -206,24 +188,15 @@ export function setupMapUtils(events: Events) {
         return scene;
     });
 
-    on(MapCreateCamera, () => {
-        const { position } = fire(GetOptions) as Reall3dMapViewerOptions;
-        const camera = new PerspectiveCamera(60, 1, 0.01, 10000);
-        position && camera.position.copy(position);
-        on(GetCamera, () => camera);
-        return camera;
-    });
-
     on(MapCreateControls, () => {
         const fogFactor = 1.0;
         const camera: PerspectiveCamera = fire(GetCamera);
         const scene: Scene = fire(GetScene);
         const opts: Reall3dMapViewerOptions = fire(GetOptions);
         const controls = new MapControls(fire(GetCamera), opts.root as HTMLElement);
-        opts.lookAt && controls.target.copy(opts.lookAt);
         controls.screenSpacePanning = false;
         controls.minDistance = 0.1;
-        controls.maxDistance = 30000;
+        controls.maxDistance = 100000;
         controls.maxPolarAngle = 1.2;
         controls.enableDamping = true;
         controls.dampingFactor = 0.07;
@@ -240,7 +213,7 @@ export function setupMapUtils(events: Events) {
             controls.zoomSpeed = Math.max(Math.log(dist), 0) + 0.5;
 
             // set far and near on dist/polar
-            camera.far = MathUtils.clamp((dist / polar) * 8, 100, 50000);
+            camera.far = MathUtils.clamp((dist / polar) * 8, 100, 200000);
             camera.near = camera.far / 1000;
             camera.updateProjectionMatrix();
 
@@ -264,10 +237,8 @@ export function setupMapUtils(events: Events) {
     });
 
     on(MapCreateDirLight, () => {
-        const { lookAt } = fire(GetOptions) as Reall3dMapViewerOptions;
         const dirLight = new DirectionalLight(0xffffff, 1);
         dirLight.position.set(0, 2e3, 1e3);
-        lookAt && dirLight.target.position.copy(lookAt);
         return dirLight;
     });
 
@@ -275,7 +246,7 @@ export function setupMapUtils(events: Events) {
 }
 
 export function initMapViewerOptions(options: Reall3dMapViewerOptions): Reall3dMapViewerOptions {
-    let { lookAt, position, root = '#map' } = options;
+    let { root = '#map' } = options;
 
     if (root) {
         root = typeof root === 'string' ? ((document.querySelector(root) || document.querySelector('#map')) as HTMLElement) : root;
@@ -288,7 +259,7 @@ export function initMapViewerOptions(options: Reall3dMapViewerOptions): Reall3dM
         document.querySelector('#gsviewer').appendChild(root);
     }
 
-    const opts: Reall3dMapViewerOptions = { lookAt, position, root };
+    const opts: Reall3dMapViewerOptions = { root };
     opts.debugMode ??= location.protocol === 'http:' || /^test\./.test(location.host); // 生产环境不开启
     return opts;
 }

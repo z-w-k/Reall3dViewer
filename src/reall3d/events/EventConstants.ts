@@ -392,8 +392,6 @@ export const MapSortSplatMeshRenderOrder = i++;
 export const MapSceneTraverseDispose = i++;
 /** 飞向目标 */
 export const MapFlyToTarget = i++;
-/** 屏幕投影是否可见 */
-export const MapIsWarpSplatMeshVisible = i++;
 
 /** 相机飞行控制 */
 export const TweenFly = i++;

@@ -13,16 +13,6 @@ export interface Reall3dMapViewerOptions {
     root?: HTMLElement | string;
 
     /**
-     * 初始相机视点
-     */
-    lookAt?: Vector3;
-
-    /**
-     * 初始相机位置
-     */
-    position?: Vector3;
-
-    /**
      *  是否调试模式，生产环境默认false
      */
     debugMode?: boolean;

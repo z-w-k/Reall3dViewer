@@ -12,6 +12,9 @@ const params: URLSearchParams = new URLSearchParams(location.search);
 let url = params.get('url');
 const debugMode = !!params.get('debug');
 
+const maxRenderCountOfPc = 384 * 10000;
+const shDegree = 3;
+
 let viewer: Reall3dViewer;
 let mapViewer: Reall3dMapViewer;
 if (url) {
@@ -19,7 +22,7 @@ if (url) {
     viewer.addModel(url);
     debugMode && initDevMode(true);
 } else {
-    viewer = new Reall3dViewer({ debugMode: true, maxRenderCountOfPc: 384 * 10000, shDegree: 3 });
+    viewer = new Reall3dViewer({ debugMode: true, maxRenderCountOfPc, shDegree });
     viewer.addModel(`https://reall3d.com/demo-models/hornedlizard.spx`);
 
     initDevMode();
@@ -60,25 +63,25 @@ function fnClick(className: string) {
     } else if (className == 'demo1') {
         viewer?.dispose();
         mapViewer?.dispose();
-        viewer = viewer || new Reall3dViewer({ debugMode: true, maxRenderCountOfPc: 384 * 10000, shDegree: 3 });
+        viewer = viewer || new Reall3dViewer({ debugMode: true, maxRenderCountOfPc, shDegree });
         viewer.reset({ debugMode: true });
         setTimeout(() => viewer.addModel(`https://reall3d.com/demo-models/yz.meta.json`), 50); // Let it GC
     } else if (className == 'demo2') {
         viewer?.dispose();
         mapViewer?.dispose();
-        viewer = viewer || new Reall3dViewer({ debugMode: true, maxRenderCountOfPc: 384 * 10000, shDegree: 3 });
+        viewer = viewer || new Reall3dViewer({ debugMode: true, maxRenderCountOfPc, shDegree });
         viewer.reset({ debugMode: true });
         setTimeout(() => viewer.addModel(`https://reall3d.com/demo-models/jtstjg.spx`), 50); // Let it GC
     } else if (className == 'demo3') {
         viewer?.dispose();
         mapViewer?.dispose();
-        viewer = viewer || new Reall3dViewer({ debugMode: true, maxRenderCountOfPc: 384 * 10000, shDegree: 3 });
+        viewer = viewer || new Reall3dViewer({ debugMode: true, maxRenderCountOfPc, shDegree });
         viewer.reset({ debugMode: true });
         setTimeout(() => viewer.addModel(`https://reall3d.com/demo-models/djj.spx`), 50); // Let it GC
     } else if (className == 'demo4') {
         viewer?.dispose();
         mapViewer?.dispose();
-        viewer = viewer || new Reall3dViewer({ debugMode: true, maxRenderCountOfPc: 384 * 10000, shDegree: 3 });
+        viewer = viewer || new Reall3dViewer({ debugMode: true, maxRenderCountOfPc, shDegree });
         viewer.reset({ debugMode: true });
         setTimeout(() => viewer.addModel(`https://reall3d.com/demo-models/bzg.spx`), 50); // Let it GC
     } else if (className == 'big-lod') {
@@ -135,12 +138,11 @@ function fnClick(className: string) {
     } else if (className == 'sub-sh') {
         viewer?.fire(8, -1);
     } else if (className == 'map') {
-        // window.open('https://reall3d.com/reall3dviewer/map/index.html', '_blank');
         viewer?.dispose();
         mapViewer?.dispose();
         viewer = null;
         document.querySelector('#map')?.classList?.remove('hidden');
         mapViewer = new Reall3dMapViewer();
-        mapViewer.addScene('https://reall3d.com/demo-models/map/0.scenes.json');
+        mapViewer.addScenes('https://reall3d.com/demo-models/map/00.scenes.json');
     }
 }
