@@ -191,8 +191,8 @@ export function setupMapUtils(events: Events) {
         controls.enableDamping = true;
         controls.dampingFactor = 0.07;
         controls.zoomToCursor = true;
-        controls.minAzimuthAngle = 0;
-        controls.maxAzimuthAngle = 0;
+        // controls.minAzimuthAngle = 0;
+        // controls.maxAzimuthAngle = 0;
 
         controls.addEventListener('change', () => {
             const polar = Math.max(controls.getPolarAngle(), 0.1); // camera polar
@@ -246,10 +246,22 @@ export function initMapViewerOptions(options: Reall3dMapViewerOptions): Reall3dM
 }
 
 export function initTileMap(): tt.TileMap {
-    const TOKEN = '7f8f4f56f3ccda758f9a497e2b981018';
-    const tdtImgSource = new tt.plugin.TDTSource({ token: TOKEN, style: 'img_w' });
-    const tdtVecSource = new tt.plugin.TDTSource({ token: TOKEN, style: 'cia_w' });
-    const imgSource = location.host.includes('reall3d.com') ? [tdtImgSource, tdtVecSource] : new tt.plugin.BingSource();
+    // const TOKEN = '7f8f4f56f3ccda758f9a497e2b981018';
+    // const tdtImgSource = new tt.plugin.TDTSource({ token: TOKEN, style: 'img_w' });
+    // const tdtVecSource = new tt.plugin.TDTSource({ token: TOKEN, style: 'cia_w' });
+    // const imgSource = location.host.includes('reall3d.com') ? [tdtImgSource, tdtVecSource] : new tt.plugin.BingSource();
+
+    // const imgSource = new tt.plugin.BingSource();
+
+    // const imgSource = [new tt.plugin.GDSource({ style: '6' }), new tt.plugin.GDSource({ style: '8' })];
+    // const imgSource = [new tt.plugin.TXSource(), new tt.plugin.GDSource({ style: '8' })];
+
+    const imgSource = tt.TileSource.create({
+        dataType: 'image',
+        attribution: 'ArcGIS',
+        url: 'https://services.arcgisonline.com/arcgis/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}',
+    });
+
     const tileMap = new tt.TileMap({ imgSource, lon0: 90, minLevel: 2, maxLevel: 16 });
     tileMap.scale.set(10, 10, 10);
     tileMap.rotateX(-Math.PI / 2);
