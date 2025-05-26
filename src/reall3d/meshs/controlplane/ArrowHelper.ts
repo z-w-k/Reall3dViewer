@@ -6,7 +6,7 @@ import { CylinderGeometry, DoubleSide, Mesh, MeshBasicMaterial, Object3D, Vector
 export class ArrowHelper extends Object3D {
     private line: Mesh;
     private cone: Mesh;
-    public type: string;
+    public declare type: string;
     private _axis: Vector3 = new Vector3();
 
     constructor(
