@@ -120,6 +120,7 @@ export function initGsViewerOptions(options: Reall3dViewerOptions): Reall3dViewe
     opts.markMode ??= false;
     opts.markVisible ??= true;
     opts.meterScale ??= 1;
+    opts.background ??= '#000000';
 
     return opts;
 }
