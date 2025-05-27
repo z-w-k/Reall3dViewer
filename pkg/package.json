@@ -1,0 +1,27 @@
+{
+    "name": "@reall3d/reall3dviewer",
+    "version": "0.0.6",
+    "type": "module",
+    "files": [
+        "dist"
+    ],
+    "main": "./dist/pkg.umd.cjs",
+    "module": "./dist/pkg.js",
+    "types": "./dist/pkg.d.ts",
+    "exports": {
+        ".": {
+            "import": "./dist/pkg.js",
+            "require": "./dist/pkg.umd.cjs",
+            "types": "./dist/pkg.d.ts"
+        },
+        "./dist/style.css": "./dist/style.css"
+    },
+    "dependencies": {
+        "@gotoeasy/three-tile": "^0.8.7",
+        "@tweenjs/tween.js": "^25.0.0",
+        "three": "^0.171.0"
+    },
+    "description": "reall3dviewer",
+    "license": "MIT",
+    "homepage": "https://github.com/reall3d-com/Reall3dViewer"
+}

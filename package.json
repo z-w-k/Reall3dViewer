@@ -5,6 +5,7 @@
     "scripts": {
         "dev": "vite",
         "build": "tsc && vite build",
+        "build-pkg": "tsc && vite build --config vite-pkg.config.ts && node buildPkg.js --before && vite build --config vite-pkg.config.ts && node buildPkg.js --after",
         "preview": "vite preview"
     },
     "dependencies": {
