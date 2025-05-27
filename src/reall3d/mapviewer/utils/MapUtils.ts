@@ -241,7 +241,8 @@ export function initMapViewerOptions(options: Reall3dMapViewerOptions): Reall3dM
         (document.querySelector('#gsviewer') || document.querySelector('body')).appendChild(root);
     }
 
-    const opts: Reall3dMapViewerOptions = { root, debugMode };
+    const opts: Reall3dMapViewerOptions = { ...options };
+    opts.root = root;
     return opts;
 }
 

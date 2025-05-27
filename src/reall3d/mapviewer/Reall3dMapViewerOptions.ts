@@ -11,6 +11,11 @@ export declare interface Reall3dMapViewerOptions {
     root?: HTMLElement | string;
 
     /**
+     * 是否允许键盘操作，默认true
+     */
+    enableKeyboard?: boolean | undefined;
+
+    /**
      *  是否调试模式，生产环境默认false
      */
     debugMode?: boolean;
