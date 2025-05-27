@@ -535,6 +535,9 @@ export class Reall3dViewer {
         that.disposed = true;
         const fire = (key: number, ...args: any): any => that.events.fire(key, ...args);
 
+        const renderer: WebGLRenderer = fire(GetRenderer);
+        const canvas = renderer.domElement as HTMLCanvasElement;
+
         fire(CommonUtilsDispose);
         fire(ViewerUtilsDispose);
         fire(CSS3DRendererDispose);
@@ -543,10 +546,10 @@ export class Reall3dViewer {
 
         fire(TraverseDisposeAndClear, fire(GetScene));
 
-        const renderer: WebGLRenderer = fire(GetRenderer);
         renderer.clear();
         renderer.dispose();
 
+        canvas.parentElement.removeChild(canvas);
         that.splatMesh = null;
         that.events.clear();
         that.events = null;
