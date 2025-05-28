@@ -206,7 +206,7 @@ export function setupMapUtils(events: Events) {
             if (scene.fog instanceof FogExp2) {
                 scene.fog.density = (polar / (dist + 5)) * fogFactor * 0.25; // set fog density on dist/polar
             }
-            controls.maxPolarAngle = Math.min(Math.pow(10000 / dist, 4), 1.2); // limit the max polar on dist
+            // controls.maxPolarAngle = Math.min(Math.pow(10000 / dist, 4), 1.2); // limit the max polar on dist
         });
 
         on(GetControls, () => controls);

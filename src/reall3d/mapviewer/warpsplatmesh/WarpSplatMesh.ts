@@ -78,22 +78,24 @@ export class WarpSplatMesh extends Mesh {
         let tween: Tween = null;
         tagWarp.onclick = () => {
             if (tween) return;
-            const target = that.position;
-            const controls: MapControls = opts.controls;
-            const pos: Vector3 = controls.object.position.clone();
-            const distance = isMobile ? 6 : 2; // 相机与目标点的距离
-            const cameraToP1 = target.clone().sub(pos).normalize(); // 获取相机到目标点的向量
-            const newPos = target.clone().sub(cameraToP1.multiplyScalar(distance)); // 计算新的相机位置
 
-            const pt = { x: pos.x, y: pos.y, z: pos.z, tx: controls.target.x, ty: controls.target.y, tz: controls.target.z };
-            const to = { x: newPos.x, y: newPos.y, z: newPos.z, tx: target.x, ty: target.y, tz: target.z };
+            const controls: MapControls = opts.controls;
+            const oldTarget = controls.target.clone(); // 原始视点
+            const oldPos = controls.object.position.clone(); // 原始位置
+            const newTarget = that.position.clone(); // 新视点
+            const distance = isMobile ? 6 : 2; // 相机与新视点的距离
+            const oldDir = oldTarget.clone().sub(oldPos).normalize(); // 计算原视线向量
+            const newDir = oldDir.clone(); // 计算新视线向量（与原视线向量平行）
+            const newPos = newTarget.clone().sub(newDir.multiplyScalar(distance)); // 计算相机的新位置
+
+            const pt = { x: oldPos.x, y: oldPos.y, z: oldPos.z, tx: oldTarget.x, ty: oldTarget.y, tz: oldTarget.z };
+            const to = { x: newPos.x, y: newPos.y, z: newPos.z, tx: newTarget.x, ty: newTarget.y, tz: newTarget.z };
             tween = new Tween(pt).to(to, 3000);
             tween
                 .easing(Easing.Sinusoidal.InOut)
                 .start()
                 .onUpdate(() => {
-                    const y = pt.y < 0.1 ? 0.1 : pt.y;
-                    controls.object.position.set(pt.x, y, pt.z);
+                    controls.object.position.set(pt.x, pt.y, pt.z);
                     controls.target.set(pt.tx, pt.ty, pt.tz);
                 })
                 .onComplete(() => {
