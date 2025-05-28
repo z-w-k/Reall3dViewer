@@ -32,17 +32,17 @@ export interface SplatMeshOptions {
     /**
      * 模型矩阵
      */
-    matrix?: Matrix4 | undefined;
+    matrix?: Matrix4;
 
     /**
      * 渲染器事件管理器
      */
-    viewerEvents?: Events | undefined;
+    viewerEvents?: Events;
 
     /**
      * 是否调试模式，生产环境默认false
      */
-    debugMode?: boolean | undefined;
+    debugMode?: boolean;
 
     /**
      * 是否大场景模式，初始化后不可修改
@@ -53,34 +53,34 @@ export interface SplatMeshOptions {
      * 是否点云模式渲染，默认为true
      * 支持通过viewer.options()动态更新
      */
-    pointcloudMode?: boolean | undefined;
+    pointcloudMode?: boolean;
 
     /**
-     * 移动端可渲染的高斯点数量限制，默认200万
+     * 移动端可渲染的高斯点数量限制
      * 支持通过viewer.options()动态更新
      */
-    maxRenderCountOfMobile?: number | undefined;
+    maxRenderCountOfMobile?: number;
 
     /**
-     * PC端可渲染的高斯点数量限制，默认500万
+     * PC端可渲染的高斯点数量限制
      * 支持通过viewer.options()动态更新
      */
-    maxRenderCountOfPc?: number | undefined;
+    maxRenderCountOfPc?: number;
 
     /**
-     * 颜色亮度系数，默认1.1
+     * 颜色亮度系数，默认1.0
      */
-    lightFactor?: number | undefined;
+    lightFactor?: number;
 
     /**
-     * 是否显示水印
+     * 是否显示水印，默认true
      */
-    showWatermark?: boolean | undefined;
+    showWatermark?: boolean;
 
     /**
-     * 球谐系数的渲染级别，默认为模型数据的最大可渲染级别
+     * 球谐系数的渲染级别，默认0
      */
-    shDegree?: number | undefined;
+    shDegree?: number;
 
     /**
      * 是否开启深度测试，默认true

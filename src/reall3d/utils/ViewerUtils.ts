@@ -91,6 +91,11 @@ export function initSplatMeshOptions(options: SplatMeshOptions): SplatMeshOption
     opts.lightFactor ??= 1.0;
     opts.name ??= '';
     opts.showWatermark ??= true;
+    opts.shDegree ??= 0;
+    opts.depthTest ??= true;
+    opts.debugMode ??= false;
+    opts.maxRenderCountOfMobile ??= opts.bigSceneMode ? 256 * 10000 : (256 + 128) * 10240;
+    opts.maxRenderCountOfPc ??= opts.bigSceneMode ? (256 + 64) * 10000 : (256 + 128) * 10000;
 
     return opts;
 }
@@ -114,8 +119,6 @@ export function initGsViewerOptions(options: Reall3dViewerOptions): Reall3dViewe
     opts.bigSceneMode ??= false;
     opts.pointcloudMode ??= !opts.bigSceneMode; // 小场景默认点云模式，大场景默认正常模式
     opts.lightFactor ??= 1.1;
-    opts.maxRenderCountOfMobile ??= opts.bigSceneMode ? 256 * 10000 : (256 + 128) * 10240;
-    opts.maxRenderCountOfPc ??= opts.bigSceneMode ? (256 + 64) * 10000 : (256 + 128) * 10000;
     opts.debugMode ??= location.protocol === 'http:' || /^test\./.test(location.host); // 生产环境不开启
     opts.markMode ??= false;
     opts.markVisible ??= true;

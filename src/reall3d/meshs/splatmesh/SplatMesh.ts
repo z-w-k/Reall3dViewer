@@ -138,7 +138,7 @@ export class SplatMesh extends Mesh {
      * @param opts 高斯模型选项
      * @param meta 元数据
      */
-    public async addModel(opts: ModelOptions, meta: MetaData): Promise<void> {
+    public async addModel(opts: ModelOptions, meta: MetaData = {}): Promise<void> {
         if (this.disposed) return;
         this.meta = meta;
         await this.events.fire(SplatTexdataManagerAddModel, opts, meta);
