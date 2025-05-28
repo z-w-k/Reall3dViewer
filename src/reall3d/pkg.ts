@@ -3,3 +3,4 @@
 // ==============================================
 export { Reall3dViewer } from './viewer/Reall3dViewer';
 export { Reall3dMapViewer } from './mapviewer/Reall3dMapViewer';
+export { SplatMesh } from './meshs/splatmesh/SplatMesh';
