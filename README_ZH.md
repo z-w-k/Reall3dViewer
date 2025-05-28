@@ -37,6 +37,8 @@
 
 
 ## 用法
+
+使用源码方式
 ```shell
 # develop
 npm run dev
@@ -50,6 +52,23 @@ npm run build
 # .spx file can be obtained through conversion using the gsbox
 gsbox p2x -i /path/to/input.ply -o /path/to/output.spx -sh 0
 ```
+
+
+使用 npm 包方式 [例子工程在这](https://github.com/reall3d-com/reall3dviewer-samples-use-npm-package)
+```shell
+# install
+npm install @reall3d/reall3dviewer
+
+# use built-in viewer
+const viewer = new Reall3dViewer({ root: '#gsviewer' });
+viewer.addModel(`https://reall3d.com/demo-models/yz.spx`);
+
+# use splat mesh
+const splatMesh = new SplatMesh({ renderer, scene, controls});
+splatMesh.addModel({ url: 'https://reall3d.com/demo-models/yz.spx' });
+scene.add(splatMesh);
+```
+
 
 ## TODO
 - 持续优化增强渲染性能

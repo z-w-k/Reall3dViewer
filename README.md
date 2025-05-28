@@ -52,7 +52,7 @@ npm run build
 gsbox p2x -i /path/to/input.ply -o /path/to/output.spx -sh 0
 ```
 
-use npm package (sample project here)[https://github.com/reall3d-com/reall3dviewer-samples-use-npm-package]
+use npm package [sample project here](https://github.com/reall3d-com/reall3dviewer-samples-use-npm-package)
 ```shell
 # install
 npm install @reall3d/reall3dviewer
