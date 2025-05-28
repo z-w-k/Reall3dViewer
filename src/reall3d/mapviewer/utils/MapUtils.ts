@@ -186,7 +186,7 @@ export function setupMapUtils(events: Events) {
         const controls = new MapControls(fire(GetCamera), opts.root as HTMLElement);
         controls.screenSpacePanning = false;
         controls.minDistance = 0.1;
-        controls.maxDistance = 100000;
+        controls.maxDistance = 60000;
         controls.maxPolarAngle = 1.2;
         controls.enableDamping = true;
         controls.dampingFactor = 0.07;
@@ -199,14 +199,14 @@ export function setupMapUtils(events: Events) {
             const dist = Math.max(controls.getDistance(), 0.1); // dist of camera to controls
             controls.zoomSpeed = Math.max(Math.log(dist), 0) + 0.5; // set zoom speed on dist
 
-            camera.far = MathUtils.clamp((dist / polar) * 8, 100, 200000); // set far and near on dist/polar
+            camera.far = MathUtils.clamp((dist / polar) * 8, 100, 100000); // set far and near on dist/polar
             camera.near = camera.far / 1000;
             camera.updateProjectionMatrix();
 
             if (scene.fog instanceof FogExp2) {
                 scene.fog.density = (polar / (dist + 5)) * fogFactor * 0.25; // set fog density on dist/polar
             }
-            // controls.maxPolarAngle = Math.min(Math.pow(10000 / dist, 4), 1.2); // limit the max polar on dist
+            controls.maxPolarAngle = Math.min(Math.pow(10000 / dist, 4), 1.2); // limit the max polar on dist
         });
 
         on(GetControls, () => controls);
