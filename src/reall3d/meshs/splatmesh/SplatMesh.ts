@@ -44,6 +44,9 @@ import { setupCommonUtils } from '../../utils/CommonUtils';
 import { MetaData } from '../../modeldata/ModelData';
 import { setupSorter } from '../../sorter/SetupSorter';
 
+/**
+ * Gaussian splatting mesh
+ */
 export class SplatMesh extends Mesh {
     public readonly isSplatMesh: boolean = true;
     public meta: MetaData;
