@@ -192,8 +192,8 @@ export function setupMapUtils(events: Events) {
         controls.dampingFactor = 0.07;
         controls.zoomToCursor = true;
 
-        const minPan = new Vector3(-20000, 0.3, -60000);
-        const maxPan = new Vector3(50000, 60000, 0);
+        const minPan = new Vector3().fromArray(opts.minPan || [-20000, 0.1, -60000]);
+        const maxPan = new Vector3().fromArray(opts.maxPan || [50000, 10000, 0]);
         const _v = new Vector3();
 
         controls.addEventListener('change', () => {

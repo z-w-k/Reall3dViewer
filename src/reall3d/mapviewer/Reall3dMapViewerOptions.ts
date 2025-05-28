@@ -16,6 +16,16 @@ export declare interface Reall3dMapViewerOptions {
     enableKeyboard?: boolean;
 
     /**
+     * 拖动范围最小值，默认[-20000, 0.1, -60000]
+     */
+    minPan?: number[];
+
+    /**
+     * 拖动范围最大值，默认[50000, 10000, 0]
+     */
+    maxPan?: number[];
+
+    /**
      *  是否调试模式，生产环境默认false
      */
     debugMode?: boolean;
