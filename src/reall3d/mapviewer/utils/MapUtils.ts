@@ -191,8 +191,6 @@ export function setupMapUtils(events: Events) {
         controls.enableDamping = true;
         controls.dampingFactor = 0.07;
         controls.zoomToCursor = true;
-        // controls.minAzimuthAngle = 0;
-        // controls.maxAzimuthAngle = 0;
 
         controls.addEventListener('change', () => {
             const polar = Math.max(controls.getPolarAngle(), 0.1); // camera polar
