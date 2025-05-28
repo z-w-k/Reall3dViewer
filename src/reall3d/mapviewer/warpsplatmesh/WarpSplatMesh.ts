@@ -110,6 +110,12 @@ export class WarpSplatMesh extends Mesh {
         that.css3dTag = css3dTag;
         opts.scene.add(css3dTag);
 
+        // @ts-ignore
+        const onMouseWheel = (e: WheelEvent) => this.mapViewer.controls._onMouseWheel(e);
+        tagWarp.addEventListener('wheel', onMouseWheel, { passive: false });
+        // @ts-ignore
+        css3dTag.dispose = () => tagWarp.removeEventListener('wheel', onMouseWheel);
+
         that.onBeforeRender = () => {
             tween?.update();
 
