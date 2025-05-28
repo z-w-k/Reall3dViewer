@@ -192,6 +192,10 @@ export function setupMapUtils(events: Events) {
         controls.dampingFactor = 0.07;
         controls.zoomToCursor = true;
 
+        const minPan = new Vector3(-20000, 0.3, -60000);
+        const maxPan = new Vector3(50000, 60000, 0);
+        const _v = new Vector3();
+
         controls.addEventListener('change', () => {
             const polar = Math.max(controls.getPolarAngle(), 0.1); // camera polar
             const dist = Math.max(controls.getDistance(), 0.1); // dist of camera to controls
@@ -205,6 +209,11 @@ export function setupMapUtils(events: Events) {
                 scene.fog.density = (polar / (dist + 5)) * fogFactor * 0.25; // set fog density on dist/polar
             }
             controls.maxPolarAngle = Math.min(Math.pow(10000 / dist, 4), 1.2); // limit the max polar on dist
+
+            _v.copy(controls.target);
+            controls.target.clamp(minPan, maxPan);
+            _v.sub(controls.target);
+            camera.position.sub(_v);
         });
 
         on(GetControls, () => controls);
