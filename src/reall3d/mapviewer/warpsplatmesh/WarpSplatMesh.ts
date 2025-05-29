@@ -90,7 +90,7 @@ export class WarpSplatMesh extends Mesh {
 
             const pt = { x: oldPos.x, y: oldPos.y, z: oldPos.z, tx: oldTarget.x, ty: oldTarget.y, tz: oldTarget.z };
             const to = { x: newPos.x, y: newPos.y, z: newPos.z, tx: newTarget.x, ty: newTarget.y, tz: newTarget.z };
-            tween = new Tween(pt).to(to, 3000);
+            tween = new Tween(pt).to(to, 3500);
             tween
                 .easing(Easing.Sinusoidal.InOut)
                 .start()
