@@ -188,7 +188,7 @@ export function setupEventListener(events: Events) {
         if (mouseState.move) return; // 鼠标有移动时忽略
         const rs: Vector3[] = await fire(RaycasterRayIntersectPoints, x, y);
         if (rs.length) {
-            fire(CameraSetLookAt, rs[0], true, fire(IsBigSceneMode)); // 第三参数false表示平移效果，小场景适用
+            fire(CameraSetLookAt, rs[0], true, true); // 最后参数false表示平移效果（有待完善）
         }
     });
 
