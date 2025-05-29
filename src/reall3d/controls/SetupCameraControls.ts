@@ -69,7 +69,7 @@ export function setupCameraControls(events: Events) {
     on(GetCameraPosition, (copy: boolean = false) => (copy ? fire(GetCamera).position.clone() : fire(GetCamera).position));
     on(GetCameraLookAt, (copy: boolean = false) => (copy ? fire(GetControls).target.clone() : fire(GetControls).target));
     on(GetCameraLookUp, (copy: boolean = false) => (copy ? fire(GetCamera).up.clone() : fire(GetCamera).up));
-    on(CameraSetLookAt, (target: Vector3, animate: boolean = false) => {
+    on(CameraSetLookAt, (target: Vector3, animate: boolean = false, rotateAnimate: boolean) => {
         fire(FocusMarkerMeshUpdate, target);
         if (!animate) {
             fire(GetControls).target.copy(target);
@@ -77,13 +77,22 @@ export function setupCameraControls(events: Events) {
             return;
         }
 
-        const start: Vector3 = fire(GetControls).target.clone();
+        const oldTarget: Vector3 = fire(GetCameraLookAt, true);
+        const oldPos: Vector3 = fire(GetCameraPosition, true);
+        const oldDir = oldTarget.clone().sub(oldPos).normalize();
+        const newDir = oldDir.clone();
+        const newPos = target.clone().sub(newDir.multiplyScalar(oldPos.distanceTo(target)));
+
         let alpha = 0;
         fire(
             RunLoopByFrame,
             () => {
                 alpha += 0.03;
-                fire(GetControls).target.copy(start.clone().lerp(target, alpha));
+                fire(GetControls).target.copy(oldTarget.clone().lerp(target, alpha));
+                if (!rotateAnimate) {
+                    fire(GetControls).object.position.copy(oldPos.clone().lerp(newPos, alpha));
+                    fire(FocusMarkerMeshUpdate, target);
+                }
                 fire(ControlPlaneUpdate);
             },
             () => alpha < 1,

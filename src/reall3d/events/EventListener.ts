@@ -187,7 +187,7 @@ export function setupEventListener(events: Events) {
         if (mouseState.move) return; // 鼠标有移动时忽略
         const rs: Vector3[] = await fire(RaycasterRayIntersectPoints, x, y);
         if (rs.length) {
-            fire(CameraSetLookAt, rs[0], true);
+            fire(CameraSetLookAt, rs[0], true, false); // 第三参数false表示平行移动
         }
     });
 
