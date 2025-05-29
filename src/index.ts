@@ -141,6 +141,7 @@ function fnClick(className: string) {
         viewer?.dispose();
         mapViewer?.dispose();
         viewer = null;
+        document.querySelector('.debug.dev-panel')?.classList?.add('map');
         document.querySelector('#map')?.classList?.remove('hidden');
         mapViewer = new Reall3dMapViewer({ debugMode: true });
         mapViewer.addScenes('https://reall3d.com/demo-models/map/00.scenes.json');

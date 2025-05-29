@@ -170,8 +170,9 @@ export function setupMapUtils(events: Events) {
     });
 
     on(MapCreateScene, () => {
+        const opts: Reall3dMapViewerOptions = fire(GetOptions);
         const scene = new Scene();
-        const backColor = 0xdbf0ff;
+        const backColor = opts.background || '#dbf0ff';
         scene.background = new Color(backColor);
         scene.fog = new FogExp2(backColor, 0);
         on(GetScene, () => scene);

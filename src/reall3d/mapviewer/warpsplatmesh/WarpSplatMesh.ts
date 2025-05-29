@@ -67,6 +67,7 @@ export class WarpSplatMesh extends Mesh {
 
     private async initCSS3DSprite(opts: SplatMeshOptions) {
         const that = this;
+        const controls: MapControls = opts.controls;
         const tagWarp: HTMLDivElement = document.createElement('div');
         tagWarp.innerHTML = `<div title="${that.meta.name}" style='flex-direction: column;align-items: center;display: flex;pointer-events: auto;margin-bottom: 20px;'>
                                <svg height="20" width="20" style="color:#eeee00;opacity:0.9;"><use href="#svgicon-point3" fill="currentColor" /></svg>
@@ -79,7 +80,6 @@ export class WarpSplatMesh extends Mesh {
         tagWarp.onclick = () => {
             if (tween) return;
 
-            const controls: MapControls = opts.controls;
             const oldTarget = controls.target.clone(); // 原始视点
             const oldPos = controls.object.position.clone(); // 原始位置
             const newTarget = that.position.clone(); // 新视点
@@ -120,12 +120,13 @@ export class WarpSplatMesh extends Mesh {
             tween?.update();
 
             const MinDistance = isMobile ? 50 : 30;
+            const MaxDistance = 100;
             const distance = that.position.distanceTo(that.mapViewer.controls.object.position);
             if (distance > MinDistance) {
                 that.css3dTag.visible = that.opts.controls.object.position.y > 2;
                 let scale = 0.002 * distance;
                 css3dTag.scale.set(scale, scale, scale);
-                that.css3dTag.visible = true;
+                that.css3dTag.visible = controls.object.position.y < 10 ? distance < MaxDistance : true; // 相机太低时，太远的不显示
                 that.splatMesh && (that.splatMesh.visible = false);
             } else {
                 if (!that.active) {

@@ -26,6 +26,11 @@ export declare interface Reall3dMapViewerOptions {
     maxPan?: number[];
 
     /**
+     * 背景色（默认 '#dbf0ff'）
+     */
+    background?: string;
+
+    /**
      *  是否调试模式，生产环境默认false
      */
     debugMode?: boolean;
