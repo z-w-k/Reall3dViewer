@@ -82,7 +82,7 @@ export async function loadSpx(model: SplatModel) {
                 model.header = header;
                 model.modelSplatCount = header.SplatCount;
                 model.dataShDegree = header.ShDegree;
-                model.aabbCenter = new Vector3((header.MaxX + header.MaxX) / 2, (header.MinY + header.MaxY) / 2, (header.MinZ + header.MaxZ) / 2);
+                model.aabbCenter = new Vector3((header.MinX + header.MaxX) / 2, (header.MinY + header.MaxY) / 2, (header.MinZ + header.MaxZ) / 2);
                 headChunks = null;
                 headChunk = null;
 
