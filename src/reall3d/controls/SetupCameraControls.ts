@@ -95,7 +95,7 @@ export function setupCameraControls(events: Events) {
         fire(
             RunLoopByFrame,
             () => {
-                alpha += 0.0035;
+                alpha += 0.035;
                 fire(GetControls).target.copy(oldTarget.clone().lerp(target, alpha));
                 !rotateAnimate && fire(GetControls).object.position.copy(oldPos.clone().lerp(newPos, alpha));
                 fire(ControlPlaneUpdate);
