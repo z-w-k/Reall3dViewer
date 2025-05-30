@@ -20,6 +20,7 @@ import { PerspectiveCamera, Vector3 } from 'three';
 import { Events } from '../events/Events';
 import { GetCamera } from '../events/EventConstants';
 import { CameraControls } from './CameraControls';
+import { OrbitControls } from 'three/examples/jsm/Addons.js';
 
 /**
  * 相机参数信息
@@ -69,6 +70,8 @@ export function setupCameraControls(events: Events) {
     on(GetCameraPosition, (copy: boolean = false) => (copy ? fire(GetCamera).position.clone() : fire(GetCamera).position));
     on(GetCameraLookAt, (copy: boolean = false) => (copy ? fire(GetControls).target.clone() : fire(GetControls).target));
     on(GetCameraLookUp, (copy: boolean = false) => (copy ? fire(GetCamera).up.clone() : fire(GetCamera).up));
+
+    let oEnables: any;
     on(CameraSetLookAt, (target: Vector3, animate: boolean = false, rotateAnimate: boolean) => {
         fire(FocusMarkerMeshUpdate, target);
         if (!animate) {
@@ -76,6 +79,12 @@ export function setupCameraControls(events: Events) {
             fire(ControlPlaneUpdate);
             return;
         }
+
+        // 适当时间内禁用拖动旋转避免操作冲突
+        const controls: OrbitControls = fire(GetControls);
+        oEnables = oEnables || { enablePan: controls.enablePan, enableRotate: controls.enableRotate };
+        controls.enablePan = false;
+        controls.enableRotate = false;
 
         const oldTarget: Vector3 = fire(GetCameraLookAt, true);
         const oldPos: Vector3 = fire(GetCameraPosition, true);
@@ -86,10 +95,14 @@ export function setupCameraControls(events: Events) {
         fire(
             RunLoopByFrame,
             () => {
-                alpha += 0.03;
+                alpha += 0.0035;
                 fire(GetControls).target.copy(oldTarget.clone().lerp(target, alpha));
                 !rotateAnimate && fire(GetControls).object.position.copy(oldPos.clone().lerp(newPos, alpha));
                 fire(ControlPlaneUpdate);
+                if (alpha >= 0.9) {
+                    controls.enablePan = oEnables.enablePan;
+                    controls.enableRotate = oEnables.enableRotate;
+                }
             },
             () => alpha < 1,
         );
