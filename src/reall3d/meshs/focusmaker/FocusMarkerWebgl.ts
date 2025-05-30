@@ -4,27 +4,19 @@
 export function getFocusMarkerVertexShader() {
     return `
         uniform vec2 viewport;
-        uniform vec3 realFocusPosition;
 
-        varying vec4 ndcPosition;
-        varying vec4 ndcCenter;
-        varying vec4 ndcFocusPosition;
+        varying float projectedRadius;
         varying float vAngle;
 
         void main() {
             vec4 viewPosition = modelViewMatrix * vec4(position.xyz, 1.0);
             vec4 viewCenter = modelViewMatrix * vec4(0.0, 0.0, 0.0, 1.0);
 
-            vec4 viewFocusPosition = modelViewMatrix * vec4(realFocusPosition, 1.0);
-
-            ndcPosition = projectionMatrix * viewPosition;
+            vec4 ndcPosition = projectionMatrix * viewPosition;
             ndcPosition = ndcPosition * vec4(1.0 / ndcPosition.w);
-            ndcCenter = projectionMatrix * viewCenter;
+            vec4 ndcCenter = projectionMatrix * viewCenter;
             ndcCenter = ndcCenter * vec4(1.0 / ndcCenter.w);
-
-            ndcFocusPosition = projectionMatrix * viewFocusPosition;
-            ndcFocusPosition = ndcFocusPosition * vec4(1.0 / ndcFocusPosition.w);
-
+            projectedRadius = length((vec2(ndcPosition) * viewport) - (vec2(ndcCenter) * viewport));
 
             // 计算角度
             vec2 screenPosition = vec2(ndcPosition) * viewport;
@@ -43,24 +35,14 @@ export function getFocusMarkerVertexShader() {
 
 export function getFocusMarkerFragmentShader() {
     return `
-        uniform vec3 cycleColor;
         uniform vec2 viewport;
         uniform float opacity;
 
-        varying vec4 ndcPosition;
-        varying vec4 ndcCenter;
-        varying vec4 ndcFocusPosition;
+        varying float projectedRadius;
         varying float vAngle;
 
         void main() {
-            vec2 screenPosition = vec2(ndcPosition) * viewport;
-            vec2 screenCenter = vec2(ndcCenter) * viewport;
-
-            vec2 screenVec = screenPosition - screenCenter;
-
-            float projectedRadius = length(screenVec);
-
-            float lineWidth = 0.0005 * viewport.y;
+            float lineWidth = 0.001 * viewport.y;
             float aaRange = 0.0025 * viewport.y;
             float radius = 0.06 * viewport.y;
             float radDiff = abs(projectedRadius - radius) - lineWidth;
@@ -72,7 +54,7 @@ export function getFocusMarkerFragmentShader() {
                 alpha = 0.0;
             }
 
-            gl_FragColor = vec4(cycleColor.rgb, alpha * opacity);
+            gl_FragColor = vec4(1.0, 1.0, 1.0, alpha * opacity);
         }
     `;
 }

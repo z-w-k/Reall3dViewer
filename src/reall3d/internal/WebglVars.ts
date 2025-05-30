@@ -3,8 +3,6 @@
 // ==============================================
 export const VarCurrentVisibleRadius = 'currentVisibleRadius';
 export const VarCurrentLightRadius = 'currentLightRadius';
-export const VarRealFocusPosition = 'realFocusPosition';
-export const VarNdcFocusPosition = 'ndcFocusPosition';
 export const VarSplatShTexture12 = 'splatShTexture12';
 export const VarSplatShTexture3 = 'splatShTexture3';
 export const VarPerformanceNow = 'performanceNow';
@@ -17,7 +15,6 @@ export const VarLightFactor = 'lightFactor';
 export const VarNdcPosition = 'ndcPosition';
 export const VarDebugEffect = 'debugEffect';
 export const VarUsingIndex = 'usingIndex';
-export const VarCycleColor = 'cycleColor';
 export const VarSplatIndex = 'splatIndex';
 export const VarVPosition = 'vPosition';
 export const VarNdcCenter = 'ndcCenter';

@@ -79,9 +79,8 @@ export function setupCameraControls(events: Events) {
 
         const oldTarget: Vector3 = fire(GetCameraLookAt, true);
         const oldPos: Vector3 = fire(GetCameraPosition, true);
-        const oldDir = oldTarget.clone().sub(oldPos).normalize();
-        const newDir = oldDir.clone();
-        const newPos = target.clone().sub(newDir.multiplyScalar(oldPos.distanceTo(target)));
+        const dir = oldTarget.clone().sub(oldPos).normalize();
+        const newPos = target.clone().sub(dir.multiplyScalar(target.clone().sub(oldPos).dot(dir)));
 
         let alpha = 0;
         fire(
@@ -89,10 +88,7 @@ export function setupCameraControls(events: Events) {
             () => {
                 alpha += 0.03;
                 fire(GetControls).target.copy(oldTarget.clone().lerp(target, alpha));
-                if (!rotateAnimate) {
-                    fire(GetControls).object.position.copy(oldPos.clone().lerp(newPos, alpha));
-                    fire(FocusMarkerMeshUpdate, target);
-                }
+                !rotateAnimate && fire(GetControls).object.position.copy(oldPos.clone().lerp(newPos, alpha));
                 fire(ControlPlaneUpdate);
             },
             () => alpha < 1,
