@@ -13,7 +13,6 @@ import {
     SplatUpdateShDegree,
     ClearMarkPoint,
     CommonUtilsDispose,
-    CreateFocusMarkerMesh,
     CSS3DRendererDispose,
     EventListenerDispose,
     GetMarkFromWeakRef,
@@ -159,7 +158,6 @@ export class Reall3dViewer {
         setupControlPlane(events);
 
         scene.add(new AmbientLight('#ffffff', 2));
-        scene.add(fire(CreateFocusMarkerMesh));
         renderer.setAnimationLoop(that.update.bind(that));
 
         on(ViewerCheckNeedUpdate, () => {
