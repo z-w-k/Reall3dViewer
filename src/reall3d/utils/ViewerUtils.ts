@@ -124,6 +124,8 @@ export function initGsViewerOptions(options: Reall3dViewerOptions): Reall3dViewe
     opts.markVisible ??= true;
     opts.meterScale ??= 1;
     opts.background ??= '#000000';
+    opts.minDistance ??= 0.1;
+    opts.maxDistance ??= 100;
 
     return opts;
 }
