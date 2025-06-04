@@ -396,8 +396,8 @@ export function setupSplatMesh(events: Events) {
             fire(Information, { shDegree: `${value} / max ${modelShDegree}` });
             fire(NotifyViewerNeedUpdate);
         });
-        on(SplatUpdateFlagValue, (value: number) => {
-            material.uniforms[VarFlagValue].value = value;
+        on(SplatUpdateFlagValue, (fvHide: number = 0, fvShow: number = 0) => {
+            material.uniforms[VarFlagValue].value = (fvHide << 16) | fvShow;
             material.uniforms[VarPerformanceAct].value = performance.now();
             material.uniformsNeedUpdate = true;
             fire(NotifyViewerNeedUpdate);

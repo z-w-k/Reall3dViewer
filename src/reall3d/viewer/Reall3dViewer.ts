@@ -207,7 +207,7 @@ export class Reall3dViewer {
             if (fvShow > max && next) return fire(OnSmallSceneTimeChange, next, max, 1);
             if (fvShow < 1 && !next) return fire(OnSmallSceneTimeChange, !next, 1, max);
 
-            that.splatMesh.fire(SplatUpdateFlagValue, (fvHide << 16) | fvShow);
+            that.splatMesh.fire(SplatUpdateFlagValue, fvHide, fvShow);
             handleSetTimeout = setTimeout(() => fire(OnSmallSceneTimeChange, next, fvShow, next ? fvShow * 2 : fvShow / 2), 6 * 1000);
         });
         // ------------------------------------------
