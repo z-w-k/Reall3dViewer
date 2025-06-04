@@ -30,11 +30,6 @@ export interface SplatMeshOptions {
     controls?: OrbitControls;
 
     /**
-     * 模型矩阵
-     */
-    matrix?: Matrix4;
-
-    /**
      * 渲染器事件管理器
      */
     viewerEvents?: Events;

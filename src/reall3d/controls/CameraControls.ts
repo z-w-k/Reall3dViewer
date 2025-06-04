@@ -21,6 +21,7 @@ export class CameraControls extends OrbitControls {
     }
 
     public updateByOptions(opts: Reall3dViewerOptions = {}) {
+        if (!opts) return;
         const that = this;
 
         opts.enableDamping !== undefined && (that.enableDamping = opts.enableDamping);
@@ -40,8 +41,6 @@ export class CameraControls extends OrbitControls {
         opts.lookAt && that.target.fromArray(opts.lookAt);
         opts.lookUp && that.object.up.fromArray(opts.lookUp);
 
-        // @ts-ignore
-        isMobile && that._dollyOut?.(0.75); // 手机适当缩小
         that.updateRotateAxis();
         that.update();
     }

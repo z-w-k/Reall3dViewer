@@ -17,6 +17,9 @@ interface SplatTexdata {
     textureReady?: boolean;
     /** 纹理数据就绪时间点 */
     textureReadyTime?: number;
+    /** 是否渲染中的活动状态 */
+    active?: boolean;
+    activeTime?: number;
 
     /** 包围盒极限点 */
     minX?: number;

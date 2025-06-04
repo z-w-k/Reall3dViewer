@@ -2,7 +2,7 @@
 // Copyright (c) 2025 reall3d.com, MIT license
 // ==============================================
 import '../style/style.less';
-import { Scene, AmbientLight, WebGLRenderer, Color } from 'three';
+import { Scene, AmbientLight, WebGLRenderer, Color, Matrix4 } from 'three';
 import {
     GetCurrentDisplayShDegree,
     GetModelShDegree,
@@ -56,6 +56,11 @@ import {
     PrintInfo,
     GetSplatMesh,
     FlySavePositions,
+    GetMeta,
+    OnSmallSceneTimeChange,
+    SplatUpdateFlagValue,
+    OnLoadAndRenderObj,
+    GetMetaMatrix,
 } from '../events/EventConstants';
 import { SplatMesh } from '../meshs/splatmesh/SplatMesh';
 import { ModelOptions } from '../modeldata/ModelOptions';
@@ -85,6 +90,7 @@ export class Reall3dViewer {
     private splatMesh: SplatMesh;
     private events: Events;
     private updateTime: number = 0;
+    private metaMatrix: Matrix4;
 
     public needUpdate: boolean = true;
 
@@ -114,6 +120,7 @@ export class Reall3dViewer {
         const on = (key: number, fn?: Function, multiFn?: boolean): Function | Function[] => events.on(key, fn, multiFn);
         const fire = (key: number, ...args: any): any => events.fire(key, ...args);
 
+        on(GetMetaMatrix, () => that.metaMatrix);
         on(GetOptions, () => opts);
         on(GetCanvas, () => renderer.domElement);
         on(GetRenderer, () => renderer);
@@ -187,10 +194,23 @@ export class Reall3dViewer {
             that.splatMesh.fire(SetGaussianText, watermark, true); // 水印文字水平朝向
         });
         on(GetCachedWaterMark, () => watermark);
-
         fire(Information, { scale: `1 : ${fire(GetOptions).meterScale} m` });
 
         that.initGsApi();
+
+        // -------- 以下动作应考虑支持自定义 --------
+        let handleSetTimeout: any;
+        on(OnSmallSceneTimeChange, (next: boolean = true, fvHide: number = 1, fvShow: number = 2) => {
+            handleSetTimeout && clearTimeout(handleSetTimeout);
+            handleSetTimeout = null;
+            const max = 16;
+            if (fvShow > max && next) return fire(OnSmallSceneTimeChange, next, max, 1);
+            if (fvShow < 1 && !next) return fire(OnSmallSceneTimeChange, !next, 1, max);
+
+            that.splatMesh.fire(SplatUpdateFlagValue, (fvHide << 16) | fvShow);
+            handleSetTimeout = setTimeout(() => fire(OnSmallSceneTimeChange, next, fvShow, next ? fvShow * 2 : fvShow / 2), 6 * 1000);
+        });
+        // ------------------------------------------
     }
 
     /**
@@ -208,7 +228,8 @@ export class Reall3dViewer {
             let file = e.dataTransfer.files[0];
             if (!file) return;
 
-            let format: 'ply' | 'splat' | 'spx' | 'spz';
+            let format: 'ply' | 'splat' | 'spx' | 'spz' | 'obj';
+            let isSceneJson = false;
             if (file.name.endsWith('.spx')) {
                 format = 'spx';
             } else if (file.name.endsWith('.splat')) {
@@ -217,22 +238,27 @@ export class Reall3dViewer {
                 format = 'ply';
             } else if (file.name.endsWith('.spz')) {
                 format = 'spz';
+            } else if (file.name.endsWith('.obj')) {
+                format = 'obj';
+            } else if (file.name.endsWith('.scene.json')) {
+                isSceneJson = true;
             } else {
                 return console.error('unsupported format:', file.name);
             }
 
             const url = URL.createObjectURL(file);
-
             const opts: Reall3dViewerOptions = that.events.fire(GetOptions);
             opts.bigSceneMode = false;
             opts.pointcloudMode = true;
-            opts.autoRotate = true;
             opts.debugMode = true;
+            opts.autoRotate = format !== 'obj';
             that.reset(opts);
-            setTimeout(async () => {
+            if (isSceneJson) {
+                await that.addScene(url);
+            } else {
                 await that.addModel({ url, format });
-                URL.revokeObjectURL(url);
-            });
+            }
+            URL.revokeObjectURL(url);
         });
     }
 
@@ -358,8 +384,7 @@ export class Reall3dViewer {
         }
 
         if (!meta.url) return console.error('missing model file url');
-        if (!meta.url.endsWith('.bin') && !meta.url.endsWith('.spx'))
-            return console.error('The format is unsupported in the large scene mode', meta.url);
+        if (!meta.url.endsWith('.spx')) return console.error('The format is unsupported in the large scene mode', meta.url);
 
         // 重置
         const opts: Reall3dViewerOptions = { ...meta, ...(meta.cameraInfo || {}) };
@@ -368,6 +393,7 @@ export class Reall3dViewer {
         that.reset({ ...opts });
 
         !opts.bigSceneMode && delete meta.autoCut; // 小场景或没有配置成切割多块，都不支持切割
+        that.metaMatrix = meta.transform ? new Matrix4().fromArray(meta.transform) : null;
 
         // 按元数据调整更新相机、标注等信息
         that.splatMesh.meta = meta;
@@ -393,6 +419,7 @@ export class Reall3dViewer {
     public async addModel(urlOpts: string | ModelOptions): Promise<void> {
         const that = this;
         if (that.disposed) return;
+        const on = (key: number, fn?: Function, multiFn?: boolean): Function | Function[] => this.events.on(key, fn, multiFn);
         const fire = (key: number, ...args: any): any => that.events.fire(key, ...args);
 
         // 参数整理
@@ -441,18 +468,31 @@ export class Reall3dViewer {
                 modelOpts.format = 'ply';
             } else if (modelOpts.url.endsWith('.spz')) {
                 modelOpts.format = 'spz';
+            } else if (modelOpts.url.endsWith('.obj')) {
+                modelOpts.format = 'obj';
             } else {
                 console.error('unknow format!', modelOpts.url);
                 return;
             }
         }
 
+        on(GetMeta, () => meta);
+        that.metaMatrix = meta.transform ? new Matrix4().fromArray(meta.transform) : null;
+
         // 按元数据调整更新相机、标注等信息
         fire(LoadSmallSceneMetaData, meta);
 
         // 加载模型
-        await that.splatMesh.addModel(modelOpts, meta);
-        await fire(OnSetWaterMark, meta.watermark);
+        if (modelOpts.format === 'obj') {
+            this.options({ autoRotate: false });
+            await fire(OnLoadAndRenderObj, modelOpts.url);
+        } else {
+            this.splatMesh.addModel(modelOpts, meta);
+            await fire(OnSetWaterMark, meta.watermark);
+        }
+
+        // @ts-ignore
+        isMobile && fire(GetControls)._dollyOut?.(0.75); // 手机适当缩小
     }
 
     /**

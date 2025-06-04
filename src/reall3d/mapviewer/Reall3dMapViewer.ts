@@ -41,7 +41,7 @@ import { setupRaycaster } from '../raycaster/SetupRaycaster';
 import { setupMark } from '../meshs/mark/SetupMark';
 import { CSS3DRenderer } from 'three/examples/jsm/Addons.js';
 import { WarpSplatMesh } from './warpsplatmesh/WarpSplatMesh';
-import { ViewerVersion } from '../utils/consts/GlobalConstants';
+import { isMobile, ViewerVersion } from '../utils/consts/GlobalConstants';
 import * as tt from '@gotoeasy/three-tile';
 
 /**
@@ -101,6 +101,8 @@ export class Reall3dMapViewer extends EventDispatcher<tt.plugin.GLViewerEventMap
         window.addEventListener('resize', that.resize.bind(that));
         that.resize();
         that.renderer.setAnimationLoop(that.animate.bind(that));
+        // @ts-ignore
+        isMobile && that.controls._dollyOut?.(0.75); // 手机适当缩小
 
         on(ViewerDispose, () => that.dispose());
 

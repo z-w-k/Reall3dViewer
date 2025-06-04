@@ -23,7 +23,7 @@ if (url) {
     debugMode && initDevMode(true);
 } else {
     viewer = new Reall3dViewer({ debugMode: true, maxRenderCountOfPc, shDegree });
-    viewer.addModel(`https://reall3d.com/demo-models/hornedlizard.spx`);
+    viewer.addModel(`https://reall3d.com/demo-models/ppt.spx`); // hornedlizard
 
     initDevMode();
 }
@@ -84,9 +84,6 @@ function fnClick(className: string) {
         viewer = viewer || new Reall3dViewer({ debugMode: true, maxRenderCountOfPc, shDegree });
         viewer.reset({ debugMode: true });
         setTimeout(() => viewer.addModel(`https://reall3d.com/demo-models/bzg.spx`), 50); // Let it GC
-    } else if (className == 'big-lod') {
-        // TODO 大场景LOD，重构改进使用spx
-        // setTimeout(() => viewer.addScene(`https://reall3d.com/demo-models/lod-demo-spx.scene.json`), 50); // Let it GC
     } else if (className == 'switch-rotate') {
         let opts: Reall3dViewerOptions = viewer?.options();
         viewer?.options({ autoRotate: !opts.autoRotate });

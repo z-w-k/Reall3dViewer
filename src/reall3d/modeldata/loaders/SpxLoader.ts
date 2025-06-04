@@ -83,6 +83,7 @@ export async function loadSpx(model: SplatModel) {
                 model.modelSplatCount = header.SplatCount;
                 model.dataShDegree = header.ShDegree;
                 model.aabbCenter = new Vector3((header.MinX + header.MaxX) / 2, (header.MinY + header.MaxY) / 2, (header.MinZ + header.MaxZ) / 2);
+                model.metaMatrix && model.aabbCenter.applyMatrix4(model.metaMatrix);
                 headChunks = null;
                 headChunk = null;
 
@@ -208,7 +209,7 @@ export async function loadSpx(model: SplatModel) {
         }
     } catch (e) {
         if (e.name === 'AbortError') {
-            console.log('Fetch Abort', model.opts.url);
+            console.warn('Fetch Abort', model.opts.url);
             model.status === ModelStatus.Fetching && (model.status = ModelStatus.FetchAborted);
         } else {
             console.error(e);
@@ -296,9 +297,8 @@ function setBlockSplatData(model: SplatModel, data: Uint8Array) {
             cut.maxY = y;
             cut.minZ = z;
             cut.maxZ = z;
-            cut.centerX = x;
-            cut.centerY = y;
-            cut.centerZ = z;
+            cut.center = new Vector3(x, y, z);
+            model.metaMatrix && cut.center.applyMatrix4(model.metaMatrix);
             cut.radius = 0;
             cut.splatData = new Uint8Array(stepCnt * SplatDataSize32);
             cut.splatData.set(data.slice(i * SplatDataSize32, i * SplatDataSize32 + SplatDataSize32), 0);
@@ -318,13 +318,13 @@ function setBlockSplatData(model: SplatModel, data: Uint8Array) {
             cut.maxY = Math.max(cut.maxY, y);
             cut.minZ = Math.min(cut.minZ, z);
             cut.maxZ = Math.max(cut.maxZ, z);
-            cut.centerX = (cut.maxX + cut.minX) / 2;
-            cut.centerY = (cut.maxY + cut.minY) / 2;
-            cut.centerZ = (cut.maxZ + cut.minZ) / 2;
+            cut.center = new Vector3((cut.maxX + cut.minX) / 2, (cut.maxY + cut.minY) / 2, (cut.maxZ + cut.minZ) / 2);
+            model.metaMatrix && cut.center.applyMatrix4(model.metaMatrix);
             const sizeX = cut.maxX - cut.minX;
             const sizeY = cut.maxY - cut.minY;
             const sizeZ = cut.maxZ - cut.minZ;
             cut.radius = Math.sqrt(sizeX * sizeX + sizeY * sizeY + sizeZ * sizeZ) / 2;
+            model.metaMatrix && (cut.radius *= model.metaMatrix.getMaxScaleOnAxis());
             cut.splatData.set(data.slice(i * SplatDataSize32, i * SplatDataSize32 + SplatDataSize32), cut.splatCount++ * SplatDataSize32);
         }
         model.dataSplatCount++;

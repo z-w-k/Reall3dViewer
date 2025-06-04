@@ -1,7 +1,7 @@
 // ==============================================
 // Copyright (c) 2025 reall3d.com, MIT license
 // ==============================================
-import { Vector3 } from 'three';
+import { Matrix4, Vector3, Vector4 } from 'three';
 import {
     OnFetchStart,
     SplatTexdataManagerDispose,
@@ -27,17 +27,22 @@ import {
     GetModelShDegree,
     SplatUpdateShDegree,
     GetAabbCenter,
+    UploadSplatTextureDone,
+    GetViewProjectionMatrix,
+    GetCameraPosition,
+    GetCameraLookAt,
+    IsCameraChangedNeedUpdate,
 } from '../events/EventConstants';
 import { Events } from '../events/Events';
-import { MetaData, ModelStatus, SplatModel } from './ModelData';
+import { CutData, MetaData, ModelStatus, SplatModel } from './ModelData';
 import { ModelOptions } from './ModelOptions';
-import { loadSplat } from './loaders/SplatLoader';
-import { isMobile, MobileDownloadLimitSplatCount, PcDownloadLimitSplatCount } from '../utils/consts/GlobalConstants';
-import { isNeedReload } from '../utils/CommonUtils';
-import { loadSpx } from './loaders/SpxLoader';
-import { SplatMeshOptions } from '../meshs/splatmesh/SplatMeshOptions';
 import { loadPly } from './loaders/PlyLoader';
+import { loadSplat } from './loaders/SplatLoader';
+import { loadSpx } from './loaders/SpxLoader';
 import { loadSpz } from './loaders/SpzLoader';
+import { isNeedReload } from '../utils/CommonUtils';
+import { SplatMeshOptions } from '../meshs/splatmesh/SplatMeshOptions';
+import { isMobile, MobileDownloadLimitSplatCount, PcDownloadLimitSplatCount } from '../utils/consts/GlobalConstants';
 
 export function setupSplatTextureManager(events: Events) {
     const on = (key: number, fn?: Function, multiFn?: boolean): Function | Function[] => events.on(key, fn, multiFn);
@@ -66,6 +71,7 @@ export function setupSplatTextureManager(events: Events) {
         }
         return rs;
     });
+
     on(GetShTexheight, async (shDegree: number): Promise<number> => {
         const opts: SplatMeshOptions = fire(GetOptions);
         if (opts.bigSceneMode) return 1; // 大场景不支持
@@ -104,6 +110,18 @@ export function setupSplatTextureManager(events: Events) {
             splatModel && (splatModel.textWatermarkVersion = Date.now());
         } catch (e) {
             console.info('failed to generate watermark');
+        }
+    });
+
+    on(UploadSplatTextureDone, (index: number) => {
+        if (isBigSceneMode) {
+            if (index) {
+                !texture1.active && (texture1.activeTime = Date.now());
+                texture1.active = true;
+            } else {
+                !texture0.active && (texture0.activeTime = Date.now());
+                texture0.active = true;
+            }
         }
     });
 
@@ -153,12 +171,12 @@ export function setupSplatTextureManager(events: Events) {
         if (mergeRunning) return;
         mergeRunning = true;
         setTimeout(async () => {
-            await mergeAndUploadTextureData(downloadDone);
+            isBigSceneMode ? await mergeAndUploadLargeSceneData(downloadDone) : await mergeAndUploadSmallSceneData(downloadDone);
             mergeRunning = false;
         });
     }
 
-    async function mergeAndUploadTextureData(downloadDone: boolean) {
+    async function mergeAndUploadSmallSceneData(downloadDone: boolean) {
         if (disposed) return;
         const texture = texture0;
         const maxRenderCount = await fire(GetMaxRenderCount);
@@ -245,6 +263,195 @@ export function setupSplatTextureManager(events: Events) {
         fire(Information, { renderSplatCount: splatModel.renderSplatCount });
     }
 
+    async function mergeAndUploadLargeSceneData(downloadDone: boolean) {
+        if (disposed) return;
+
+        const maxRenderCount = await fire(GetMaxRenderCount);
+        const texwidth = 1024 * 2;
+        const texheight = Math.ceil((2 * maxRenderCount) / texwidth);
+        const txtWatermarkData = textWatermarkData;
+        const watermarkCount = 0; // model.watermarkCount; // 待合并的水印数（模型数据部分）
+        const textWatermarkCount = (txtWatermarkData?.byteLength || 0) / 32; // 待合并的水印数（可动态变化的文字水印部分）
+        const maxDataMergeCount = maxRenderCount - watermarkCount - textWatermarkCount; // 最大数据合并点数
+
+        fire(Information, { modelSplatCount: splatModel.downloadSplatCount + textWatermarkCount });
+
+        let texture: SplatTexdata = texture0.version <= texture1.version ? texture0 : texture1;
+        if (texture0.version && ((!texture.index && !texture1.active) || (texture.index && !texture0.active))) return; // 待渲染
+        if (Date.now() - texture.activeTime < (isMobile ? 400 : 200)) return;
+
+        if (downloadDone) {
+            // 文件下载完，相机没有变化，不必重复刷数据
+            const ve = (fire(GetOptions) as SplatMeshOptions).viewerEvents;
+            if (ve && !ve.fire(IsCameraChangedNeedUpdate)) return;
+        }
+
+        if (!texture.version) {
+            let ver: string = splatModel.opts.format;
+            if (splatModel.opts.format == 'spx') {
+                ver = 'spx' + (splatModel.header.ExclusiveId ? (' ' + splatModel.header.ExclusiveId).substring(0, 6) : '');
+            }
+            fire(Information, { scene: `large (${ver})` }); // 初次提示场景模型版本
+        }
+
+        const sysTime = Date.now();
+        texture.version = sysTime;
+        texture.active = false;
+
+        // 计算合并
+        let currentTotalVisibleCnt = 0; // 当前可见块的总数据点数
+        const cuts: CutData[] = [];
+        const viewProjMatrix: Matrix4 = fire(GetViewProjectionMatrix);
+        const cameraPosition: Vector3 = fire(GetCameraPosition);
+        const cameraTarget: Vector3 = fire(GetCameraLookAt);
+        for (const cut of splatModel.map.values()) {
+            if (checkCutDataVisible(viewProjMatrix, cameraPosition, cameraTarget, cut)) {
+                cuts.push(cut);
+                cut.currentRenderCnt = cut.splatCount;
+                currentTotalVisibleCnt += cut.splatCount;
+            }
+        }
+
+        fire(Information, { cuts: `${cuts.length} / ${splatModel.map.size}` });
+
+        const perLimit = Math.min(maxDataMergeCount / currentTotalVisibleCnt, 1); // 最大不超100%
+        if (perLimit > 0.95) {
+            // 最大合并数占比大于95%时按比例简化概算
+            for (const cut of cuts) cut.currentRenderCnt = (cut.splatCount * perLimit) | 0;
+        } else {
+            // 占比较小时按距离计算
+            cuts.sort((a, b) => a.distance - b.distance);
+            // 微调
+            for (const cut of cuts) {
+                if (cut.distance < 5) {
+                    cut.distance *= 0.5;
+                } else if (cut.distance < 4) {
+                    cut.distance *= 0.4;
+                } else if (cut.distance < 3) {
+                    cut.distance *= 0.3;
+                } else if (cut.distance < 2) {
+                    cut.distance *= 0.1;
+                }
+            }
+            // 分配
+            allocatePoints(cuts, maxDataMergeCount);
+
+            // 检查、调整
+            let totalCurrentRenderCnt = 0;
+            for (let cut of cuts) totalCurrentRenderCnt += cut.currentRenderCnt;
+
+            if (totalCurrentRenderCnt > maxDataMergeCount) {
+                // 检查
+                let delCnt = totalCurrentRenderCnt - maxDataMergeCount;
+                for (let i = cuts.length - 1; i >= 0; i--) {
+                    if (delCnt <= 0) break;
+                    const cut = cuts[i];
+                    if (cut.currentRenderCnt >= delCnt) {
+                        cut.currentRenderCnt -= delCnt;
+                        delCnt = 0;
+                    } else {
+                        delCnt -= cut.currentRenderCnt;
+                        cut.currentRenderCnt = 0;
+                    }
+                }
+            } else if (totalCurrentRenderCnt < maxDataMergeCount) {
+                // 调整
+                let addCnt = maxDataMergeCount - totalCurrentRenderCnt;
+                for (let i = 0; i < cuts.length; i++) {
+                    if (addCnt <= 0) break;
+                    let cut = cuts[i];
+                    if (cut.splatCount > cut.currentRenderCnt) {
+                        if (cut.splatCount - cut.currentRenderCnt >= addCnt) {
+                            cut.currentRenderCnt += addCnt;
+                            addCnt = 0;
+                        } else {
+                            const add = cut.splatCount - cut.currentRenderCnt;
+                            cut.currentRenderCnt += add;
+                            addCnt -= add;
+                        }
+                    }
+                }
+            }
+        }
+
+        // 合并
+        const ui32s = new Uint32Array(texwidth * texheight * 4);
+        const f32s = new Float32Array(ui32s.buffer);
+        const mergeSplatData = new Uint8Array(ui32s.buffer);
+        let mergeDataCount = 0;
+        for (let cut of cuts) {
+            mergeSplatData.set(cut.splatData.slice(0, cut.currentRenderCnt * 32), mergeDataCount * 32);
+            mergeDataCount += cut.currentRenderCnt;
+        }
+        if (watermarkCount) {
+            mergeSplatData.set(splatModel.watermarkData.slice(0, watermarkCount * 32), mergeDataCount * 32);
+        }
+        if (textWatermarkCount) {
+            mergeSplatData.set(txtWatermarkData.slice(0, textWatermarkCount * 32), (mergeDataCount + watermarkCount) * 32);
+        }
+
+        // 保险起见以最终数据数量为准
+        const totalRenderSplatCount = mergeDataCount + watermarkCount + textWatermarkCount;
+        const xyz = new Float32Array(totalRenderSplatCount * 3);
+        for (let i = 0, n = 0; i < totalRenderSplatCount; i++) {
+            xyz[i * 3] = f32s[i * 8];
+            xyz[i * 3 + 1] = f32s[i * 8 + 1];
+            xyz[i * 3 + 2] = f32s[i * 8 + 2];
+        }
+
+        texture.txdata = ui32s;
+        texture.xyz = xyz;
+        texture.renderSplatCount = totalRenderSplatCount;
+        texture.visibleSplatCount = currentTotalVisibleCnt + splatModel.watermarkCount + textWatermarkCount;
+        texture.modelSplatCount = splatModel.downloadSplatCount + textWatermarkCount;
+        texture.watermarkCount = watermarkCount + textWatermarkCount;
+        texture.minX = splatModel.header.MinX;
+        texture.maxX = splatModel.header.MaxX;
+        texture.minY = splatModel.header.MinY;
+        texture.maxY = splatModel.header.MaxY;
+        texture.minZ = splatModel.header.MinZ;
+        texture.maxZ = splatModel.header.MaxZ;
+
+        fire(UploadSplatTexture, texture);
+        lastPostDataTime = sysTime;
+
+        fire(Information, { visibleSplatCount: texture.visibleSplatCount, modelSplatCount: texture.modelSplatCount });
+    }
+
+    function allocatePoints(cuts: CutData[], maxPoints: number): void {
+        const weights = cuts.map(cut => 1 / (cut.distance + 1e-6));
+        const totalWeight = weights.reduce((sum, weight) => sum + weight, 0);
+        let totalRenderSplatCount = 0;
+        cuts.forEach((cut, index) => {
+            cut.currentRenderCnt = Math.min(Math.floor((weights[index] / totalWeight) * maxPoints), cut.splatCount);
+            totalRenderSplatCount += cut.currentRenderCnt;
+        });
+        if (totalRenderSplatCount < maxPoints) {
+            const remainingPoints = maxPoints - totalRenderSplatCount;
+            const remainingWeights = cuts.map((cut, index) => (cut.currentRenderCnt < cut.splatCount ? weights[index] : 0));
+            const remainingTotalWeight = remainingWeights.reduce((sum, weight) => sum + weight, 0);
+
+            cuts.forEach((cut, index) => {
+                if (remainingTotalWeight > 0 && cut.currentRenderCnt < cut.splatCount) {
+                    const additionalPoints = Math.min(
+                        Math.floor((remainingWeights[index] / remainingTotalWeight) * remainingPoints),
+                        cut.splatCount - cut.currentRenderCnt,
+                    );
+                    cut.currentRenderCnt += additionalPoints;
+                }
+            });
+        }
+    }
+
+    function checkCutDataVisible(viewProjMatrix: Matrix4, cameraPosition: Vector3, cameraTarget: Vector3, cut: CutData): boolean {
+        cut.distance = Math.max(cut.center.distanceTo(cameraPosition) - cut.radius, 0);
+        if (!cut.distance || cut.center.distanceTo(cameraTarget) <= 2 * cut.radius) return true;
+
+        const pos2d = new Vector4(cut.center.x, cut.center.y, cut.center.z, 1).applyMatrix4(viewProjMatrix);
+        const clip = 3 * pos2d.w;
+        return !(pos2d.z < -clip || pos2d.x < -clip || pos2d.x > clip || pos2d.y < -clip || pos2d.y > clip);
+    }
+
     function dispose() {
         if (disposed) return;
         disposed = true;
@@ -313,6 +520,7 @@ export function setupSplatTextureManager(events: Events) {
             return;
         }
         fire(OnFetchStart);
+        fire(Information, { cuts: `` });
     }
 
     on(SplatTexdataManagerAddModel, async (opts: ModelOptions, meta: MetaData) => await add(opts, meta));

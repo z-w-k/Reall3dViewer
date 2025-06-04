@@ -16,6 +16,7 @@ import {
     UnsignedIntType,
     Vector2,
     Vector4,
+    WebGLProgramParametersWithUniforms,
 } from 'three';
 import { Events } from '../../events/Events';
 import {
@@ -27,6 +28,7 @@ import {
     SplatUpdateSh3Texture,
     SplatUpdateShDegree,
     UploadSplatTexture,
+    UploadSplatTextureDone,
     NotifyViewerNeedUpdate,
     SplatUpdateViewport,
     GetSplatMaterial,
@@ -66,6 +68,8 @@ import {
     SplatUpdateShowWaterMark,
     FlyOnce,
     SplatUpdateDebugEffect,
+    SplatUpdateFlagValue,
+    OnSmallSceneTimeChange,
 } from '../../events/EventConstants';
 import { SplatMeshOptions } from './SplatMeshOptions';
 import {
@@ -75,9 +79,11 @@ import {
     VarCurrentLightRadius,
     VarCurrentVisibleRadius,
     VarDebugEffect,
+    VarFlagValue,
     VarFocal,
     VarLightFactor,
     VarMarkPoint,
+    VarPerformanceAct,
     VarPerformanceNow,
     VarPointMode,
     VarShDegree,
@@ -124,6 +130,11 @@ export function setupSplatMesh(events: Events) {
     let currentDisplayShDegree: number = 0;
     on(GetCurrentDisplayShDegree, () => currentDisplayShDegree);
 
+    on(SplatGeometryDispose, () => {}, true);
+    on(SplatMaterialDispose, () => {}, true);
+    on(SplatUpdateFocal, () => {}, true);
+    on(SplatUpdateViewport, () => {}, true);
+
     on(CreateSplatGeometry, async () => {
         const baseGeometry = new InstancedBufferGeometry();
         baseGeometry.setIndex([0, 1, 2, 0, 2, 3]);
@@ -147,22 +158,30 @@ export function setupSplatMesh(events: Events) {
         geometry.setAttribute(VarSplatIndex, indexAttribute);
         geometry.instanceCount = 0;
 
-        on(SplatUpdateSplatIndex, (datas: Uint32Array, index: number, sortTime: number, sortStartTime: number) => {
+        on(SplatUpdateSplatIndex, (datas: Uint32Array, index: number, sortTime: number, sortStartTime: number, renderSplatCount: number) => {
             fire(SplatUpdateUsingIndex, index);
             indexArray.set(datas, 0);
             indexAttribute.clearUpdateRanges();
             indexAttribute.addUpdateRange(0, datas.length);
             indexAttribute.needsUpdate = true;
+            indexAttribute.onUpload(() => {
+                fire(UploadSplatTextureDone, index);
+                fire(Information, { renderSplatCount });
+            });
             geometry.instanceCount = datas.length;
             fire(NotifyViewerNeedUpdate);
             fire(Information, { sortTime: `${sortTime} / ${Date.now() - sortStartTime}` });
         });
 
         on(GetSplatGeometry, () => geometry);
-        on(SplatGeometryDispose, () => {
-            indexAttribute.array = null;
-            geometry.dispose();
-        });
+        on(
+            SplatGeometryDispose,
+            () => {
+                indexAttribute.array = null;
+                geometry.dispose();
+            },
+            true,
+        );
 
         return geometry;
     });
@@ -277,22 +296,30 @@ export function setupSplatMesh(events: Events) {
 
         on(GetSplatMaterial, () => material);
 
-        on(SplatUpdateFocal, () => {
-            const camera: PerspectiveCamera = fire(GetCamera);
-            const { width, height } = fire(GetCanvasSize);
-            const fx = Math.abs(camera.projectionMatrix.elements[0]) * 0.5 * width;
-            const fy = Math.abs(camera.projectionMatrix.elements[5]) * 0.5 * height;
-            const material: ShaderMaterial = fire(GetSplatMaterial);
-            material.uniforms[VarFocal].value.set(fx, fy);
-            material.uniformsNeedUpdate = true;
-            fire(NotifyViewerNeedUpdate);
-        });
-        on(SplatUpdateViewport, () => {
-            const { width, height } = fire(GetCanvasSize);
-            material.uniforms[VarViewport].value.set(width, height);
-            material.uniformsNeedUpdate = true;
-            fire(NotifyViewerNeedUpdate);
-        });
+        on(
+            SplatUpdateFocal,
+            () => {
+                const camera: PerspectiveCamera = fire(GetCamera);
+                const { width, height } = fire(GetCanvasSize);
+                const fx = Math.abs(camera.projectionMatrix.elements[0]) * 0.5 * width;
+                const fy = Math.abs(camera.projectionMatrix.elements[5]) * 0.5 * height;
+                const material: ShaderMaterial = fire(GetSplatMaterial);
+                material.uniforms[VarFocal].value.set(fx, fy);
+                material.uniformsNeedUpdate = true;
+                fire(NotifyViewerNeedUpdate);
+            },
+            true,
+        );
+        on(
+            SplatUpdateViewport,
+            () => {
+                const { width, height } = fire(GetCanvasSize);
+                material.uniforms[VarViewport].value.set(width, height);
+                material.uniformsNeedUpdate = true;
+                fire(NotifyViewerNeedUpdate);
+            },
+            true,
+        );
         on(SplatUpdateUsingIndex, (index: number) => {
             material.uniforms[VarUsingIndex].value = index;
             material.uniformsNeedUpdate = true;
@@ -301,17 +328,17 @@ export function setupSplatMesh(events: Events) {
         on(SplatUpdatePointMode, (isPointcloudMode: boolean) => {
             const opts: SplatMeshOptions = fire(GetOptions);
             isPointcloudMode === undefined && (isPointcloudMode = !opts.pointcloudMode);
-            material.uniforms[VarPointMode].value = isPointcloudMode ? 1 : 0;
+            material.uniforms[VarPointMode].value = isPointcloudMode;
             material.uniformsNeedUpdate = true;
             opts.pointcloudMode = isPointcloudMode;
             fire(NotifyViewerNeedUpdate);
             opts.viewerEvents && (opts.viewerEvents.fire(GetOptions).pointcloudMode = isPointcloudMode);
         });
-        on(SplatUpdateBigSceneMode, (isbigSceneMode: boolean) => {
-            material.uniforms[VarBigSceneMode].value = isbigSceneMode ? 1 : 0;
+        on(SplatUpdateBigSceneMode, (isBigSceneMode: boolean) => {
+            material.uniforms[VarBigSceneMode].value = isBigSceneMode;
             material.uniformsNeedUpdate = true;
             const opts: SplatMeshOptions = fire(GetOptions);
-            opts.bigSceneMode = isbigSceneMode;
+            opts.bigSceneMode = isBigSceneMode;
             fire(NotifyViewerNeedUpdate);
         });
         on(SplatUpdateLightFactor, (value: number) => {
@@ -346,7 +373,7 @@ export function setupSplatMesh(events: Events) {
             fire(NotifyViewerNeedUpdate);
         });
         on(SplatUpdateShowWaterMark, (show: boolean = true) => {
-            material.uniforms[VarShowWaterMark].value = !!show ? 1 : 0;
+            material.uniforms[VarShowWaterMark].value = show;
             material.uniformsNeedUpdate = true;
             fire(NotifyViewerNeedUpdate);
         });
@@ -354,7 +381,7 @@ export function setupSplatMesh(events: Events) {
             material.uniforms[VarPerformanceNow].value = value;
             material.uniformsNeedUpdate = true;
         });
-        on(SplatUpdateDebugEffect, (value: number) => {
+        on(SplatUpdateDebugEffect, (value: boolean) => {
             material.uniforms[VarDebugEffect].value = value;
             material.uniformsNeedUpdate = true;
         });
@@ -369,13 +396,23 @@ export function setupSplatMesh(events: Events) {
             fire(Information, { shDegree: `${value} / max ${modelShDegree}` });
             fire(NotifyViewerNeedUpdate);
         });
-        on(SplatMaterialDispose, () => {
-            material.dispose();
-            dataTexture0 && dataTexture0.dispose();
-            dataTexture1 && dataTexture1.dispose();
-            dataTextureSh12 && dataTextureSh12.dispose();
-            dataTextureSh3 && dataTextureSh3.dispose();
+        on(SplatUpdateFlagValue, (value: number) => {
+            material.uniforms[VarFlagValue].value = value;
+            material.uniforms[VarPerformanceAct].value = performance.now();
+            material.uniformsNeedUpdate = true;
+            fire(NotifyViewerNeedUpdate);
         });
+        on(
+            SplatMaterialDispose,
+            () => {
+                material.dispose();
+                dataTexture0 && dataTexture0.dispose();
+                dataTexture1 && dataTexture1.dispose();
+                dataTextureSh12 && dataTextureSh12.dispose();
+                dataTextureSh3 && dataTextureSh3.dispose();
+            },
+            true,
+        );
 
         return material;
     });
@@ -428,6 +465,7 @@ export function setupSplatMesh(events: Events) {
                     fire(IsPointcloudMode) && fire(SplatMeshSwitchDisplayMode, true);
                     fire(SplatUpdateCurrentVisibleRadius, 0);
                     stop = true;
+                    setTimeout(() => fire(GetOptions)?.viewerEvents?.fire(OnSmallSceneTimeChange), 5000);
                 } else if (isDataAllReay && visibleRate > 0.7) {
                     stepRate = Math.min(stepRate * 1.2, 0.3);
                 } else if (isDataAllReay && visibleRate > 0.5) {
@@ -464,8 +502,8 @@ export function setupSplatMesh(events: Events) {
                     switchProcess.stop = true; // 主动完成
                     arySwitchProcess.length === 1 && arySwitchProcess[0] === switchProcess && arySwitchProcess.pop();
 
-                    showMark && fire(GetOptions)?.viewerEvents?.fire(MarkUpdateVisible);
-                    fire(GetOptions)?.viewerEvents?.fire(FlyOnce);
+                    showMark && fire(GetOptions).viewerEvents?.fire(MarkUpdateVisible);
+                    fire(GetOptions).viewerEvents?.fire(FlyOnce);
                 } else if (switchProcess.currentLightRadius / maxRadius < 0.4) {
                     switchProcess.stepRate = Math.min(switchProcess.stepRate * 1.02, 0.03); // 前半圈提速并限速
                 } else {
@@ -485,9 +523,9 @@ export function setupSplatMesh(events: Events) {
             [VarFocal]: { type: 'v2', value: new Vector2() },
             [VarViewport]: { type: 'v2', value: new Vector2() },
             [VarUsingIndex]: { type: 'int', value: 0 },
-            [VarPointMode]: { type: 'int', value: 0 },
-            [VarDebugEffect]: { type: 'int', value: 1 },
-            [VarBigSceneMode]: { type: 'int', value: 0 },
+            [VarPointMode]: { type: 'bool', value: false },
+            [VarDebugEffect]: { type: 'bool', value: true },
+            [VarBigSceneMode]: { type: 'bool', value: false },
             [VarShDegree]: { type: 'int', value: 0 },
             [VarLightFactor]: { type: 'float', value: 1 },
             [VarTopY]: { type: 'float', value: 0 },
@@ -495,8 +533,10 @@ export function setupSplatMesh(events: Events) {
             [VarCurrentLightRadius]: { type: 'float', value: 0 },
             [VarMarkPoint]: { type: 'v4', value: new Vector4(0, 0, 0, -1) },
             [VarPerformanceNow]: { type: 'float', value: performance.now() },
+            [VarPerformanceAct]: { type: 'float', value: 0 },
             [VarWaterMarkColor]: { type: 'v4', value: new Vector4(1, 1, 0, 0.5) },
-            [VarShowWaterMark]: { type: 'int', value: 1 },
+            [VarShowWaterMark]: { type: 'bool', value: true },
+            [VarFlagValue]: { type: 'uint', value: 1 },
         };
     });
 

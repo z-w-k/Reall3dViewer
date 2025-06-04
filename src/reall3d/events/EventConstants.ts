@@ -351,6 +351,17 @@ export const GetCurrentDisplayShDegree = i++;
 export const GetAabbCenter = i++;
 /** 聚焦包围盒中心点 */
 export const FocusAabbCenter = i++;
+/** 渲染obj模型 */
+export const OnLoadAndRenderObj = i++;
+/** 取内存中的元数据 */
+export const GetMeta = i++;
+/** Splat更新标记 */
+export const SplatUpdateFlagValue = i++;
+/** 小场景开始时间变迁效果 */
+export const OnSmallSceneTimeChange = i++;
+
+/** 取元数据中配置的矩阵 */
+export const GetMetaMatrix = i++;
 
 /** 创建地图渲染器 */
 export const MapCreateRenderer = i++;

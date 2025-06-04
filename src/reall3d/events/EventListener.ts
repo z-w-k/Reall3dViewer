@@ -48,7 +48,7 @@ import {
     OnViewerUpdate,
     FocusAabbCenter,
     GetAabbCenter,
-    IsBigSceneMode,
+    FlySavePositions,
 } from './EventConstants';
 import { Reall3dViewerOptions } from '../viewer/Reall3dViewerOptions';
 import { SplatMesh } from '../meshs/splatmesh/SplatMesh';
@@ -170,6 +170,7 @@ export function setupEventListener(events: Events) {
             fire(ClearFlyPosition);
             keySet.clear();
         } else if (keySet.has('KeyY')) {
+            fire(FlySavePositions, false);
             fire(MetaSaveSmallSceneCameraInfo);
             keySet.clear();
         } else if (keySet.has('KeyI')) {
