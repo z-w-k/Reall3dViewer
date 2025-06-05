@@ -78,6 +78,12 @@ export async function loadSpx(model: SplatModel) {
                     console.error(`invalid spx format`);
                     continue;
                 }
+                if (model.meta.autoCut > 1 && !isLargeSpx(header)) {
+                    model.abortController.abort();
+                    model.status === ModelStatus.Fetching && (model.status = ModelStatus.Invalid);
+                    console.error(`invalid LOD format`);
+                    continue;
+                }
 
                 model.header = header;
                 model.modelSplatCount = header.SplatCount;
@@ -329,4 +335,9 @@ function setBlockSplatData(model: SplatModel, data: Uint8Array) {
         }
         model.dataSplatCount++;
     }
+}
+
+// Flag1 的左1位标识大场景
+function isLargeSpx(header: SpxHeader) {
+    return ((header?.Flag1 || 0) & 128) > 0;
 }

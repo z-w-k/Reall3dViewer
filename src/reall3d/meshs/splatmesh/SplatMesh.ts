@@ -43,7 +43,6 @@ import { initSplatMeshOptions } from '../../utils/ViewerUtils';
 import { setupCommonUtils } from '../../utils/CommonUtils';
 import { MetaData } from '../../modeldata/ModelData';
 import { setupSorter } from '../../sorter/SetupSorter';
-import { defineSplatShaderChunks } from './SplatShaderChunks';
 
 /**
  * Gaussian splatting mesh
@@ -65,7 +64,6 @@ export class SplatMesh extends Mesh {
         const events = new Events();
         const on = (key: number, fn?: Function, multiFn?: boolean): Function | Function[] => events.on(key, fn, multiFn);
         const fire = (key: number, ...args: any): any => events.fire(key, ...args);
-        defineSplatShaderChunks();
 
         const opts: SplatMeshOptions = initSplatMeshOptions(options); // 默认参数校验设定
         const camera = opts.controls.object as PerspectiveCamera;

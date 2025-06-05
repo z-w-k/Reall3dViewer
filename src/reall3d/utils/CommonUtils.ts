@@ -27,7 +27,6 @@ import {
 } from '../events/EventConstants';
 import { SplatMeshOptions } from '../meshs/splatmesh/SplatMeshOptions';
 import { ViewerVersion } from './consts/GlobalConstants';
-import { defineSplatShaderChunks } from '../meshs/splatmesh/SplatShaderChunks';
 
 export function setupCommonUtils(events: Events) {
     let disposed: boolean = false;
