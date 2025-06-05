@@ -78,6 +78,9 @@ export function setupMapUtils(events: Events) {
             child.isWarpSplatMesh && (child as WarpSplatMesh).splatMesh?.visible && warpMeshs.push(child);
         });
         warpMeshs.sort((a, b) => camera.position.distanceTo(a.position) - camera.position.distanceTo(b.position));
+        for (let i = 0; i < warpMeshs.length; i++) {
+            warpMeshs[i].splatMesh.boundBox.visible = i < 1;
+        }
         window['splat'] = warpMeshs[0]?.splatMesh;
         return warpMeshs[0]?.splatMesh;
     });

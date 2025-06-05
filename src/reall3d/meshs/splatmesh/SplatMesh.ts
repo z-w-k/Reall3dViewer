@@ -32,6 +32,8 @@ import {
     GetSplatMesh,
     GetCameraLookAt,
     GetCameraDirection,
+    SplatUpdateBoundBox,
+    SplatSetBoundBoxVisible,
 } from '../../events/EventConstants';
 import { setupSplatTextureManager } from '../../modeldata/SplatTexdataManager';
 import { SplatMeshOptions } from './SplatMeshOptions';
@@ -43,6 +45,7 @@ import { initSplatMeshOptions } from '../../utils/ViewerUtils';
 import { setupCommonUtils } from '../../utils/CommonUtils';
 import { MetaData } from '../../modeldata/ModelData';
 import { setupSorter } from '../../sorter/SetupSorter';
+import { BoundBox } from '../boundbox/BoundBox';
 
 /**
  * Gaussian splatting mesh
@@ -53,6 +56,7 @@ export class SplatMesh extends Mesh {
     private disposed: boolean = false;
     private events: Events;
     private opts: SplatMeshOptions;
+    public boundBox: BoundBox;
 
     /**
      * 构造函数
@@ -108,6 +112,17 @@ export class SplatMesh extends Mesh {
                 fire(SplatTexdataManagerDataChanged, 10000) && fire(NotifyViewerNeedUpdate); // 纹理数据更新后10秒内总是要刷新
             };
         })();
+
+        // 包围盒
+        const boundBox = new BoundBox();
+        boundBox.visible = false;
+        boundBox.renderOrder = 99999;
+        that.boundBox = boundBox;
+        that.add(boundBox);
+        on(SplatUpdateBoundBox, (minX: number, minY: number, minZ: number, maxX: number, maxY: number, maxZ: number, show?: boolean) => {
+            boundBox.update(minX, minY, minZ, maxX, maxY, maxZ, show);
+        });
+        on(SplatSetBoundBoxVisible, (visible: boolean = true) => (boundBox.visible = visible));
     }
 
     /**
@@ -160,7 +175,9 @@ export class SplatMesh extends Mesh {
         const fire = (key: number, ...args: any): any => that.events.fire(key, ...args);
 
         fire(TraverseDisposeAndClear, that);
+        fire(TraverseDisposeAndClear, that.boundBox);
         fire(GetScene).remove(that);
+        fire(GetScene).remove(that.boundBox);
 
         fire(CommonUtilsDispose);
         fire(SplatTexdataManagerDispose);
@@ -171,5 +188,6 @@ export class SplatMesh extends Mesh {
         that.events = null;
         that.opts = null;
         that.onAfterRender = null;
+        that.boundBox = null;
     }
 }

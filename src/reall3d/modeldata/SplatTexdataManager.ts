@@ -1,7 +1,7 @@
 // ==============================================
 // Copyright (c) 2025 reall3d.com, MIT license
 // ==============================================
-import { Matrix4, Vector3, Vector4 } from 'three';
+import { Box3, Matrix4, Vector3, Vector4 } from 'three';
 import {
     OnFetchStart,
     SplatTexdataManagerDispose,
@@ -32,6 +32,7 @@ import {
     GetCameraPosition,
     GetCameraLookAt,
     IsCameraChangedNeedUpdate,
+    SplatUpdateBoundBox,
 } from '../events/EventConstants';
 import { Events } from '../events/Events';
 import { CutData, MetaData, ModelStatus, SplatModel } from './ModelData';
@@ -57,6 +58,7 @@ export function setupSplatTextureManager(events: Events) {
     let texture1: SplatTexdata = { index: 1, version: 0 };
     let mergeRunning: boolean = false;
     const isBigSceneMode: boolean = fire(IsBigSceneMode);
+    let initBoundBox: boolean = false;
 
     on(GetAabbCenter, () => splatModel?.aabbCenter || new Vector3());
 
@@ -157,6 +159,7 @@ export function setupSplatTextureManager(events: Events) {
         if (!splatModel || !splatModel.downloadSize) return; // 尚未下载
 
         const downloadDone = splatModel.status !== ModelStatus.FetchReady && splatModel.status !== ModelStatus.Fetching;
+        updateBoundBox(downloadDone);
         if (downloadDone) {
             // 已下载完，通知一次进度条
             const downloadCount = Math.min(splatModel.fetchLimit, splatModel.downloadSplatCount);
@@ -174,6 +177,23 @@ export function setupSplatTextureManager(events: Events) {
             isBigSceneMode ? await mergeAndUploadLargeSceneData(downloadDone) : await mergeAndUploadSmallSceneData(downloadDone);
             mergeRunning = false;
         });
+    }
+
+    function updateBoundBox(downloadDone: boolean) {
+        // 包围盒
+        if (!initBoundBox) {
+            if (splatModel.header) {
+                initBoundBox = true;
+                const min = new Vector3(splatModel.header.MinX, splatModel.header.MinY, splatModel.header.MinZ);
+                const max = new Vector3(splatModel.header.MaxX, splatModel.header.MaxY, splatModel.header.MaxZ);
+                fire(SplatUpdateBoundBox, min.x, min.y, min.z, max.x, max.y, max.z, splatModel.meta.showBoundBox);
+            } else if (downloadDone) {
+                initBoundBox = true;
+                const min = new Vector3(splatModel.minX, splatModel.minY, splatModel.minZ);
+                const max = new Vector3(splatModel.maxX, splatModel.maxY, splatModel.maxZ);
+                fire(SplatUpdateBoundBox, min.x, min.y, min.z, max.x, max.y, max.z, splatModel.meta.showBoundBox);
+            }
+        }
     }
 
     async function mergeAndUploadSmallSceneData(downloadDone: boolean) {

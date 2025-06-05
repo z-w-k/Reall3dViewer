@@ -208,6 +208,8 @@ export interface MetaData {
     watermark?: string;
     /** 是否显示水印 */
     showWatermark?: boolean;
+    /** 是否显示包围盒 */
+    showBoundBox?: boolean;
     /** 相机参数 */
     cameraInfo?: CameraInfo;
     /** 标注 */

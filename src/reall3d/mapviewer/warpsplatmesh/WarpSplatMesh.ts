@@ -11,6 +11,7 @@ import { SplatMeshOptions } from '../../meshs/splatmesh/SplatMeshOptions';
 import { MetaData } from '../../modeldata/ModelData';
 import { Reall3dMapViewer } from '../Reall3dMapViewer';
 import { Reall3dMapViewerOptions } from '../Reall3dMapViewerOptions';
+import { BoundBox } from '../../meshs/boundbox/BoundBox';
 
 const isMobile = navigator.userAgent.includes('Mobi');
 
@@ -138,6 +139,7 @@ export class WarpSplatMesh extends Mesh {
                     let scale = 0.002 * distance;
                     css3dTag.scale.set(scale, scale, scale);
                     that.css3dTag.visible = true;
+                    that.splatMesh?.boundBox && (that.splatMesh.boundBox.visible = false); // 包围盒
                     return;
                 }
 
@@ -159,6 +161,7 @@ export class WarpSplatMesh extends Mesh {
                     splatMesh.fire(SetGaussianText, watermark, true, false);
                     splatMesh.addModel({ url: meta.url }, meta);
                 }
+                that.splatMesh.meta.showBoundBox && (that.splatMesh.boundBox.visible = true); // 包围盒
             }
         };
 

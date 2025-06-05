@@ -362,6 +362,10 @@ export const OnSmallSceneTimeChange = i++;
 
 /** 取元数据中配置的矩阵 */
 export const GetMetaMatrix = i++;
+/** 更新包围盒数据 */
+export const SplatUpdateBoundBox = i++;
+/** 更新包围盒数据 */
+export const SplatSetBoundBoxVisible = i++;
 
 /** 创建地图渲染器 */
 export const MapCreateRenderer = i++;

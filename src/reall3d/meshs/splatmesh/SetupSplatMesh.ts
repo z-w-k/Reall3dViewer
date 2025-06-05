@@ -70,6 +70,7 @@ import {
     SplatUpdateDebugEffect,
     SplatUpdateFlagValue,
     OnSmallSceneTimeChange,
+    SplatSetBoundBoxVisible,
 } from '../../events/EventConstants';
 import { SplatMeshOptions } from './SplatMeshOptions';
 import {
