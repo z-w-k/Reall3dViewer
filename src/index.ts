@@ -23,7 +23,7 @@ if (url) {
     debugMode && initDevMode(true);
 } else {
     viewer = new Reall3dViewer({ debugMode: true, maxRenderCountOfPc, shDegree });
-    viewer.addModel(`https://reall3d.com/demo-models/ppt.spx`); // hornedlizard
+    viewer.addModel(`https://reall3d.com/demo-models/hornedlizard.spx`);
 
     initDevMode();
 }
@@ -84,6 +84,12 @@ function fnClick(className: string) {
         viewer = viewer || new Reall3dViewer({ debugMode: true, maxRenderCountOfPc, shDegree });
         viewer.reset({ debugMode: true });
         setTimeout(() => viewer.addModel(`https://reall3d.com/demo-models/bzg.spx`), 50); // Let it GC
+    } else if (className == 'ppt') {
+        viewer?.dispose();
+        mapViewer?.dispose();
+        viewer = viewer || new Reall3dViewer({ debugMode: true, maxRenderCountOfPc, shDegree });
+        viewer.reset({ debugMode: true });
+        setTimeout(() => viewer.addModel(`https://reall3d.com/demo-models/ppt.spx`), 50); // Let it GC
     } else if (className == 'switch-rotate') {
         let opts: Reall3dViewerOptions = viewer?.options();
         viewer?.options({ autoRotate: !opts.autoRotate });
