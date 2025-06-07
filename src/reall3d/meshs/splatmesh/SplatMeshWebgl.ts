@@ -134,11 +134,11 @@ export function getSplatVertexShader() {
             return result;
         }
 
-        int animateParticle(out vec3 v3Cen, int particleMode, float performanceNow, float performanceAct, float currentVisibleRadius, float maxRadius) {
-            if (particleMode < 1) return 0;    
+        vec3 animateParticle(vec3 v3Cen, int particleMode, float performanceNow, float performanceAct, float currentVisibleRadius, float maxRadius) {
+            if (particleMode < 1) return v3Cen;    
             float factor = particleMode>1? ((performanceAct-performanceNow)/5000.0):(performanceNow/5000.0);
             float radius = particleMode>1? (max(currentVisibleRadius, maxRadius)*0.6 * min((performanceNow)/3000.0, 1.0)) : (max(currentVisibleRadius, maxRadius)*0.6 * min((performanceNow-performanceAct)/3000.0, 1.0));
-            if (factor <= 0.0) return 0;
+            if (factor <= 0.0) return v3Cen;
 
             // 随机种子（均匀分布）
             vec3 randSeed = fract(sin(vec3(
@@ -182,8 +182,7 @@ export function getSplatVertexShader() {
             }
 
             // 最终约束（确保严格在球体内）
-            v3Cen = normalize(newPos) * min(length(newPos), radius);
-            return 1;
+            return normalize(newPos) * min(length(newPos), radius);
         }
 
         void main () {
@@ -219,7 +218,7 @@ export function getSplatVertexShader() {
             bool isWatermark = (cen.w & 65536u) > 0u;
             vec3 v3Cen = uintBitsToFloat(cen.xyz);
 
-            animateParticle(v3Cen, particleMode, performanceNow, performanceAct, currentVisibleRadius, maxRadius);
+            v3Cen = animateParticle(v3Cen, particleMode, performanceNow, performanceAct, currentVisibleRadius, maxRadius);
 
             if ( isWatermark && debugEffect) {
                 v3Cen.y += sin(performanceNow*0.002 + v3Cen.x) * 0.1; // 水印动画
