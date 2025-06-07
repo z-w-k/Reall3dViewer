@@ -282,12 +282,12 @@ export function setupSplatTextureManager(events: Events) {
             fire(GetSplatActivePoints); // 小场景下载完时主动触发一次坐标分块
 
             if (splatModel.meta.particleMode) {
-                // 粒子效果，至少3秒加载过程，固定5秒正常化过程
+                // 粒子效果，先5秒加载过程，后5秒正常化过程
                 setTimeout(() => {
-                    fire(SplatUpdatePerformanceAct, performance.now() + 5000);
-                    fire(SplatUpdateParticleMode, 2); // 过程5秒，逐渐变化到正常
-                    setTimeout(() => fire(OnSmallSceneShowDone, true), 5000);
-                }, Math.max(3000 + performanceStart - performance.now(), 0));
+                    fire(SplatUpdatePerformanceAct, performance.now() + 5000); // 后5秒正常化过程
+                    fire(SplatUpdateParticleMode, 2); // 逐渐变化到正常
+                    setTimeout(() => fire(OnSmallSceneShowDone, true), 5000); // 显示完成后期处理
+                }, Math.max(5000 + performanceStart - performance.now(), 0)); // 先5秒加载过程
             }
         }
         fire(Information, { renderSplatCount: splatModel.renderSplatCount });
