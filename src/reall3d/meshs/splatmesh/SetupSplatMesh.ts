@@ -16,7 +16,6 @@ import {
     UnsignedIntType,
     Vector2,
     Vector4,
-    WebGLProgramParametersWithUniforms,
 } from 'three';
 import { Events } from '../../events/Events';
 import {
@@ -70,7 +69,10 @@ import {
     SplatUpdateDebugEffect,
     SplatUpdateFlagValue,
     OnSmallSceneTimeChange,
-    SplatSetBoundBoxVisible,
+    SplatUpdateMaxRadius,
+    SplatUpdatePerformanceAct,
+    OnSmallSceneShowDone,
+    SplatUpdateParticleMode,
 } from '../../events/EventConstants';
 import { SplatMeshOptions } from './SplatMeshOptions';
 import {
@@ -84,6 +86,8 @@ import {
     VarFocal,
     VarLightFactor,
     VarMarkPoint,
+    VarMaxRadius,
+    VarParticleMode,
     VarPerformanceAct,
     VarPerformanceNow,
     VarPointMode,
@@ -368,6 +372,11 @@ export function setupSplatMesh(events: Events) {
             material.uniformsNeedUpdate = true;
             fire(NotifyViewerNeedUpdate);
         });
+        on(SplatUpdateMaxRadius, (value: number) => {
+            material.uniforms[VarMaxRadius].value = value;
+            material.uniformsNeedUpdate = true;
+            fire(NotifyViewerNeedUpdate);
+        });
         on(SplatUpdateMarkPoint, (x: number, y: number, z: number, isMark: boolean) => {
             material.uniforms[VarMarkPoint].value = [x, y, z, isMark ? 1 : -1];
             material.uniformsNeedUpdate = true;
@@ -381,6 +390,16 @@ export function setupSplatMesh(events: Events) {
         on(SplatUpdatePerformanceNow, (value: number) => {
             material.uniforms[VarPerformanceNow].value = value;
             material.uniformsNeedUpdate = true;
+        });
+        on(SplatUpdatePerformanceAct, (value: number) => {
+            material.uniforms[VarPerformanceAct].value = value;
+            material.uniformsNeedUpdate = true;
+            fire(NotifyViewerNeedUpdate);
+        });
+        on(SplatUpdateParticleMode, (value: number) => {
+            material.uniforms[VarParticleMode].value = value;
+            material.uniformsNeedUpdate = true;
+            fire(NotifyViewerNeedUpdate);
         });
         on(SplatUpdateDebugEffect, (value: boolean) => {
             material.uniforms[VarDebugEffect].value = value;
@@ -503,8 +522,7 @@ export function setupSplatMesh(events: Events) {
                     switchProcess.stop = true; // 主动完成
                     arySwitchProcess.length === 1 && arySwitchProcess[0] === switchProcess && arySwitchProcess.pop();
 
-                    showMark && fire(GetOptions).viewerEvents?.fire(MarkUpdateVisible);
-                    fire(GetOptions).viewerEvents?.fire(FlyOnce);
+                    fire(OnSmallSceneShowDone, showMark);
                 } else if (switchProcess.currentLightRadius / maxRadius < 0.4) {
                     switchProcess.stepRate = Math.min(switchProcess.stepRate * 1.02, 0.03); // 前半圈提速并限速
                 } else {
@@ -513,6 +531,12 @@ export function setupSplatMesh(events: Events) {
             },
             () => !disposed && !switchProcess.stop,
         );
+    });
+
+    on(OnSmallSceneShowDone, (showMark: boolean = false) => {
+        fire(SplatUpdateParticleMode, 0); // 若有，停止粒子加载效果
+        showMark && fire(GetOptions).viewerEvents?.fire(MarkUpdateVisible);
+        fire(GetOptions).viewerEvents?.fire(FlyOnce);
     });
 
     on(CreateSplatUniforms, () => {
@@ -532,7 +556,9 @@ export function setupSplatMesh(events: Events) {
             [VarTopY]: { type: 'float', value: 0 },
             [VarCurrentVisibleRadius]: { type: 'float', value: 0 },
             [VarCurrentLightRadius]: { type: 'float', value: 0 },
+            [VarMaxRadius]: { type: 'float', value: 0 },
             [VarMarkPoint]: { type: 'v4', value: new Vector4(0, 0, 0, -1) },
+            [VarParticleMode]: { type: 'int', value: 0 },
             [VarPerformanceNow]: { type: 'float', value: performance.now() },
             [VarPerformanceAct]: { type: 'float', value: 0 },
             [VarWaterMarkColor]: { type: 'v4', value: new Vector4(1, 1, 0, 0.5) },

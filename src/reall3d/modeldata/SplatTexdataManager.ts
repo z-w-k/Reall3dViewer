@@ -1,7 +1,7 @@
 // ==============================================
 // Copyright (c) 2025 reall3d.com, MIT license
 // ==============================================
-import { Box3, Matrix4, Vector3, Vector4 } from 'three';
+import { Matrix4, Vector3, Vector4 } from 'three';
 import {
     OnFetchStart,
     SplatTexdataManagerDispose,
@@ -33,6 +33,11 @@ import {
     GetCameraLookAt,
     IsCameraChangedNeedUpdate,
     SplatUpdateBoundBox,
+    SplatUpdateMaxRadius,
+    SplatUpdatePerformanceAct,
+    SplatUpdatePointMode,
+    OnSmallSceneShowDone,
+    SplatUpdateParticleMode,
 } from '../events/EventConstants';
 import { Events } from '../events/Events';
 import { CutData, MetaData, ModelStatus, SplatModel } from './ModelData';
@@ -43,7 +48,13 @@ import { loadSpx } from './loaders/SpxLoader';
 import { loadSpz } from './loaders/SpzLoader';
 import { isNeedReload } from '../utils/CommonUtils';
 import { SplatMeshOptions } from '../meshs/splatmesh/SplatMeshOptions';
-import { isMobile, MobileDownloadLimitSplatCount, PcDownloadLimitSplatCount } from '../utils/consts/GlobalConstants';
+import {
+    BlankingTimeOfLargeScene,
+    BlankingTimeOfSmallScene,
+    isMobile,
+    MobileDownloadLimitSplatCount,
+    PcDownloadLimitSplatCount,
+} from '../utils/consts/GlobalConstants';
 
 export function setupSplatTextureManager(events: Events) {
     const on = (key: number, fn?: Function, multiFn?: boolean): Function | Function[] => events.on(key, fn, multiFn);
@@ -59,6 +70,7 @@ export function setupSplatTextureManager(events: Events) {
     let mergeRunning: boolean = false;
     const isBigSceneMode: boolean = fire(IsBigSceneMode);
     let initBoundBox: boolean = false;
+    let performanceStart = 0; // 小场景粒子加载效果使用
 
     on(GetAabbCenter, () => splatModel?.aabbCenter || new Vector3());
 
@@ -179,23 +191,6 @@ export function setupSplatTextureManager(events: Events) {
         });
     }
 
-    function updateBoundBox(downloadDone: boolean) {
-        // 包围盒
-        if (!initBoundBox) {
-            if (splatModel.header) {
-                initBoundBox = true;
-                const min = new Vector3(splatModel.header.MinX, splatModel.header.MinY, splatModel.header.MinZ);
-                const max = new Vector3(splatModel.header.MaxX, splatModel.header.MaxY, splatModel.header.MaxZ);
-                fire(SplatUpdateBoundBox, min.x, min.y, min.z, max.x, max.y, max.z, splatModel.meta.showBoundBox);
-            } else if (downloadDone) {
-                initBoundBox = true;
-                const min = new Vector3(splatModel.minX, splatModel.minY, splatModel.minZ);
-                const max = new Vector3(splatModel.maxX, splatModel.maxY, splatModel.maxZ);
-                fire(SplatUpdateBoundBox, min.x, min.y, min.z, max.x, max.y, max.z, splatModel.meta.showBoundBox);
-            }
-        }
-    }
-
     async function mergeAndUploadSmallSceneData(downloadDone: boolean) {
         if (disposed) return;
         const texture = texture0;
@@ -217,7 +212,7 @@ export function setupSplatTextureManager(events: Events) {
 
         fire(Information, { visibleSplatCount: splatModel.renderSplatCount, modelSplatCount: splatModel.modelSplatCount + textWatermarkCount }); // 可见数=模型数据总点数
 
-        if (Date.now() - texture.textureReadyTime < (isMobile ? 600 : 300)) return; // 悠哉
+        if (Date.now() - texture.textureReadyTime < BlankingTimeOfSmallScene) return;
         if (splatModel.smallSceneUploadDone && splatModel.lastTextWatermarkVersion == splatModel.textWatermarkVersion) return; // 已传完(模型数据 + 动态文字水印)
 
         if (!texture.version) {
@@ -266,7 +261,13 @@ export function setupSplatTextureManager(events: Events) {
         texture.minZ = splatModel.minZ;
         texture.maxZ = splatModel.maxZ;
 
-        // TODO MaxRadius?
+        if (splatModel.meta.particleMode && !performanceStart) {
+            performanceStart = performance.now();
+            fire(SplatUpdatePerformanceAct, performanceStart);
+            fire(SplatUpdatePointMode, false); // 小场景粒子效果时，固定不用点云
+            fire(SplatUpdateParticleMode, 1); // 粒子加载效果
+        }
+        splatModel.maxRadius && fire(SplatUpdateMaxRadius, splatModel.maxRadius);
         fire(UploadSplatTexture, texture, splatModel.currentRadius, splatModel.currentRadius);
         lastPostDataTime = sysTime;
 
@@ -279,6 +280,15 @@ export function setupSplatTextureManager(events: Events) {
             const opts: SplatMeshOptions = fire(GetOptions);
             fire(SplatUpdateShDegree, opts.shDegree === undefined ? 3 : opts.shDegree);
             fire(GetSplatActivePoints); // 小场景下载完时主动触发一次坐标分块
+
+            if (splatModel.meta.particleMode) {
+                // 粒子效果，至少3秒加载过程，固定5秒正常化过程
+                setTimeout(() => {
+                    fire(SplatUpdatePerformanceAct, performance.now() + 5000);
+                    fire(SplatUpdateParticleMode, 2); // 过程5秒，逐渐变化到正常
+                    setTimeout(() => fire(OnSmallSceneShowDone, true), 5000);
+                }, Math.max(3000 + performanceStart - performance.now(), 0));
+            }
         }
         fire(Information, { renderSplatCount: splatModel.renderSplatCount });
     }
@@ -298,7 +308,7 @@ export function setupSplatTextureManager(events: Events) {
 
         let texture: SplatTexdata = texture0.version <= texture1.version ? texture0 : texture1;
         if (texture0.version && ((!texture.index && !texture1.active) || (texture.index && !texture0.active))) return; // 待渲染
-        if (Date.now() - texture.activeTime < (isMobile ? 400 : 200)) return;
+        if (Date.now() - texture.activeTime < BlankingTimeOfLargeScene) return;
 
         if (downloadDone) {
             // 文件下载完，相机没有变化，不必重复刷数据
@@ -472,6 +482,23 @@ export function setupSplatTextureManager(events: Events) {
         return !(pos2d.z < -clip || pos2d.x < -clip || pos2d.x > clip || pos2d.y < -clip || pos2d.y > clip);
     }
 
+    function updateBoundBox(downloadDone: boolean) {
+        // 包围盒
+        if (!initBoundBox) {
+            if (splatModel.header) {
+                initBoundBox = true;
+                const min = new Vector3(splatModel.header.MinX, splatModel.header.MinY, splatModel.header.MinZ);
+                const max = new Vector3(splatModel.header.MaxX, splatModel.header.MaxY, splatModel.header.MaxZ);
+                fire(SplatUpdateBoundBox, min.x, min.y, min.z, max.x, max.y, max.z, splatModel.meta.showBoundBox);
+            } else if (downloadDone) {
+                initBoundBox = true;
+                const min = new Vector3(splatModel.minX, splatModel.minY, splatModel.minZ);
+                const max = new Vector3(splatModel.maxX, splatModel.maxY, splatModel.maxZ);
+                fire(SplatUpdateBoundBox, min.x, min.y, min.z, max.x, max.y, max.z, splatModel.meta.showBoundBox);
+            }
+        }
+    }
+
     function dispose() {
         if (disposed) return;
         disposed = true;
@@ -525,7 +552,7 @@ export function setupSplatTextureManager(events: Events) {
             }
             if (splatModel.modelSplatCount >= 0) {
                 fnResolveModelSplatCount(splatModel.modelSplatCount);
-                setTimeout(() => fire(SplatMeshCycleZoom), 5);
+                !splatModel.meta.particleMode && setTimeout(() => fire(SplatMeshCycleZoom), 5);
             } else if (Date.now() - startTime >= 3000) {
                 return fnResolveModelSplatCount(0); // 超3秒还取不到模型数量，放弃，将按配置的最大渲染数计算
             } else {

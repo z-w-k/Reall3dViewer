@@ -51,7 +51,7 @@ export function setupMapUtils(events: Events) {
     const on = (key: number, fn?: Function, multiFn?: boolean): Function | Function[] => events.on(key, fn, multiFn);
     const fire = (key: number, ...args: any): any => events.fire(key, ...args);
 
-    const MaxActiveCount: number = isMobile ? 1 : 20;
+    const MaxActiveCount: number = isMobile ? 2 : 20;
 
     const fpsMap: Map<number, any> = new Map();
     const fpsRealMap: Map<number, any> = new Map();

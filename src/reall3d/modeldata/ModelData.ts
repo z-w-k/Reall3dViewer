@@ -96,6 +96,7 @@ export class SplatModel {
     public topY: number = 0;
     public currentRadius: number = 0;
     public aabbCenter: Vector3;
+    public maxRadius: number = 0; // spx包围球半径
     public metaMatrix: Matrix4;
 
     public notifyFetchStopDone: boolean;
@@ -218,6 +219,9 @@ export interface MetaData {
     flyPositions?: number[];
     /** 飞翔相机注视点 */
     flyTargets?: number[];
+
+    /** 是否粒子加载效果，小场景用 */
+    particleMode?: boolean;
 
     /** 自动切割数量 */
     autoCut?: number;

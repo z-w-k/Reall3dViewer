@@ -11,7 +11,6 @@ import { SplatMeshOptions } from '../../meshs/splatmesh/SplatMeshOptions';
 import { MetaData } from '../../modeldata/ModelData';
 import { Reall3dMapViewer } from '../Reall3dMapViewer';
 import { Reall3dMapViewerOptions } from '../Reall3dMapViewerOptions';
-import { BoundBox } from '../../meshs/boundbox/BoundBox';
 
 const isMobile = navigator.userAgent.includes('Mobi');
 
@@ -124,7 +123,7 @@ export class WarpSplatMesh extends Mesh {
         that.onBeforeRender = () => {
             tween?.update();
 
-            const MinDistance = isMobile ? 50 : 30;
+            const MinDistance = isMobile ? 60 : 30;
             const MaxDistance = 100;
             const distance = that.position.distanceTo(that.mapViewer.controls.object.position);
             if (distance > MinDistance) {

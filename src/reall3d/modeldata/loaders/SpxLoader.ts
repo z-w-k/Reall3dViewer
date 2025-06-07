@@ -71,34 +71,35 @@ export async function loadSpx(model: SplatModel) {
                 }
 
                 // 解析头数据
-                const header: SpxHeader = await parseSpxHeader(headChunk);
-                if (!header) {
+                const h: SpxHeader = await parseSpxHeader(headChunk);
+                if (!h) {
                     model.abortController.abort();
                     model.status === ModelStatus.Fetching && (model.status = ModelStatus.Invalid);
                     console.error(`invalid spx format`);
                     continue;
                 }
-                if (model.meta.autoCut > 1 && !isLargeSpx(header)) {
+                if (model.meta.autoCut > 1 && !isLargeSpx(h)) {
                     model.abortController.abort();
                     model.status === ModelStatus.Fetching && (model.status = ModelStatus.Invalid);
                     console.error(`invalid LOD format`);
                     continue;
                 }
 
-                model.header = header;
-                model.modelSplatCount = header.SplatCount;
-                model.dataShDegree = header.ShDegree;
-                model.aabbCenter = new Vector3((header.MinX + header.MaxX) / 2, (header.MinY + header.MaxY) / 2, (header.MinZ + header.MaxZ) / 2);
+                model.header = h;
+                model.modelSplatCount = h.SplatCount;
+                model.dataShDegree = h.ShDegree;
+                model.aabbCenter = new Vector3((h.MinX + h.MaxX) / 2, (h.MinY + h.MaxY) / 2, (h.MinZ + h.MaxZ) / 2);
+                model.maxRadius = 0.5 * Math.sqrt(Math.pow(h.MaxX - h.MinX, 2) + Math.pow(h.MaxY - h.MinY, 2) + Math.pow(h.MaxZ - h.MinZ, 2));
                 model.metaMatrix && model.aabbCenter.applyMatrix4(model.metaMatrix);
                 headChunks = null;
                 headChunk = null;
 
                 // 文件头检查校验
-                if (!ExclusiveFormats.includes(header.ExclusiveId)) {
+                if (!ExclusiveFormats.includes(h.ExclusiveId)) {
                     // 属于无法识别的格式时停止处理，或者进一步结合CreaterId判断是否能识别，避免后续出现数据解析错误
                     model.abortController.abort();
                     model.status = ModelStatus.Invalid;
-                    console.error(`Unrecognized format, creater id =`, header.CreaterId, ', exclusive id =', header.ExclusiveId, header.Comment);
+                    console.error(`Unrecognized format, creater id =`, h.CreaterId, ', exclusive id =', h.ExclusiveId, h.Comment);
                     continue;
                 }
             }

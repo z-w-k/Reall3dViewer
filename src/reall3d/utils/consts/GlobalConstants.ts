@@ -5,6 +5,8 @@ export const ViewerVersion = 'v1.6.0-dev'; // Reall3dViewer 版本
 
 export const isMobile = navigator.userAgent.includes('Mobi');
 export const HalfChars = 'QWERTYUIOPLKJHGFDSAZXCVBNM1234567890qwertyuioplkjhgfdsazxcvbnm`~!@#$%^&*()-_=+\\|]}[{\'";::,<.>//? \t';
+export const BlankingTimeOfSmallScene = isMobile ? 600 : 300;
+export const BlankingTimeOfLargeScene = isMobile ? 2000 : 300;
 export const BinHeaderSize = 140;
 export const SpxHeaderSize = 128;
 export const DataSize36 = 36;

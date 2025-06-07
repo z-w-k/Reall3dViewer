@@ -366,6 +366,14 @@ export const GetMetaMatrix = i++;
 export const SplatUpdateBoundBox = i++;
 /** 更新包围盒数据 */
 export const SplatSetBoundBoxVisible = i++;
+/** 更新包围球半径 */
+export const SplatUpdateMaxRadius = i++;
+/** Splat更新动作时间 */
+export const SplatUpdatePerformanceAct = i++;
+/** 小场景显示完成 */
+export const OnSmallSceneShowDone = i++;
+/** 小场景粒子效果加载模式（0，1，2） */
+export const SplatUpdateParticleMode = i++;
 
 /** 创建地图渲染器 */
 export const MapCreateRenderer = i++;
