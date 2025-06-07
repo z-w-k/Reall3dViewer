@@ -145,4 +145,6 @@ function setSplatData(model: SplatModel, data: Uint8Array) {
     const topY = model.header?.MinTopY || 0;
     model.currentRadius = Math.sqrt(model.maxX * model.maxX + topY * topY + model.maxZ * model.maxZ);
     model.aabbCenter = new Vector3((model.minX + model.maxX) / 2, (model.minY + model.maxY) / 2, (model.minZ + model.maxZ) / 2);
+    model.maxRadius = 0.5 * Math.sqrt(Math.pow(model.maxX - model.minX, 2) + Math.pow(model.maxY - model.minY, 2) + Math.pow(model.maxZ - model.minZ, 2));
+    model.metaMatrix && model.aabbCenter.applyMatrix4(model.metaMatrix);
 }

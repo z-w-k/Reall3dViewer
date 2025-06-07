@@ -11,9 +11,9 @@ export interface ModelOptions {
     url: string;
 
     /**
-     *  模型格式（ply | splat | spx | spz），默认自动识别
+     *  模型格式（ply | splat | spx | spz | obj），默认自动识别
      */
-    format?: 'ply' | 'splat' | 'spx' | 'spz';
+    format?: 'ply' | 'splat' | 'spx' | 'spz' | 'obj';
 
     /**
      *  是否重新下载

@@ -1,7 +1,7 @@
 // ==============================================
 // Copyright (c) 2025 reall3d.com, MIT license
 // ==============================================
-import { Mesh, PerspectiveCamera, Vector3 } from 'three';
+import { Matrix4, Mesh, PerspectiveCamera, Vector3 } from 'three';
 import { Events } from '../../events/Events';
 import {
     SplatUpdatePerformanceNow,
@@ -32,6 +32,8 @@ import {
     GetSplatMesh,
     GetCameraLookAt,
     GetCameraDirection,
+    SplatUpdateBoundBox,
+    SplatSetBoundBoxVisible,
 } from '../../events/EventConstants';
 import { setupSplatTextureManager } from '../../modeldata/SplatTexdataManager';
 import { SplatMeshOptions } from './SplatMeshOptions';
@@ -43,6 +45,7 @@ import { initSplatMeshOptions } from '../../utils/ViewerUtils';
 import { setupCommonUtils } from '../../utils/CommonUtils';
 import { MetaData } from '../../modeldata/ModelData';
 import { setupSorter } from '../../sorter/SetupSorter';
+import { BoundBox } from '../boundbox/BoundBox';
 
 /**
  * Gaussian splatting mesh
@@ -53,6 +56,7 @@ export class SplatMesh extends Mesh {
     private disposed: boolean = false;
     private events: Events;
     private opts: SplatMeshOptions;
+    public boundBox: BoundBox;
 
     /**
      * 构造函数
@@ -60,14 +64,12 @@ export class SplatMesh extends Mesh {
      */
     constructor(options: SplatMeshOptions) {
         super();
-
+        const that = this;
         const events = new Events();
         const on = (key: number, fn?: Function, multiFn?: boolean): Function | Function[] => events.on(key, fn, multiFn);
         const fire = (key: number, ...args: any): any => events.fire(key, ...args);
 
-        // 默认参数校验设定
-        const opts: SplatMeshOptions = initSplatMeshOptions(options);
-
+        const opts: SplatMeshOptions = initSplatMeshOptions(options); // 默认参数校验设定
         const camera = opts.controls.object as PerspectiveCamera;
         on(GetOptions, () => opts);
         on(GetCanvas, () => opts.renderer.domElement);
@@ -75,14 +77,14 @@ export class SplatMesh extends Mesh {
         on(GetCameraFov, () => camera.fov);
         on(GetCameraPosition, (copy: boolean = false) => (copy ? camera.position.clone() : camera.position));
         on(GetCameraLookAt, (copy: boolean = false) => (copy ? opts.controls.target.clone() : opts.controls.target));
-        on(GetViewProjectionMatrixArray, () => camera.projectionMatrix.clone().multiply(camera.matrixWorldInverse).multiply(this.matrix).toArray());
+        on(GetViewProjectionMatrixArray, () => camera.projectionMatrix.clone().multiply(camera.matrixWorldInverse).multiply(that.matrix).toArray());
         on(GetViewProjectionMatrix, () => camera.projectionMatrix.clone().multiply(camera.matrixWorldInverse));
         on(GetCameraDirection, () => camera.getWorldDirection(new Vector3()).toArray());
         on(GetRenderer, () => opts.renderer);
         on(GetScene, () => opts.scene);
         on(IsBigSceneMode, () => opts.bigSceneMode);
         on(IsPointcloudMode, () => opts.pointcloudMode);
-        on(GetSplatMesh, () => this);
+        on(GetSplatMesh, () => that);
 
         on(NotifyViewerNeedUpdate, () => opts.viewerEvents?.fire(ViewerNeedUpdate));
 
@@ -93,23 +95,34 @@ export class SplatMesh extends Mesh {
         setupSplatMesh(events);
         setupGaussianText(events);
 
-        this.name = `${opts.name || this.id}`;
+        that.name = `${opts.name || that.id}`;
 
-        this.events = events;
-        this.opts = opts;
+        that.events = events;
+        that.opts = opts;
 
         (async () => {
-            this.copy(await events.fire(CreateSplatMesh));
-            opts.matrix && this.applyMatrix4(opts.matrix);
-            this.frustumCulled = false;
-            this.onBeforeRender = () => {
+            that.copy(await events.fire(CreateSplatMesh));
+            that.meta.transform && that.applyMatrix4(new Matrix4().fromArray(that.meta.transform));
+            that.frustumCulled = false;
+            that.onBeforeRender = () => {
                 fire(WorkerSort);
                 fire(SplatUpdatePerformanceNow, performance.now());
             };
-            this.onAfterRender = () => {
+            that.onAfterRender = () => {
                 fire(SplatTexdataManagerDataChanged, 10000) && fire(NotifyViewerNeedUpdate); // 纹理数据更新后10秒内总是要刷新
             };
         })();
+
+        // 包围盒
+        const boundBox = new BoundBox();
+        boundBox.visible = false;
+        boundBox.renderOrder = 99999;
+        that.boundBox = boundBox;
+        that.add(boundBox);
+        on(SplatUpdateBoundBox, (minX: number, minY: number, minZ: number, maxX: number, maxY: number, maxZ: number, show?: boolean) => {
+            boundBox.update(minX, minY, minZ, maxX, maxY, maxZ, show);
+        });
+        on(SplatSetBoundBoxVisible, (visible: boolean = true) => (boundBox.visible = visible));
     }
 
     /**
@@ -118,9 +131,10 @@ export class SplatMesh extends Mesh {
      * @returns 最新配置项
      */
     public options(opts?: SplatMeshOptions): SplatMeshOptions {
-        if (this.disposed) return;
-        const fire = (key: number, ...args: any): any => this.events.fire(key, ...args);
-        const thisOpts = this.opts;
+        const that = this;
+        if (that.disposed) return;
+        const fire = (key: number, ...args: any): any => that.events.fire(key, ...args);
+        const thisOpts = that.opts;
 
         if (opts) {
             opts.pointcloudMode !== undefined && fire(SplatUpdatePointMode, opts.pointcloudMode);
@@ -139,35 +153,41 @@ export class SplatMesh extends Mesh {
      * @param meta 元数据
      */
     public async addModel(opts: ModelOptions, meta: MetaData = {}): Promise<void> {
-        if (this.disposed) return;
-        this.meta = meta;
-        await this.events.fire(SplatTexdataManagerAddModel, opts, meta);
+        const that = this;
+        if (that.disposed) return;
+        that.meta = meta;
+        await that.events.fire(SplatTexdataManagerAddModel, opts, meta);
     }
 
     public fire(key: number, ...args: any): any {
-        if (this.disposed) return;
-        return this.events.fire(key, ...args);
+        const that = this;
+        if (that.disposed) return;
+        return that.events.fire(key, ...args);
     }
 
     /**
      * 销毁
      */
     public dispose(): void {
-        if (this.disposed) return;
-        this.disposed = true;
-        const fire = (key: number, ...args: any): any => this.events.fire(key, ...args);
+        const that = this;
+        if (that.disposed) return;
+        that.disposed = true;
+        const fire = (key: number, ...args: any): any => that.events.fire(key, ...args);
 
-        fire(TraverseDisposeAndClear, this);
-        fire(GetScene).remove(this);
+        fire(TraverseDisposeAndClear, that);
+        fire(TraverseDisposeAndClear, that.boundBox);
+        fire(GetScene).remove(that);
+        fire(GetScene).remove(that.boundBox);
 
         fire(CommonUtilsDispose);
         fire(SplatTexdataManagerDispose);
         fire(WorkerDispose);
         fire(SplatMeshDispose);
 
-        this.events.clear();
-        this.events = null;
-        this.opts = null;
-        this.onAfterRender = null;
+        that.events.clear();
+        that.events = null;
+        that.opts = null;
+        that.onAfterRender = null;
+        that.boundBox = null;
     }
 }

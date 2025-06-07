@@ -7,9 +7,11 @@ export function getSplatVertexShader() {
 
         uniform highp usampler2D splatTexture0, splatTexture1, splatShTexture12, splatShTexture3;
         uniform vec2 focal, viewport;
-        uniform int usingIndex, pointMode, bigSceneMode, showWaterMark, debugEffect, shDegree;
-        uniform float topY, currentVisibleRadius, currentLightRadius, performanceNow;
+        uniform int usingIndex, shDegree, particleMode;
+        uniform bool pointMode, bigSceneMode, showWaterMark, debugEffect;
+        uniform float topY, maxRadius, currentVisibleRadius, currentLightRadius, performanceNow, performanceAct;
         uniform vec4 markPoint, waterMarkColor;
+        uniform uint flagValue;
 
         attribute uint splatIndex;
 
@@ -132,9 +134,60 @@ export function getSplatVertexShader() {
             return result;
         }
 
+        vec3 animateParticle(vec3 v3Cen, int particleMode, float performanceNow, float performanceAct, float currentVisibleRadius, float maxRadius) {
+            if (particleMode < 1) return v3Cen;    
+            float factor = particleMode>1? ((performanceAct-performanceNow)/5000.0):(performanceNow/5000.0);
+            float radius = particleMode>1? (max(currentVisibleRadius, maxRadius)*0.6 * min((performanceNow)/3000.0, 1.0)) : (max(currentVisibleRadius, maxRadius)*0.6 * min((performanceNow-performanceAct)/3000.0, 1.0));
+            if (factor <= 0.0) return v3Cen;
+
+            // 随机种子（均匀分布）
+            vec3 randSeed = fract(sin(vec3(
+                dot(v3Cen, vec3(12.9898, 78.233, 37.719)),
+                dot(v3Cen.yzx, vec3(49.123, 23.456, 87.654)),
+                dot(v3Cen.zxy, vec3(34.567, 91.234, 56.789))
+            ))) * 2.0 - 1.0;
+
+            // 动态相位计算（增加随机性）
+            float phase = factor * 12.0 
+                + v3Cen.y * (15.0 + randSeed.x * 3.0) 
+                + v3Cen.z * (13.0 + randSeed.y * 2.0);
+
+            // 混合波形计算（增加复杂性）
+            float wave1 = sin(phase * (2.0 + randSeed.y * 1.5 + randSeed.z * 1.5));
+            float wave2 = cos(phase * (1.2 + randSeed.x * 0.3) + v3Cen.x * 20.0);
+            float dynamicFactor = mix(wave1, wave2, 0.5 + randSeed.z * 0.2) * 0.5 + 0.5;
+
+            // 均匀的运动幅度（不再依赖距离）
+            float amplitude = radius * 0.25 * factor * (0.9 + randSeed.z * 0.2);
+
+            // 位移应用（三轴都有适度运动）
+            vec3 offset = vec3(
+                amplitude * (dynamicFactor * 2.0 - 1.0),
+                amplitude * randSeed.x * 5.0,
+                amplitude * randSeed.y * 2.5
+            );
+            
+            // 物理碰撞系统（保持反弹效果）
+            vec3 newPos = v3Cen + offset;
+            float newDist = length(newPos);
+            if (newDist > radius) {
+                vec3 dir = normalize(newPos);
+                float penetration = newDist - radius;
+                float elasticity = 0.7 + randSeed.z * 0.2;
+                
+                // 反弹（带切向扰动）
+                vec3 bounceVec = dir * penetration * elasticity;
+                vec3 tangent = normalize(cross(dir, vec3(randSeed.x, randSeed.y, 1.0)));
+                newPos -= bounceVec - tangent * (length(randSeed.xy) * penetration * 0.2);
+            }
+
+            // 最终约束（确保严格在球体内）
+            return normalize(newPos) * min(length(newPos), radius);
+        }
+
         void main () {
             uvec4 cen, cov3d;
-            if (bigSceneMode == 1) {
+            if (bigSceneMode) {
                 if (usingIndex == 0){
                     cen = texelFetch(splatTexture0, ivec2((splatIndex & 0x3ffu) << 1, splatIndex >> 10), 0);
                     cov3d = texelFetch(splatTexture0, ivec2(((splatIndex & 0x3ffu) << 1) | 1u, splatIndex >> 10), 0);
@@ -146,22 +199,36 @@ export function getSplatVertexShader() {
                 cen = texelFetch(splatTexture0, ivec2((splatIndex & 0x3ffu) << 1, splatIndex >> 10), 0);
                 cov3d = texelFetch(splatTexture0, ivec2(((splatIndex & 0x3ffu) << 1) | 1u, splatIndex >> 10), 0);
             }
+ 
+            uint fvSplat = cen.w & 65535u;
+            uint fvHide = flagValue >> 16u;
+            uint fvShow = flagValue & 65535u;
+            float fvAlpha = 1.0;
+            if (fvSplat > 0u) {
+                if ( fvSplat == fvShow ) {
+                    fvAlpha = clamp((performanceNow - performanceAct) / 2000.0, 0.0, 1.0);
+                } else if ( fvSplat == fvHide) {
+                    fvAlpha = 1.0 - clamp((performanceNow - performanceAct) / 2000.0, 0.0, 1.0);
+                } else {
+                    gl_Position = vec4(0.0, 0.0, 2.0, 1.0);
+                    return;
+                }
+            }
 
-            int waterMarkValue = int((cen.w & 65536u) >> 16u);
-            int cenState = int(cen.w & 65535u);
-
+            bool isWatermark = (cen.w & 65536u) > 0u;
             vec3 v3Cen = uintBitsToFloat(cen.xyz);
 
-            if ( waterMarkValue == 1 && debugEffect == 1) {
-                // 水印动画
-                v3Cen.y += sin(performanceNow*0.002 + v3Cen.x) * 0.1;
+            v3Cen = animateParticle(v3Cen, particleMode, performanceNow, performanceAct, currentVisibleRadius, maxRadius);
+
+            if ( isWatermark && debugEffect) {
+                v3Cen.y += sin(performanceNow*0.002 + v3Cen.x) * 0.1; // 水印动画
             }
 
             vec4 cam = modelViewMatrix * vec4(v3Cen, 1.0);
             vec4 pos2d = projectionMatrix * cam;
             float clip = 1.2 * pos2d.w;
             if (pos2d.z < -clip || pos2d.x < -clip || pos2d.x > clip || pos2d.y < -clip || pos2d.y > clip
-                || waterMarkValue == 1 && (showWaterMark == 0 || pointMode == 1) ) {
+                || isWatermark && (!showWaterMark || pointMode) ) {
                 gl_Position = vec4(0.0, 0.0, 2.0, 1.0);
                 return;
             }
@@ -174,14 +241,14 @@ export function getSplatVertexShader() {
 
             vec2 uh1 = unpackHalf2x16(cov3d.x), uh2 = unpackHalf2x16(cov3d.y), uh3 = unpackHalf2x16(cov3d.z);
             mat3 Vrk = mat3(uh1.x, uh1.y, uh2.x, uh1.y, uh2.y, uh3.x, uh2.x, uh3.x, uh3.y);
-
+        
             float ZxZ = cam.z * cam.z;
             mat3 J_m3 = mat3(
-                focal.x / cam.z, 0.0, -(focal.x * cam.x) / ZxZ,
-                0.0, focal.y / cam.z, -(focal.y * cam.y) / ZxZ,
+                focal.x / cam.z, 0.0, -(focal.x * cam.x) / ZxZ, 
+                0.0, focal.y / cam.z, -(focal.y * cam.y) / ZxZ, 
                 0.0, 0.0, 0.0
             );
-
+        
             mat3 T_m3 = transpose(mat3(modelViewMatrix)) * J_m3;
             mat3 cov2d = transpose(T_m3) * Vrk * T_m3;
 
@@ -193,21 +260,21 @@ export function getSplatVertexShader() {
             float eigenValueOrig1 = eigenValue1;
             float eigenValueOrig2 = eigenValue2;
 
-            int lightColorFlag = 0;
-            if ( waterMarkValue == 0 ) {
-                if ( pointMode == 1 ) {
+            bool isLightColor = false;
+            if ( !isWatermark ) {
+                if ( pointMode ) {
                     eigenValue1 = eigenValue2 = 0.5;
                 }
 
-                if ( bigSceneMode == 0 && currentLightRadius > 0.0 ) {
+                if ( !bigSceneMode && currentLightRadius > 0.0 ) {
                     // 仅小场景支持光圈过渡效果
                     if ( currentRadius < currentLightRadius && currentRadius > currentLightRadius * 0.9 ) {
                         eigenValue1 = eigenValueOrig1;
                         eigenValue2 = eigenValueOrig2;
-                        lightColorFlag = 1;
+                        isLightColor = true;
                     }
                     if ( currentRadius < currentLightRadius * 0.9 ){
-                        if ( pointMode == 1 ){
+                        if ( pointMode ){
                             eigenValue1 = eigenValueOrig1;
                             eigenValue2 = eigenValueOrig2;
                         } else {
@@ -217,27 +284,22 @@ export function getSplatVertexShader() {
                 }
             }
 
-            int iSelectPoint = 0;
-            if (markPoint.w > 0.0 && length(vec3(markPoint.xyz) - v3Cen) < 0.000001){
-                iSelectPoint = 1;
-            }
-
             vPosition = vec3(position.xy, -1.0);
             vec2 eigenVector1 = normalize(vec2(cov2Dv.y, eigenValue1 - cov2Dv.x));
-            if (iSelectPoint == 1){
+            bool isSelectPoint = markPoint.w > 0.0 && length(vec3(markPoint.xyz) - v3Cen) < 0.000001;
+            if (markPoint.w > 0.0 && length(vec3(markPoint.xyz) - v3Cen) < 0.000001){
                 vColor = vec4(1.0, 1.0, 0.0, 1.0);
-                eigenValue1 = eigenValue2 = 10.0;
-                eigenVector1 = normalize(vec2(10.0, eigenValue1 - 10.0));
-                vPosition.z = 1.0;
-            } else if ( lightColorFlag == 1 ) {
+                eigenValue1 = eigenValue2 = 11.0;
+                eigenVector1 = normalize(vec2(11.0, 0.0));
+                vPosition.z = 1.0; // 选点，提示固定不透明
+            } else if ( isLightColor ) {
                 vColor = vec4(1.0, 1.0, 1.0, 0.2);
-            } else if ( waterMarkValue == 1 ) {
+            } else if ( isWatermark ) {
                 vColor = waterMarkColor;
             } else {
-                vColor = vec4( float(cov3d.w & 0xFFu) / 255.0, float((cov3d.w >> 8) & 0xFFu) / 255.0, float((cov3d.w >> 16) & 0xFFu) / 255.0, float(cov3d.w >> 24) / 255.0 );
+                vColor = vec4( float(cov3d.w & 0xFFu) / 255.0, float((cov3d.w >> 8) & 0xFFu) / 255.0, float((cov3d.w >> 16) & 0xFFu) / 255.0, (float(cov3d.w >> 24) / 255.0) * fvAlpha );
                 if (shDegree > 0) {
                     vColor.rgb += evalSH(v3Cen);
-                    vColor.rgb = clamp(vColor.rgb, vec3(0.), vec3(1.));
                 }
             }
 
@@ -247,7 +309,7 @@ export function getSplatVertexShader() {
 
             vec2 v2Center = vec2(pos2d) / pos2d.w;  // NDC坐标
             gl_Position = vec4(
-                v2Center
+                v2Center 
                 + vPosition.x * majorAxis / viewport
                 + vPosition.y * minorAxis / viewport
                 , 1.0, 1.0);
@@ -259,9 +321,7 @@ export function getSplatVertexShader() {
 export function getSplatFragmentShader() {
     return `
         precision highp float;
-
         uniform float lightFactor;
-
         varying vec4 vColor;
         varying vec3 vPosition;
 
@@ -269,8 +329,8 @@ export function getSplatFragmentShader() {
             float dtPos = -dot(vPosition.xy, vPosition.xy);
             if (dtPos < -4.0) discard;
 
-            dtPos = vPosition.z > 0.0 ? 1.0 : exp(dtPos) * vColor.a;
-            gl_FragColor = vec4(lightFactor * vColor.rgb, dtPos);
+            dtPos = vPosition.z >= 1.0 ? 1.0 : exp(dtPos) * vColor.a;
+             gl_FragColor = vec4(lightFactor * vColor.rgb, dtPos);
         }
 
     `;

@@ -3,15 +3,7 @@
 // ==============================================
 import { Vector3 } from 'three';
 import { clipUint8, encodeSplatSH } from '../../utils/CommonUtils';
-import {
-    DataSize32,
-    isMobile,
-    SH_C0,
-    SplatDataSize32,
-    SpxBlockFormatSH1,
-    SpxBlockFormatSH2,
-    SpxBlockFormatSH3,
-} from '../../utils/consts/GlobalConstants';
+import { DataSize32, isMobile, SH_C0, SplatDataSize32, SpxBlockFormatSH1, SpxBlockFormatSH2, SpxBlockFormatSH3 } from '../../utils/consts/GlobalConstants';
 import { ModelStatus, SplatModel } from '../ModelData';
 import { parseSplatToTexdata, parseSpxBlockData } from '../wasm/WasmParser';
 
@@ -96,13 +88,7 @@ export async function loadPly(model: SplatModel) {
         model.status === ModelStatus.Fetching && (model.status = ModelStatus.FetchDone);
     }
 
-    async function parsePlyAndSetSplatData(
-        header: any,
-        model: SplatModel,
-        perByteLen: number,
-        perValue: Uint8Array,
-        newValue: Uint8Array,
-    ): Promise<number> {
+    async function parsePlyAndSetSplatData(header: any, model: SplatModel, perByteLen: number, perValue: Uint8Array, newValue: Uint8Array): Promise<number> {
         return new Promise(async resolve => {
             let cntSplat = ((perByteLen + newValue.byteLength) / model.rowLength) | 0;
             let leave: number = (perByteLen + newValue.byteLength) % model.rowLength;
@@ -318,4 +304,6 @@ function setSplatData(model: SplatModel, data: Uint8Array) {
     const topY = 0;
     model.currentRadius = Math.sqrt(model.maxX * model.maxX + topY * topY + model.maxZ * model.maxZ);
     model.aabbCenter = new Vector3((model.minX + model.maxX) / 2, (model.minY + model.maxY) / 2, (model.minZ + model.maxZ) / 2);
+    model.maxRadius = 0.5 * Math.sqrt(Math.pow(model.maxX - model.minX, 2) + Math.pow(model.maxY - model.minY, 2) + Math.pow(model.maxZ - model.minZ, 2));
+    model.metaMatrix && model.aabbCenter.applyMatrix4(model.metaMatrix);
 }

@@ -1,7 +1,7 @@
 // ==============================================
 // Copyright (c) 2025 reall3d.com, MIT license
 // ==============================================
-import { Vector3 } from 'three';
+import { Matrix4, Vector3 } from 'three';
 import { CameraInfo } from '../controls/SetupCameraControls';
 import { ModelOptions } from './ModelOptions';
 
@@ -96,6 +96,8 @@ export class SplatModel {
     public topY: number = 0;
     public currentRadius: number = 0;
     public aabbCenter: Vector3;
+    public maxRadius: number = 0; // spx包围球半径
+    public metaMatrix: Matrix4;
 
     public notifyFetchStopDone: boolean;
     public smallSceneUploadDone: boolean;
@@ -108,24 +110,26 @@ export class SplatModel {
 
     constructor(opts: ModelOptions, meta: MetaData = {}) {
         this.opts = { ...opts };
+        const that = this;
 
-        this.meta = meta;
-        meta.autoCut && (this.map = new Map());
+        that.meta = meta;
+        meta.autoCut && (that.map = new Map());
+        that.metaMatrix = meta.transform ? new Matrix4().fromArray(meta.transform) : null;
 
         if (!opts.format) {
             if (opts.url?.endsWith('.spx')) {
-                this.opts.format = 'spx';
+                that.opts.format = 'spx';
             } else if (opts.url?.endsWith('.splat')) {
-                this.opts.format = 'splat';
+                that.opts.format = 'splat';
             } else if (opts.url?.endsWith('.ply')) {
-                this.opts.format = 'ply';
+                that.opts.format = 'ply';
             } else if (opts.url?.endsWith('.spz')) {
-                this.opts.format = 'spz';
+                that.opts.format = 'spz';
             } else {
                 console.error('unknow format!');
             }
         }
-        this.abortController = new AbortController();
+        that.abortController = new AbortController();
     }
 }
 
@@ -146,9 +150,7 @@ export interface CutData {
     minZ?: number;
     maxZ?: number;
     // 块的包围球
-    centerX?: number;
-    centerY?: number;
-    centerZ?: number;
+    center?: Vector3;
     radius?: number;
 
     /** 当前待渲染点数（动态计算使用） */
@@ -207,6 +209,8 @@ export interface MetaData {
     watermark?: string;
     /** 是否显示水印 */
     showWatermark?: boolean;
+    /** 是否显示包围盒 */
+    showBoundBox?: boolean;
     /** 相机参数 */
     cameraInfo?: CameraInfo;
     /** 标注 */
@@ -215,6 +219,9 @@ export interface MetaData {
     flyPositions?: number[];
     /** 飞翔相机注视点 */
     flyTargets?: number[];
+
+    /** 是否粒子加载效果，小场景用 */
+    particleMode?: boolean;
 
     /** 自动切割数量 */
     autoCut?: number;

@@ -1,6 +1,7 @@
 // ==============================================
 // Copyright (c) 2025 reall3d.com, MIT license
 // ==============================================
+import { CatmullRomCurve3, Vector3 } from 'three';
 import { Events } from '../events/Events';
 import {
     AddFlyPosition,
@@ -20,10 +21,11 @@ import {
     FlyDisable,
     FlyEnable,
     FlyOnce,
+    GetMeta,
 } from '../events/EventConstants';
 import { CameraControls } from './CameraControls';
-import { CatmullRomCurve3, Vector3 } from 'three';
 import { MetaData } from '../modeldata/ModelData';
+
 export function setupFlying(events: Events) {
     const fire = (key: number, ...args: any): any => events.fire(key, ...args);
     const on = (key: number, fn?: Function, multiFn?: boolean): Function | Function[] => events.on(key, fn, multiFn);
@@ -69,8 +71,8 @@ export function setupFlying(events: Events) {
         flyPositions.length = 0;
         flyTargets.length = 0;
     });
-    on(FlySavePositions, async () => {
-        const meta: MetaData = fire(GetSplatMesh).meta || {};
+    on(FlySavePositions, async (bSave: boolean = true) => {
+        const meta: MetaData = fire(GetSplatMesh).meta || fire(GetMeta);
         if (flyPositions.length) {
             const positions: number[] = [];
             const targets: number[] = [];
@@ -84,8 +86,7 @@ export function setupFlying(events: Events) {
             delete meta.flyPositions;
             delete meta.flyTargets;
         }
-
-        return await fire(HttpPostMetaData, meta);
+        bSave && (await fire(HttpPostMetaData, meta));
     });
 
     on(FlyOnce, () => {

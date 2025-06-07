@@ -16,7 +16,6 @@ import {
     IsSmallSceneRenderDataReady,
     OnTextureReadySplatCount,
     OnFetching,
-    IsBigSceneMode,
     EncodeBase64,
     DecodeBase64,
     GetCanvasSize,
@@ -33,8 +32,6 @@ export function setupCommonUtils(events: Events) {
     let disposed: boolean = false;
     const on = (key: number, fn?: Function, multiFn?: boolean): Function | Function[] => events.on(key, fn, multiFn);
     const fire = (key: number, ...args: any): any => events.fire(key, ...args);
-
-    const isMap: boolean = !fire(GetOptions).renderer;
 
     on(IsDebugMode, () => fire(GetOptions).debugMode);
 
@@ -221,7 +218,7 @@ export function setupCommonUtils(events: Events) {
             fps !== undefined && setInfo('fps', fps);
             realFps !== undefined && setInfo('realFps', `raw ${realFps}`);
             sortTime !== undefined && setInfo('sort', `${sortTime} ms`);
-            !isMap && fire(IsBigSceneMode) ? cuts !== undefined && setInfo('cuts', `（${cuts} cuts）`) : setInfo('cuts', '');
+            cuts !== undefined && setInfo('cuts', cuts === '' ? '' : `（${cuts} cuts）`);
             worker && setInfo('worker', `${worker}`);
             // updateSceneData && setInfo('updateSceneData', `（up ${updateSceneData} ms）`);
             scene && setInfo('scene', scene);
