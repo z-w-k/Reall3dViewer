@@ -22,7 +22,7 @@
 - [x] Support formats: `.ply`, `.splat`, `.spx`, `.spz`
 - [x] Support mark and measurement
 - [x] Support text watermark
-- [x] Support 1st to 3nd degree spherical harmonics
+- [x] Support 1st to 3rd degree spherical harmonics
 - [x] Support rendering models within maps
 
 
