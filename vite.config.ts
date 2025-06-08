@@ -2,6 +2,7 @@ import { defineConfig } from 'vite';
 import { resolve } from 'path';
 import postcss from '@vituum/vite-plugin-postcss';
 import { createSvgIconsPlugin } from 'vite-plugin-svg-icons';
+import glsl from 'vite-plugin-glsl';
 
 export default defineConfig({
     plugins: [
@@ -9,6 +10,10 @@ export default defineConfig({
         createSvgIconsPlugin({
             iconDirs: [`${resolve(__dirname, 'src/reall3d/assets/icons')}`],
             symbolId: 'svgicon-[name]',
+        }),
+        glsl({
+            include: ['**/*.glsl'],
+            minify: true,
         }),
     ],
     server: {

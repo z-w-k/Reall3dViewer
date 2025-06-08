@@ -76,8 +76,6 @@ import {
 } from '../../events/EventConstants';
 import { SplatMeshOptions } from './SplatMeshOptions';
 import {
-    getSplatFragmentShader,
-    getSplatVertexShader,
     VarBigSceneMode,
     VarCurrentLightRadius,
     VarCurrentVisibleRadius,
@@ -122,6 +120,8 @@ import {
     WkModelSplatCount,
     WkWatermarkCount,
 } from '../../utils/consts/Index';
+import vertexShader from './shaders/SplatVertex.glsl';
+import fragmentShader from './shaders/SplatFragment.glsl';
 
 export function setupSplatMesh(events: Events) {
     let disposed = false;
@@ -200,8 +200,8 @@ export function setupSplatMesh(events: Events) {
 
         const material: ShaderMaterial = new ShaderMaterial({
             uniforms: fire(CreateSplatUniforms),
-            vertexShader: getSplatVertexShader(),
-            fragmentShader: getSplatFragmentShader(),
+            vertexShader,
+            fragmentShader,
             transparent: true,
             alphaTest: 1.0,
             blending: NormalBlending,

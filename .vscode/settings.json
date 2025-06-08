@@ -5,5 +5,9 @@
     "[cpp]": {
         "editor.defaultFormatter": "ms-vscode.cpptools"
     },
+    "[glsl]": {
+        "editor.defaultFormatter": "raczzalan.webgl-glsl-editor"
+    },
+    "webgl-glsl-editor.diagnostics": false,
     "C_Cpp.errorSquiggles": "disabled"
 }
