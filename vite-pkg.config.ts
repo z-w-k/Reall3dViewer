@@ -1,5 +1,6 @@
 import { defineConfig } from 'vite';
 import dts from 'vite-plugin-dts';
+import glsl from 'vite-plugin-glsl';
 
 export default defineConfig({
     plugins: [
@@ -7,7 +8,13 @@ export default defineConfig({
             outDir: ['./pkg/dist'],
             rollupTypes: true,
         }),
+        glsl({ include: ['**/*.glsl'] }),
     ],
+
+    esbuild: {
+        pure: ['console.log', 'console.debug'],
+    },
+
     build: {
         target: 'es2020',
         outDir: './pkg/dist',
