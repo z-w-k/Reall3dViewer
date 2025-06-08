@@ -4,7 +4,7 @@
 /*
 * 粒子加载效果
 */
-vec3 animateParticle(vec3 v3Cen, int particleMode, float performanceNow, float performanceAct, float currentVisibleRadius, float maxRadius) {
+vec3 animateParticle(vec3 v3Cen) {
     if(particleMode < 1)
         return v3Cen;
     float factor = particleMode > 1 ? ((performanceAct - performanceNow) / 5000.0) : (performanceNow / 5000.0);

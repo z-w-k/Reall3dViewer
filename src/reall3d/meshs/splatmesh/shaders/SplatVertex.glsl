@@ -4,6 +4,7 @@
 #include ./Chunk0VarDeclarations
 #include ./Chunk9AnimateParticle
 #include ./Chunk9SpaltEvalSH
+#include ./Chunk9GetFvAlpha
 
 void main() {
     uvec4 cen, cov3d;
@@ -20,25 +21,14 @@ void main() {
         cov3d = texelFetch(splatTexture0, ivec2(((splatIndex & 0x3ffu) << 1) | 1u, splatIndex >> 10), 0);
     }
 
-    uint fvSplat = cen.w & 65535u;
-    uint fvHide = flagValue >> 16u;
-    uint fvShow = flagValue & 65535u;
-    float fvAlpha = 1.0;
-    if(fvSplat > 0u) {
-        if(fvSplat == fvShow) {
-            fvAlpha = clamp((performanceNow - performanceAct) / 2000.0, 0.0, 1.0);
-        } else if(fvSplat == fvHide) {
-            fvAlpha = 1.0 - clamp((performanceNow - performanceAct) / 2000.0, 0.0, 1.0);
-        } else {
-            gl_Position = vec4(0.0, 0.0, 2.0, 1.0);
-            return;
-        }
-    }
+    float fvAlpha = getFvAlpha(cen);
+    if(fvAlpha <= 0.0)
+        return;
 
     bool isWatermark = (cen.w & 65536u) > 0u;
     vec3 v3Cen = uintBitsToFloat(cen.xyz);
 
-    v3Cen = animateParticle(v3Cen, particleMode, performanceNow, performanceAct, currentVisibleRadius, maxRadius);
+    v3Cen = animateParticle(v3Cen);
 
     if(isWatermark && debugEffect) {
         v3Cen.y += sin(performanceNow * 0.002 + v3Cen.x) * 0.1; // 水印动画
