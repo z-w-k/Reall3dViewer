@@ -11,10 +11,7 @@ export default defineConfig({
             iconDirs: [`${resolve(__dirname, 'src/reall3d/assets/icons')}`],
             symbolId: 'svgicon-[name]',
         }),
-        glsl({
-            include: ['**/*.glsl'],
-            minify: true,
-        }),
+        glsl({ include: ['**/*.glsl'] }),
     ],
     server: {
         port: 3100,
