@@ -7,7 +7,7 @@
 vec3 animateParticle(vec3 v3Cen) {
     if(particleMode < 1)
         return v3Cen;
-    float factor = particleMode > 1 ? ((performanceAct - performanceNow) / 5000.0) : (performanceNow / 5000.0);
+    float factor = particleMode > 1 ? ((performanceAct - performanceNow) / 5000.0) : ((performanceNow - performanceAct) / 5000.0);
     float radius = particleMode > 1 ? (max(currentVisibleRadius, maxRadius) * 0.6 * min((performanceNow) / 3000.0, 1.0)) : (max(currentVisibleRadius, maxRadius) * 0.6 * min((performanceNow - performanceAct) / 3000.0, 1.0));
     if(factor <= 0.0)
         return v3Cen;
