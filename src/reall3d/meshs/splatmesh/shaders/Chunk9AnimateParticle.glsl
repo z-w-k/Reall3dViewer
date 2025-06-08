@@ -5,11 +5,11 @@
 * 粒子加载效果
 */
 vec3 animateParticle(vec3 v3Cen) {
-    if(particleMode < 1)
+    if (particleMode < 1)
         return v3Cen;
     float factor = particleMode > 1 ? ((performanceAct - performanceNow) / 5000.0) : ((performanceNow - performanceAct) / 5000.0);
     float radius = particleMode > 1 ? (max(currentVisibleRadius, maxRadius) * 0.6 * min((performanceNow) / 3000.0, 1.0)) : (max(currentVisibleRadius, maxRadius) * 0.6 * min((performanceNow - performanceAct) / 3000.0, 1.0));
-    if(factor <= 0.0)
+    if (factor <= 0.0)
         return v3Cen;
 
     // 随机种子（均匀分布）
@@ -32,7 +32,7 @@ vec3 animateParticle(vec3 v3Cen) {
     // 物理碰撞系统（保持反弹效果）
     vec3 newPos = v3Cen + offset;
     float newDist = length(newPos);
-    if(newDist > radius) {
+    if (newDist > radius) {
         vec3 dir = normalize(newPos);
         float penetration = newDist - radius;
         float elasticity = 0.7 + randSeed.z * 0.2;

@@ -14,7 +14,7 @@ vec3[15] splatReadShDatas() {
     int shCnt = 0;
     float[45] fSHs;
     uvec4 rgb12 = texelFetch(splatShTexture12, ivec2((splatIndex & 0x7ffu), (splatIndex >> 11)), 0);
-    if(rgb12.a > 0u) {
+    if (rgb12.a > 0u) {
         shCnt = 3;
         fSHs[0] = float((rgb12.r >> 27) & MaskSH) * FactorSH - 1.0;
         fSHs[1] = float((rgb12.r >> 22) & MaskSH) * FactorSH - 1.0;
@@ -26,7 +26,7 @@ vec3[15] splatReadShDatas() {
         fSHs[7] = float((rgb12.g >> 24) & MaskSH) * FactorSH - 1.0;
         fSHs[8] = float((rgb12.g >> 19) & MaskSH) * FactorSH - 1.0;
 
-        if(shDegree > 1) {
+        if (shDegree > 1) {
             shCnt = 8;
             fSHs[9] = float((rgb12.g >> 14) & MaskSH) * FactorSH - 1.0;
             fSHs[10] = float((rgb12.g >> 9) & MaskSH) * FactorSH - 1.0;
@@ -44,9 +44,9 @@ vec3[15] splatReadShDatas() {
             fSHs[22] = float((rgb12.a >> 13) & MaskSH) * FactorSH - 1.0;
             fSHs[23] = float((rgb12.a >> 8) & MaskSH) * FactorSH - 1.0;
 
-            if(shDegree > 2) {
+            if (shDegree > 2) {
                 uvec4 rgb3 = texelFetch(splatShTexture3, ivec2(splatIndex & 0x7ffu, splatIndex >> 11), 0);
-                if(rgb3.a > 0u) {
+                if (rgb3.a > 0u) {
                     shCnt = 15;
                     fSHs[24] = float((rgb3.r >> 27) & MaskSH) * FactorSH - 1.0;
                     fSHs[25] = float((rgb3.r >> 22) & MaskSH) * FactorSH - 1.0;
@@ -75,7 +75,7 @@ vec3[15] splatReadShDatas() {
     }
 
     vec3[15] sh;
-    for(int i = 0; i < 15; ++i) {
+    for (int i = 0; i < 15; ++i) {
         sh[i] = i < shCnt ? vec3(fSHs[i * 3], fSHs[i * 3 + 1], fSHs[i * 3 + 2]) : vec3(0.0);
     }
     return sh;
@@ -91,7 +91,7 @@ vec3 splatEvalSH(in vec3 v3Cen) {
     vec3[15] sh = splatReadShDatas();
     vec3 result = SH_C1 * (-sh[0] * y + sh[1] * z - sh[2] * x);
 
-    if(shDegree > 1) {
+    if (shDegree > 1) {
         float xx = x * x;
         float yy = y * y;
         float zz = z * z;
@@ -105,7 +105,7 @@ vec3 splatEvalSH(in vec3 v3Cen) {
             sh[6] * (SH_C2[3] * xz) +
             sh[7] * (SH_C2[4] * (xx - yy));
 
-        if(shDegree > 2) {
+        if (shDegree > 2) {
             result += sh[8] * (SH_C3[0] * y * (3.0 * xx - yy)) +
                 sh[9] * (SH_C3[1] * xy * z) +
                 sh[10] * (SH_C3[2] * y * (4.0 * zz - xx - yy)) +

@@ -9,7 +9,7 @@ varying vec3 vPosition;
 
 void main() {
     float dtPos = -dot(vPosition.xy, vPosition.xy);
-    if(dtPos < -4.0)
+    if (dtPos < -4.0)
         discard;
 
     dtPos = vPosition.z >= 1.0 ? 1.0 : exp(dtPos) * vColor.a;
