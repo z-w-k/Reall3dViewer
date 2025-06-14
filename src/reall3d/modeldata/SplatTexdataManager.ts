@@ -56,6 +56,9 @@ import {
     PcDownloadLimitSplatCount,
 } from '../utils/consts/GlobalConstants';
 
+/**
+ * 纹理数据管理
+ */
 export function setupSplatTextureManager(events: Events) {
     const on = (key: number, fn?: Function, multiFn?: boolean): Function | Function[] => events.on(key, fn, multiFn);
     const fire = (key: number, ...args: any): any => events.fire(key, ...args);
