@@ -6,185 +6,186 @@ import { OrbitControls } from 'three/examples/jsm/Addons.js';
 import { Events } from '../events/Events';
 
 /**
- * 高斯网格配置项
+ * Configuration options for Reall3dViewer
  */
 export interface Reall3dViewerOptions {
     /**
-     *  指定渲染器对象传入使用，未定义时自动生成
+     * Specify a custom renderer instance. If undefined, one will be created automatically.
      */
     renderer?: Renderer | undefined;
 
     /**
-     *  指定场景对象传入使用，未定义时自动生成
+     * Specify a custom scene instance. If undefined, one will be created automatically.
      */
     scene?: Scene | undefined;
 
     /**
-     *  指定相机对象传入使用，未定义时自动生成
+     * Specify a custom camera instance. If undefined, one will be created automatically.
      */
     camera?: PerspectiveCamera | undefined;
 
     /**
-     *  控制器
+     * Orbit controls instance
      */
     controls?: OrbitControls;
 
     /**
-     *  渲染器事件管理器
+     * Renderer event manager
      */
     viewerEvents?: Events | undefined;
 
     /**
-     *  是否调试模式，生产环境默认false
+     * Debug mode flag. Defaults to false in production.
      */
     debugMode?: boolean | undefined;
 
     /**
-     * 是否大场景模式，初始化后不可修改
+     * Large scene mode flag. Cannot be modified after initialization.
      */
     bigSceneMode?: boolean;
 
     /**
-     * 是否点云模式渲染，默认为true
-     * 支持通过viewer.options()动态更新
+     * Point cloud rendering mode. Defaults to true.
+     * Can be dynamically updated via viewer.options()
      */
     pointcloudMode?: boolean | undefined;
 
     /**
-     * 移动端可渲染的高斯点数量限制
-     * 支持通过viewer.options()动态更新
+     * Maximum renderable Gaussian points count for mobile devices.
+     * Can be dynamically updated via viewer.options()
      */
     maxRenderCountOfMobile?: number | undefined;
 
     /**
-     * PC端可渲染的高斯点数量限制
-     * 支持通过viewer.options()动态更新
+     * Maximum renderable Gaussian points count for PC.
+     * Can be dynamically updated via viewer.options()
      */
     maxRenderCountOfPc?: number | undefined;
 
     /**
-     * 颜色亮度系数，默认1.1
+     * Color brightness factor. Defaults to 1.1.
      */
     lightFactor?: number | undefined;
 
     /**
-     *  容器元素或其选择器，默认选择器为'#gsviewer'，自动创建画布时若找不到容器节点，将在body下自动创建容器
+     * Container element or its selector. Defaults to '#gsviewer'.
+     * If no container is found when creating canvas, one will be automatically created under body.
      */
     root?: HTMLElement | string | undefined;
 
     /**
-     * 相机视场，默认 45
+     * Camera field of view. Defaults to 45.
      */
     fov?: number | undefined;
 
     /**
-     * 相机近截面距离，默认 0.1
+     * Camera near clipping plane. Defaults to 0.1.
      */
     near?: number | undefined;
 
     /**
-     * 相机远截面距离，默认 1000
+     * Camera far clipping plane. Defaults to 1000.
      */
     far?: number | undefined;
 
     /**
-     * 相机位置，默认 [0, -5, 15]
+     * Camera position. Defaults to [0, -5, 15].
      */
     position?: number[] | undefined;
 
     /**
-     * 相机注视点，默认 [0, 0, 0]
+     * Camera look-at target. Defaults to [0, 0, 0].
      */
     lookAt?: number[] | undefined;
 
     /**
-     * 相机上向量，默认 [0, -1, 0]
+     * Camera up vector. Defaults to [0, -1, 0].
      */
     lookUp?: number[] | undefined;
 
     /**
-     * 是否自动旋转，默认true
-     * 支持通过viewer.options()动态更新
+     * Auto-rotation flag. Defaults to true.
+     * Can be dynamically updated via viewer.options()
      */
     autoRotate?: boolean | undefined;
 
     /**
-     * 是否启用阻尼效果，默认true
+     * Damping effect flag. Defaults to true.
      */
     enableDamping?: boolean | undefined;
 
     /**
-     * 是否允许操作缩放，默认true
+     * Zoom control flag. Defaults to true.
      */
     enableZoom?: boolean | undefined;
 
     /**
-     * 是否允许操作旋转，默认true
+     * Rotation control flag. Defaults to true.
      */
     enableRotate?: boolean | undefined;
 
     /**
-     * 是否允许操作拖动，默认true
+     * Pan control flag. Defaults to true.
      */
     enablePan?: boolean | undefined;
 
     /**
-     * 最小视距
+     * Minimum camera distance
      */
     minDistance?: number | undefined;
 
     /**
-     * 最大视距
+     * Maximum camera distance
      */
     maxDistance?: number | undefined;
 
     /**
-     * 最小倾斜角度
+     * Minimum polar angle (vertical rotation limit)
      */
     minPolarAngle?: number | undefined;
 
     /**
-     * 最大倾斜角度
+     * Maximum polar angle (vertical rotation limit)
      */
     maxPolarAngle?: number | undefined;
 
     /**
-     * 是否允许键盘操作，默认true
+     * Keyboard controls flag. Defaults to true.
      */
     enableKeyboard?: boolean | undefined;
 
     /**
-     * 标注模式，默认false
+     * Annotation mode flag. Defaults to false.
      */
     markMode?: boolean | undefined;
 
     /**
-     * 标注类型（点、线、面、距离、面积、圆），默认undefined
+     * Annotation type (point/lines/plans/distance/area/circle)
      */
     markType?: 'point' | 'lines' | 'plans' | 'distance' | 'area' | 'circle' | undefined;
 
     /**
-     * 标注是否显示，默认true
+     * Annotation visibility flag. Defaults to true.
      */
     markVisible?: boolean | undefined;
 
     /**
-     * 米单位比例尺（1单位长度等于多少米），默认1
+     * Meter scale (how many meters per unit length). Defaults to 1.
      */
     meterScale?: number | undefined;
 
     /**
-     * 是否禁止直接拖拽本地文件进行查看，默认false
+     * Disable local file drag-and-drop flag. Defaults to false.
      */
     disableDropLocalFile?: boolean | undefined;
 
     /**
-     * 球谐系数的渲染级别，默认为模型数据的最大可渲染级别
+     * Spherical harmonics rendering level. Defaults to the maximum renderable level of model data.
      */
     shDegree?: number | undefined;
 
     /**
-     * 背景色（默认 '#000000'）
+     * Background color (defaults to '#000000')
      */
     background?: string;
 }

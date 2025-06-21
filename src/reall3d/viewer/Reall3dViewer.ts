@@ -83,7 +83,7 @@ import { isMobile, ViewerVersion } from '../utils/consts/GlobalConstants';
 import { MetaData } from '../modeldata/ModelData';
 
 /**
- * 高斯渲染器
+ * Built-in Gaussian Splatting model viewer
  */
 export class Reall3dViewer {
     private disposed: boolean = false;
