@@ -45,7 +45,7 @@ import { isMobile, ViewerVersion } from '../utils/consts/GlobalConstants';
 import * as tt from '@gotoeasy/three-tile';
 
 /**
- * 地图渲染器
+ * Built-in Map viewer with Gaussian Splatting model support
  */
 export class Reall3dMapViewer extends EventDispatcher<tt.plugin.GLViewerEventMap> {
     public scene: Scene;

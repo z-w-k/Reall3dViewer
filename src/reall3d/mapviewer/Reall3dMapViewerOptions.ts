@@ -2,36 +2,37 @@
 // Copyright (c) 2025 reall3d.com, MIT license
 // ==============================================
 /**
- * 地图配置项
+ * Configuration options for Reall3dMapViewer
  */
 export declare interface Reall3dMapViewerOptions {
     /**
-     *  容器元素或其选择器，默认选择器为'#map'，找不到时将自动创建
+     * Container element or its selector (default: '#map').
+     * Will be automatically created if not found.
      */
     root?: HTMLElement | string;
 
     /**
-     * 是否允许键盘操作，默认false
+     * Enable keyboard controls (default: false)
      */
     enableKeyboard?: boolean;
 
     /**
-     * 拖动范围最小值，默认[-20000, 0.1, -60000]
+     * Minimum panning boundaries (default: [-20000, 0.1, -60000])
      */
     minPan?: number[];
 
     /**
-     * 拖动范围最大值，默认[50000, 10000, 0]
+     * Maximum panning boundaries (default: [50000, 10000, 0])
      */
     maxPan?: number[];
 
     /**
-     * 背景色（默认 '#dbf0ff'）
+     * Background color (default: '#dbf0ff')
      */
     background?: string;
 
     /**
-     *  是否调试模式，生产环境默认false
+     * Debug mode flag (default: false in production)
      */
     debugMode?: boolean;
 }
